@@ -1,0 +1,53 @@
+{
+  "_id": "00001",
+  "nomePantone": "P186C",
+  "variante": "DSSMITH",
+  "dataCreazione": "2025-04-30T10:00:00.000Z",
+  "articolo": "5468",
+  "is": "458.1",
+  "cliente": "Grisport",
+  "noteArticolo": "",
+  "urgente": false,
+  "tipoCarta": "WP4",
+  "fornitoreCarta": "EsempioCarta Srl",
+  "passoCarta": 1360,
+  "hCarta": 950,
+  "hex": "#FFFFFF",
+  "stato": "In uso",
+  "tipo": "EB",
+  "descrizione": "Pantone di esempio con tutte le basi",
+  "noteColore": "",
+  "consumo": 0.15,
+  "dose": 1.2,
+  "ultimoUso": "2025-04-30T10:00:00.000Z",
+  "noteMagazzino": "",
+  "daProdurre": false,
+  "qtDaProdurre": 0,
+  "consegnatoProduzione": false,
+  "qtConsegnataProduzione": 0,
+  "basi": [
+  { "nome": "Base1", "label": "Bianco UV", "valore": 1.5, "codiceFornitore": "XYZ123", "tipo": "UV", "codiceColore": "1234" },
+  { "nome": "Base2", "label": "Nero EB", "valore": 0.35, "codiceFornitore": "ABC456", "tipo": "EB", "codiceColore": "5678" }
+],
+  "dispMagazzino": "Dinamico da DB-magazzinoPantoni",
+  "movimentiMagazzino": [
+    {
+      "tipo": "carico",
+      "quantita": 1.1,
+      "data": "2025-04-30T10:00:00.000Z",
+      "causale": "Rimanenza produzione"
+    },
+    {
+      "tipo": "carico",
+      "quantita": 12,
+      "data": "2025-04-30T10:00:00.000Z",
+      "causale": "Prodotto"
+    },
+    {
+      "tipo": "scarico",
+      "quantita": 1.1,
+      "data": "2025-04-30T10:00:00.000Z",
+      "causale": "Uso produzione"
+    }
+  ]
+}

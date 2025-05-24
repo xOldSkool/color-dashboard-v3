@@ -1,0 +1,37 @@
+{
+  "nome": "red032",
+  "label": "Red 032",
+  "codiceColore": "",
+  "codiceFornitore": "",
+  "quantita": 150,
+  "fornitore": "J+S",
+  "tipo": "EB/UV",
+  "stato": "In uso/Obsoleto/Da verificare",
+  "utilizzo": "base/materiale",
+  "noteMateriale": "Usare solo se necessario",
+  "dataCreazione": "2025-03-15T09:00:00.000Z",
+  "movimenti": [
+    {
+      "tipo": "carico",
+      "quantita": 100,
+      "data": "2025-03-15T09:00:00.000Z",
+      "noteOperatore": "",
+      "causale": "Arrivo fornitore"
+    },
+    {
+      "tipo": "carico",
+      "quantita": 80,
+      "data": "2025-04-10T09:00:00.000Z",
+      "noteOperatore": "",
+      "causale": "Rifornimento mensile"
+    },
+    {
+      "tipo": "scarico",
+      "quantita": 30,
+      "data": "2025-04-20T15:00:00.000Z",
+      "noteOperatore": "Buttata via una dose per composizione errata",
+      "causale": "Usato per PANTONE 123 C",
+      "riferimentoPantone": "66400fcf55c9f16c2af847b0"
+    }
+  ]
+}

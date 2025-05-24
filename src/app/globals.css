@@ -1,21 +1,79 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "tailwindcss";
 
 :root {
+  --font-poppins: 'Poppins', sans-serif;
   --background: #ffffff;
   --foreground: #171717;
+  --border: oklch(80% 0 0);
+  --accent: oklch(70.5% 0.213 47.604);
+  --text: #000;
+  --text-inverted: #fff;
+  --selected-row: #ffe9c3;
+
+  /* Bottoni */
+  --bg-btn-primary: #0a0a0a;
+  --text-btn-primary: #ffffff;
+  --hover-btn-primary: #171717;
+
+  --bg-btn-secondary: oklch(92.2% 0 0);
+  --text-btn-secondary: #171717;
+  --hover-btn-secondary: oklch(88% 0.003 48.717);
+
+  --bg-btn-danger: #dc2626;
+  --text-btn-danger: #ffffff;
+  --hover-btn-danger: #b91c1c;
+
+  --border-btn-outline: #d4d4d4;
+  --text-btn-outline: #171717;
+  --hover-btn-outline: #f5f5f5;
+
+  --text-btn-ghost: #171717;
+  --hover-btn-ghost: #f5f5f5;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
+/* @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+} */
+
+html.dark {
+    --background: oklch(14.5% 0 0);
     --foreground: #ededed;
-  }
+    --border: oklch(40% 0 0);
+    --accent: oklch(70.5% 0.213 47.604);
+    --text: #fff;
+    --text-inverted: #000;
+    --selected-row: #333333;
+
+    /* Bottoni */
+    --bg-btn-primary: #ffffff;
+    --text-btn-primary: #000000;
+    --hover-btn-primary: #e5e5e5;
+
+    --bg-btn-secondary: oklch(37.1% 0 0);
+    --text-btn-secondary: #ffffff;
+    --hover-btn-secondary: oklch(34% 0 0);
+
+    --bg-btn-danger: #ef4444;
+    --text-btn-danger: #ffffff;
+    --hover-btn-danger: #dc2626;
+
+    --border-btn-outline: oklch(37.1% 0 0);
+    --text-btn-outline: #ffffff;
+    --hover-btn-outline: oklch(37.1% 0 0);
+
+    --text-btn-ghost: #ffffff;
+    --hover-btn-ghost: #262626;
 }
 
 body {
-  color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--foreground);
+  font-family: var(--font-poppins);
 }
+

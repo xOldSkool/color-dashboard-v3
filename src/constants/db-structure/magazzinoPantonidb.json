@@ -1,0 +1,12 @@
+{
+  "pantoneGroupId": "string",
+  "dispMagazzino": "number",
+  "movimenti": [
+    {
+    "tipo": "carico | scarico",
+    "quantita": "number",
+    "data": "string",
+    "causale": "string"
+    }
+  ]
+}
