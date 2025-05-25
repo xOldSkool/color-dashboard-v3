@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { Button } from '@/components/ClientWrapper';
 import Table from '@/components/Tables/Table';
 import { DEFAULT_COLS } from '@/constants/defaultColumns';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/transformJSON';
 

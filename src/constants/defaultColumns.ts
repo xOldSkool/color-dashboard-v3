@@ -1,4 +1,6 @@
-export const PANTONE_COLUMNS = [
+import { TableColumn } from '@/types/constantsTypes';
+
+export const PANTONE_COLUMNS: TableColumn[] = [
   {
     key: '_id',
     label: '_id',
@@ -388,7 +390,7 @@ export const PANTONE_COLUMNS = [
   },
 ];
 
-export const MATERIALI_COLUMNS = [
+export const MATERIALI_COLUMNS: TableColumn[] = [
   {
     key: 'nome',
     label: 'Materiale',
@@ -476,7 +478,7 @@ export const MATERIALI_COLUMNS = [
   },
 ];
 
-export const SHOWABLE_PANTONE_COLS = [
+export const SHOWABLE_PANTONE_COLS: string[] = [
   'nomePantone',
   'variante',
   'dataCreazione',
@@ -505,7 +507,7 @@ export const SHOWABLE_PANTONE_COLS = [
   'dispMagazzino',
   'movimentiMagazzino',
 ];
-export const SHOWABLE_MATERIALI_COLS = [
+export const SHOWABLE_MATERIALI_COLS: string[] = [
   'nome',
   'label',
   'codiceColore',
@@ -519,67 +521,14 @@ export const SHOWABLE_MATERIALI_COLS = [
   'movimenti',
 ];
 
-export const DEFAULT_COLS = [
-  'hex',
-  'nomePantone',
-  'variante',
-  'articolo',
-  'is',
-  'cliente',
-  'tipo',
-  'consumo',
-  'dose',
-  'dispMagazzino',
-];
-export const CONFIG_DA_PRODURRE = [
-  'hex',
-  'nomePantone',
-  'cliente',
-  'urgente',
-  'qtDaProdurre',
-  'consegnatoProduzione',
-  'basi',
-];
-export const CONFIG_MAGAZZINO = [
-  'hex',
-  'nomePantone',
-  'variante',
-  'cliente',
-  'tipo',
-  'dispMagazzino',
-  'noteMagazzino',
-];
-export const CONFIG_CONSEGNATI_PRODUZIONE = [
-  'hex',
-  'nomePantone',
-  'variante',
-  'consumo',
-  'dose',
-  'cliente',
-  'qtConsegnataProduzione',
-];
-export const CONFIG_SCHEDA_PANTONE = [
-  'variante',
-  'articolo',
-  'passoCarta',
-  'hCarta',
-  'dose',
-  'consumo',
-  'dispMagazzino',
-];
-export const CONFIG_MATERIALI = [
-  'label',
-  'codiceColore',
-  'fornitore',
-  'tipo',
-  'quantita',
-  'utilizzo',
-  'stato',
-];
+export const DEFAULT_COLS: string[] = ['hex', 'nomePantone', 'variante', 'articolo', 'is', 'cliente', 'tipo', 'consumo', 'dose', 'dispMagazzino'];
+export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'urgente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
+export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino'];
+export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
+export const CONFIG_SCHEDA_PANTONE: string[] = ['variante', 'articolo', 'passoCarta', 'hCarta', 'dose', 'consumo', 'dispMagazzino'];
+export const CONFIG_MATERIALI: string[] = ['label', 'codiceColore', 'fornitore', 'tipo', 'quantita', 'utilizzo', 'stato'];
 
-export const visibleColumns = DEFAULT_COLS.map((key) =>
-  PANTONE_COLUMNS.find((col) => col.key === key)
-); //scorre ogni chiave in DEFAULT_COLS e per ogni chiave (key) cerca nell'array PANTONE_COLUMNS l'oggetto con quella chiave (key). "!" serve a dire che si trova sempre un valore diverso da undefined
+export const visibleColumns = DEFAULT_COLS.map((key) => PANTONE_COLUMNS.find((col) => col.key === key)); //scorre ogni chiave in DEFAULT_COLS e per ogni chiave (key) cerca nell'array PANTONE_COLUMNS l'oggetto con quella chiave (key). "!" serve a dire che si trova sempre un valore diverso da undefined
 
 // _id
 // nomePantone

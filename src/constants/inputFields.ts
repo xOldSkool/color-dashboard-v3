@@ -1,4 +1,6 @@
-export const pantoneFieldsLeft = [
+import { Field } from '@/types/constantsTypes';
+
+export const pantoneFieldsLeft: Field[] = [
   {
     form: 'input',
     type: 'text',
@@ -54,7 +56,7 @@ export const pantoneFieldsLeft = [
   },
 ];
 
-export const pantoneFieldsCenter = [
+export const pantoneFieldsCenter: Field[] = [
   {
     form: 'input',
     type: 'text',
@@ -111,7 +113,7 @@ export const pantoneFieldsCenter = [
   },
 ];
 
-export const pantoneNotes = [
+export const pantoneNotes: Field[] = [
   {
     form: 'textarea',
     name: 'descrizione',
@@ -149,7 +151,7 @@ export const pantoneNotes = [
 // MATERIALI MATERIALI MATERIALI MATERIALI
 // MATERIALI MATERIALI MATERIALI MATERIALI
 
-export const materialeFieldsCreate = [
+export const materialeFieldsCreate: Field[] = [
   {
     form: 'input',
     type: 'text',
@@ -218,7 +220,7 @@ export const materialeFieldsCreate = [
   },
 ];
 
-export const materialeFieldsMovimento = [
+export const materialeFieldsMovimento: Field[] = [
   {
     form: 'input',
     type: 'number',

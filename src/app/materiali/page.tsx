@@ -2,7 +2,7 @@ import Button from '@/components/Button';
 import TableClient from '@/components/Tables/Table';
 import { CONFIG_MATERIALI } from '@/constants/defaultColumns';
 import { getAllMateriali } from '@/lib/materiali';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { normalizeMateriali } from '@/lib/transformJSON';
 
 export default async function MaterialiPage() {
@@ -20,11 +20,7 @@ export default async function MaterialiPage() {
           </Button>
         </div>
       </div>
-      <TableClient
-        items={materiali}
-        config={CONFIG_MATERIALI}
-        tableKey="materiali"
-      />
+      <TableClient items={materiali} config={CONFIG_MATERIALI} tableKey="materiali" />
     </div>
   );
 }

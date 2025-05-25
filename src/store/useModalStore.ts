@@ -12,10 +12,13 @@ export type ModalKey =
   | 'returnPantone'
   | 'producePantone'
   | 'destinationPantone'
-  | 'returnPantoneDecisione'
+  | 'transferPantone'
+  | 'duplicatePantone'
+  | 'removeFromToProduce'
   | 'newMateriale'
   | 'loadMateriale'
-  | 'unloadMateriale';
+  | 'unloadMateriale'
+  | 'editMateriale';
 
 type Handler = {
   submit?: () => Promise<void>;
@@ -42,10 +45,13 @@ export const useModalStore = create<ModalState>((set) => ({
     returnPantone: false,
     producePantone: false,
     destinationPantone: false,
-    returnPantoneDecisione: false,
+    transferPantone: false,
+    duplicatePantone: false,
+    removeFromToProduce: false,
     newMateriale: false,
     loadMateriale: false,
     unloadMateriale: false,
+    editMateriale: false,
   },
   submitHandlers: {} as Record<ModalKey, () => Promise<void>>,
   resetHandlers: {} as Record<ModalKey, () => void>,

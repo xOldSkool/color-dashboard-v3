@@ -19,35 +19,14 @@
   "noteColore": "",
   "consumo": 0.15,
   "dose": 1.2,
-  "ultimoUso": "2025-04-30T10:00:00.000Z",
   "noteMagazzino": "",
   "daProdurre": false,
   "qtDaProdurre": 0,
   "consegnatoProduzione": false,
   "qtConsegnataProduzione": 0,
+  "pantoneGroupId": "P186C_b85b8a",
   "basi": [
   { "nome": "Base1", "label": "Bianco UV", "valore": 1.5, "codiceFornitore": "XYZ123", "tipo": "UV", "codiceColore": "1234" },
   { "nome": "Base2", "label": "Nero EB", "valore": 0.35, "codiceFornitore": "ABC456", "tipo": "EB", "codiceColore": "5678" }
-],
-  "dispMagazzino": "Dinamico da DB-magazzinoPantoni",
-  "movimentiMagazzino": [
-    {
-      "tipo": "carico",
-      "quantita": 1.1,
-      "data": "2025-04-30T10:00:00.000Z",
-      "causale": "Rimanenza produzione"
-    },
-    {
-      "tipo": "carico",
-      "quantita": 12,
-      "data": "2025-04-30T10:00:00.000Z",
-      "causale": "Prodotto"
-    },
-    {
-      "tipo": "scarico",
-      "quantita": 1.1,
-      "data": "2025-04-30T10:00:00.000Z",
-      "causale": "Uso produzione"
-    }
-  ]
+]
 }

@@ -1,5 +1,5 @@
 import Button from '@/components/Button';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllMateriali } from '@/lib/materiali';
 import { normalizeMateriali } from '@/lib/transformJSON';
 
@@ -22,11 +22,7 @@ export default async function MaterialePage({ params }) {
           <Button modalKey="loadMateriale" iconName="loadin" variant="primary">
             Carico
           </Button>
-          <Button
-            modalKey="unloadMateriale"
-            iconName="loadout"
-            variant="primary"
-          >
+          <Button modalKey="unloadMateriale" iconName="loadout" variant="primary">
             Scarico
           </Button>
         </div>
@@ -34,8 +30,7 @@ export default async function MaterialePage({ params }) {
 
       <div className="border border-dashed border-[var(--border)] rounded-xl shadow-lg p-6 text-xl space-y-4">
         <p>
-          <span className="font-bold">Codice colore:</span>{' '}
-          {materiale.codiceColore}
+          <span className="font-bold">Codice colore:</span> {materiale.codiceColore}
         </p>
         <p>
           <span className="font-bold">Quantità:</span> {materiale.quantita} kg
@@ -56,12 +51,8 @@ export default async function MaterialePage({ params }) {
         {materiale.movimenti?.length ? (
           <ul className="space-y-2">
             {materiale.movimenti.map((mov, index) => (
-              <li
-                key={index}
-                className="bg-[var(--hover-btn-ghost)] p-3 rounded-lg text-lg"
-              >
-                <strong>{mov.tipo}</strong> • {mov.quantita} kg •{' '}
-                {new Date(mov.data).toLocaleDateString()}
+              <li key={index} className="bg-[var(--hover-btn-ghost)] p-3 rounded-lg text-lg">
+                <strong>{mov.tipo}</strong> • {mov.quantita} kg • {new Date(mov.data).toLocaleDateString()}
                 {mov.note && ` • ${mov.note}`}
                 {mov.causale && `• ${mov.causale}`}
               </li>

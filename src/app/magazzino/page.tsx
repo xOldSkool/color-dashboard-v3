@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import TableClient from '@/components/Tables/Table';
 import { CONFIG_MAGAZZINO } from '@/constants/defaultColumns';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/transformJSON';
 
@@ -12,11 +12,7 @@ export default async function Magazzino() {
 
   return (
     <>
-      <TableClient
-        items={pantoni}
-        config={CONFIG_MAGAZZINO}
-        tableKey="magazzino"
-      />
+      <TableClient items={pantoni} config={CONFIG_MAGAZZINO} tableKey="magazzino" />
     </>
   );
 }

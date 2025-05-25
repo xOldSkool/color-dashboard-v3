@@ -1,6 +1,8 @@
 {
   "pantoneGroupId": "string",
   "dispMagazzino": "number",
+  "tipo": "EB/UV",
+  "ultimo uso": "2025-04-30T10:00:00.000Z",
   "movimenti": [
     {
     "tipo": "carico | scarico",
