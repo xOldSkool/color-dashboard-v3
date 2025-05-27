@@ -1,7 +1,7 @@
 import Button from '@/components/Button';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllMateriali } from '@/lib/materiali';
-import { normalizeMateriali } from '@/lib/transformJSON';
+import { normalizeMateriali } from '@/lib/normalizers';
 
 export default async function MaterialePage({ params }) {
   const id = params.id;

@@ -3,7 +3,7 @@ import TableClient from '@/components/Tables/Table';
 import { CONFIG_MAGAZZINO } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
-import { normalizePantoni } from '@/lib/transformJSON';
+import { normalizePantoni } from '@/lib/normalizers';
 
 export default async function Magazzino() {
   const db = await connectToDatabase();

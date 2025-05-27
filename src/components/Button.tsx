@@ -122,7 +122,7 @@ export default function Button({
     }
   };
 
-  // Se è specificato iconName e mappa contiene la chiave, usalo; altrimenti usa Icon
+  // Se è specificato 'iconName' e 'iconsMap' contiene la chiave, usalo. Altrimenti usa 'Icon'
   const IconComponent = iconName && iconsMap[iconName] ? iconsMap[iconName] : Icon;
 
   const buttonElement = (

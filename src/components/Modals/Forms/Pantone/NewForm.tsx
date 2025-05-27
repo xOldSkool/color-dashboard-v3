@@ -15,18 +15,26 @@ interface FormData {
 }
 
 export default function NewForm() {
-  const { basi, loading, error } = useBasiMateriali();
   const { create } = useCreatePantone();
   const [formData, setFormData] = useState<FormData>({});
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
+  const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
+  const basiFiltrate =
+    !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
+  const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
+    if (!acc[base.name]) acc[base.name] = [];
+    acc[base.name].push(base);
+    return acc;
+  }, {});
 
   useEffect(() => {
     const requiredFields = [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes].filter((field) => field.required);
-
     const isValid = requiredFields.every((field) => {
       const value = formData[field.name];
       return value !== undefined && value !== '' && value !== null;
     });
-
     useModalStore.getState().setFormValid('newPantone', isValid);
   }, [formData, basi]);
 
@@ -44,22 +52,11 @@ export default function NewForm() {
     const doseTotale = Object.entries(formData)
       .filter(([key]) => key.startsWith('valore_'))
       .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
-
     // Aggiorna il campo dose solo se è diverso
     if (formData.dose !== doseTotale) {
       setFormData((prev) => ({ ...prev, dose: doseTotale }));
     }
   }, [formData]);
-
-  const tipoSelezionato = formData['tipo'];
-  const basiFiltrate = tipoSelezionato
-    ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base')
-    : [];
-  const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
-    if (!acc[base.name]) acc[base.name] = [];
-    acc[base.name].push(base);
-    return acc;
-  }, {});
 
   const pantone: Record<string, string | number | undefined> = {};
   for (const [key, value] of Object.entries(formData)) {
@@ -76,7 +73,6 @@ export default function NewForm() {
       const valoreInserito = formData[`valore_${nomeBase}`];
       // Trovo il documento della base corrispondente al fornitore selezionato
       const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
-
       return {
         name: baseSelezionata.name,
         label: baseSelezionata.label,
@@ -128,13 +124,16 @@ export default function NewForm() {
       if (!validation.success) {
         // Mostra errore (puoi usare un toast, alert, setState, ecc.)
         alert('Errore di validazione:\n' + validation.error.issues.map((e) => e.message).join('\n'));
-        return;
+        return false;
       }
 
       await create(nuovoPantone);
-      // Puoi aggiungere qui una notifica o un reset del form
+      setErrorMessage(null);
+      return true;
     } catch (error) {
       console.error('Errore durante il submit:', error);
+      setErrorMessage('Errore durante il submit.');
+      return false;
     }
   }, [formData, basiFinali, create]);
 
@@ -161,11 +160,9 @@ export default function NewForm() {
     });
   }, []);
 
-  if (loading) return <Loader />;
-  if (error) return <p>{error}</p>;
-
   return (
     <form className="w-6xl">
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-3 gap-2">
           <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
@@ -174,56 +171,67 @@ export default function NewForm() {
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold mt-5">Composizione</h2>
-          <div className="grid grid-cols-4 gap-2">
-            {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
-              const fornitoriDisponibili = basi.map((b) => ({
-                id: b._id.toString(),
-                label: b.label,
-                fornitore: b.fornitore,
-                codiceColore: b.codiceColore,
-              }));
-              const label = basi[0].label || nome;
 
-              return (
-                <div key={nome}>
-                  <label>
-                    {label}
-                    <span className="text-sm">
-                      {fornitoriDisponibili.length > 1 ? (
-                        // Select per più fornitori
-                        <select
-                          name={`fornitore_${nome}`}
-                          className="ml-2 rounded bg-zinc-800 text-white italic focus:outline-none"
-                          onChange={handleChange}
-                          value={formData[`fornitore_${nome}`] || ''}
-                        >
-                          <option value="">Seleziona fornitore</option>
-                          {fornitoriDisponibili.map((f) => (
-                            <option key={f.id} value={f.fornitore}>
-                              {f.fornitore} - {f.codiceColore}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        // Mostra fornitore + codiceColore
-                        <span className="ml-2 text-sm text-neutral-300 italic">
-                          {fornitoriDisponibili[0].fornitore} - {fornitoriDisponibili[0].codiceColore}
+          {tipoSelezionato ? (
+            loading ? (
+              <Loader />
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : basi.length === 0 ? (
+              <p className="text-neutral-400 italic">Nessuna base disponibile per questo &quot;Tipo&quot;.</p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
+                  const fornitoriDisponibili = basi.map((b) => ({
+                    id: b._id.toString(),
+                    label: b.label,
+                    fornitore: b.fornitore,
+                    codiceColore: b.codiceColore,
+                  }));
+                  const label = basi[0].label || nome;
+
+                  return (
+                    <div key={nome}>
+                      <label>
+                        {label}
+                        <span className="text-sm">
+                          {fornitoriDisponibili.length > 1 ? (
+                            <select
+                              name={`fornitore_${nome}`}
+                              className="ml-2 rounded bg-zinc-800 text-white italic focus:outline-none"
+                              onChange={handleChange}
+                              value={formData[`fornitore_${nome}`] || ''}
+                            >
+                              <option value="">Seleziona fornitore</option>
+                              {fornitoriDisponibili.map((f) => (
+                                <option key={f.id} value={f.fornitore}>
+                                  {f.fornitore} - {f.codiceColore}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span className="ml-2 text-sm text-neutral-300 italic">
+                              {fornitoriDisponibili[0].fornitore} - {fornitoriDisponibili[0].codiceColore}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
-                  </label>
-                  <input
-                    name={`valore_${nome}`}
-                    type="number"
-                    placeholder="0"
-                    className="w-full p-2 rounded bg-zinc-600 text-white focus:outline-none mt-1"
-                    value={formData[`valore_${nome}`] || ''}
-                    onChange={handleChange}
-                  />
-                </div>
-              );
-            })}
-          </div>
+                      </label>
+                      <input
+                        name={`valore_${nome}`}
+                        type="number"
+                        placeholder="0"
+                        className="w-full p-2 rounded bg-zinc-600 text-white focus:outline-none mt-1"
+                        value={formData[`valore_${nome}`] || ''}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            <p className="text-neutral-400 italic">Seleziona un &quot;Tipo&quot; per vedere le basi disponibili.</p>
+          )}
         </div>
       </div>
     </form>

@@ -3,7 +3,7 @@ import TableClient from '@/components/Tables/Table';
 import { CONFIG_MATERIALI } from '@/constants/defaultColumns';
 import { getAllMateriali } from '@/lib/materiali';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
-import { normalizeMateriali } from '@/lib/transformJSON';
+import { normalizeMateriali } from '@/lib/normalizers';
 
 export default async function MaterialiPage() {
   const db = await connectToDatabase();

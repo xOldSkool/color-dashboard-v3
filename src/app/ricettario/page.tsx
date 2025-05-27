@@ -4,7 +4,7 @@ import Table from '@/components/Tables/Table';
 import { DEFAULT_COLS } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
-import { normalizePantoni } from '@/lib/transformJSON';
+import { normalizePantoni } from '@/lib/normalizers';
 
 export default async function Ricettario() {
   const db = await connectToDatabase();

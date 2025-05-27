@@ -27,12 +27,11 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
   const resetHandlers = useModalStore((state) => state.resetHandlers);
   const isFormValid = useModalStore((state) => state.formValid[modalKey] ?? true);
 
-  const handleConfirm = () => {
-    submitHandlers[modalKey]?.(); // ?. è l'optional chaining. Verifica se la funzione onConfirm è definita prima di chiamarla.
-    // Se passata come prop viene eseguita.
-    // Se è undefined non succede nulla ed evita errori.
-    // onConfirm viene definita al momento della definizione della modale all'interno di <Modal onConfirm={() =>{qui la funzione la click di 'Conferma'}}></Modal>
-    onClose();
+  const handleConfirm = async () => {
+    const success = await submitHandlers[modalKey]?.(); // aspetta il risultato
+    if (success) {
+      onClose(); // chiude la modale solo se submit ha successo
+    }
   };
 
   const handleReset = () => {

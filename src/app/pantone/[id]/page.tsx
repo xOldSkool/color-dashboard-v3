@@ -3,7 +3,7 @@ import TableClient from '@/components/Tables/Table';
 import { CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
-import { normalizePantoni } from '@/lib/transformJSON';
+import { normalizePantoni } from '@/lib/normalizers';
 
 export default async function PantonePage({ params }) {
   const db = await connectToDatabase();

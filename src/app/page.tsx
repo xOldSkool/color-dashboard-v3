@@ -1,4 +1,5 @@
 import Button from '@/components/Button';
+import Table from '@/components/Tables/Table';
 
 export const dynamic = 'force-dynamic';
 

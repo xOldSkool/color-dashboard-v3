@@ -11,7 +11,7 @@ export default function ProduceForm({ pantone }: ProduceFormProps) {
   const [urgente, setUrgente] = useState(false);
   const basiFiltrate = useMemo(() => {
     if (!pantone?.basi || !Array.isArray(pantone.basi)) return [];
-    return pantone.basi.filter((b) => b.valore > 0);
+    return pantone.basi.filter((b) => b.quantita > 0);
   }, [pantone]);
 
   if (!pantone || !Array.isArray(pantone.basi)) {
@@ -24,7 +24,7 @@ export default function ProduceForm({ pantone }: ProduceFormProps) {
 
   const risultati = basiFiltrate.map((b) => ({
     ...b,
-    totale: +((b.valore * battute) / 1000).toFixed(3),
+    totale: +((b.quantita * battute) / 1000).toFixed(3),
   }));
 
   const totaleKg = risultati.reduce((acc, b) => acc + b.totale, 0).toFixed(3);
@@ -37,9 +37,9 @@ export default function ProduceForm({ pantone }: ProduceFormProps) {
         </h3>
         <ul className="space-y-1">
           {basiFiltrate.map((b) => (
-            <li key={b.nome} className="flex justify-between">
+            <li key={b.name} className="flex justify-between">
               <span>{b.label}</span>
-              <span>{b.valore} kg</span>
+              <span>{b.quantita} kg</span>
             </li>
           ))}
         </ul>
@@ -71,7 +71,7 @@ export default function ProduceForm({ pantone }: ProduceFormProps) {
         </h3>
         <ul className="space-y-1">
           {risultati.map((b) => (
-            <li key={b.nome} className="flex justify-between">
+            <li key={b.name} className="flex justify-between">
               <span>{b.label}</span>
               <span>{b.totale} kg</span>
             </li>

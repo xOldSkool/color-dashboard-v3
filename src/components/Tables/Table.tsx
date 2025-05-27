@@ -86,7 +86,7 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
     const matchesBasi =
       'basi' in item &&
       Array.isArray(item.basi) &&
-      item.basi.filter((b) => b.valore > 0).some((b) => b.label?.toLowerCase().includes(searchQuery.toLowerCase()));
+      item.basi.filter((b) => b.quantita > 0).some((b) => b.label?.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return matchesColumns || matchesBasi;
   });

@@ -21,13 +21,13 @@ export type ModalKey =
   | 'editMateriale';
 
 type Handler = {
-  submit?: () => Promise<void>;
+  submit?: () => Promise<void | boolean>;
   reset?: () => void;
 };
 
 export interface ModalState {
   modals: Record<ModalKey, boolean>;
-  submitHandlers: Record<ModalKey, () => Promise<void>>;
+  submitHandlers: Record<ModalKey, () => Promise<boolean>>;
   resetHandlers: Record<ModalKey, () => void>;
   formValid: Record<ModalKey, boolean>;
   setFormValid: (key: ModalKey, isValid: boolean) => void;
@@ -55,7 +55,7 @@ export const useModalStore = create<ModalState>((set) => ({
     unloadMateriale: false,
     editMateriale: false,
   },
-  submitHandlers: {} as Record<ModalKey, () => Promise<void>>,
+  submitHandlers: {} as Record<ModalKey, () => Promise<boolean>>,
   resetHandlers: {} as Record<ModalKey, () => void>,
   formValid: {} as Record<ModalKey, boolean>,
   openModal: (key) => set((state) => ({ modals: { ...state.modals, [key]: true } })),
@@ -68,10 +68,10 @@ export const useModalStore = create<ModalState>((set) => ({
     set((state) => {
       const wrappedSubmit = handlers.submit
         ? async () => {
-            await handlers.submit?.();
-            useTableStore.getState().clearAll();
+            const success = await handlers.submit?.(); // ora ritorna boolean
+            return success ?? false; // fallback
           }
-        : undefined;
+        : async () => false; // se non definito, ritorna false
 
       return {
         submitHandlers: {

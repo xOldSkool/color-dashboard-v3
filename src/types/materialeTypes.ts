@@ -17,7 +17,7 @@ export interface Materiale {
   codiceFornitore?: string;
   quantita: number;
   fornitore: string;
-  tipo: string;
+  tipo: 'carico' | 'scarico';
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   utilizzo: 'Base' | 'Materiale';
   noteMateriale?: string;
@@ -29,3 +29,19 @@ export type BaseMateriale = Pick<
   Materiale,
   'name' | 'label' | 'quantita' | 'codiceColore' | 'codiceFornitore' | 'fornitore' | 'tipo' | 'stato' | 'utilizzo' | '_id'
 >;
+
+export interface RawMateriale {
+  _id: string | ObjectId;
+  name: string;
+  stato: 'In uso' | 'Obsoleto' | 'Da verificare';
+  label: string;
+  codiceColore: string;
+  codiceFornitore: string;
+  quantita: number;
+  fornitore: string;
+  tipo: 'carico' | 'scarico';
+  utilizzo: 'Base' | 'Materiale';
+  noteMateriale: string;
+  dataCreazione: string | Date;
+  movimenti: MovimentoMateriale[];
+}
