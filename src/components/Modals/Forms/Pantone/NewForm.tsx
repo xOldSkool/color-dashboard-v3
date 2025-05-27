@@ -4,6 +4,7 @@ import Loader from '@/components/Loader';
 import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
 import { useBasiMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
+import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { BaseMateriale } from '@/types/materialeTypes';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
@@ -112,6 +113,14 @@ export default function NewForm() {
         basi: basiFinali,
         basiNormalizzate: '', // Se serve, aggiungi la logica
       };
+
+      // Validazione con Zod
+      const validation = PantoneSchema.safeParse(nuovoPantone);
+      if (!validation.success) {
+        // Mostra errore (puoi usare un toast, alert, setState, ecc.)
+        alert('Errore di validazione:\n' + validation.error.issues.map((e) => e.message).join('\n'));
+        return;
+      }
 
       await create(nuovoPantone);
       // Puoi aggiungere qui una notifica o un reset del form
