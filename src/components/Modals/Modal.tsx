@@ -25,6 +25,7 @@ interface ModalProps {
 export default function Modal({ title, modalKey, onClose, children, showFooter = true }: ModalProps) {
   const submitHandlers = useModalStore((state) => state.submitHandlers);
   const resetHandlers = useModalStore((state) => state.resetHandlers);
+  const isFormValid = useModalStore((state) => state.formValid[modalKey] ?? true);
 
   const handleConfirm = () => {
     submitHandlers[modalKey]?.(); // ?. è l'optional chaining. Verifica se la funzione onConfirm è definita prima di chiamarla.
@@ -75,7 +76,7 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
                 <Button onClick={onClose} variant="ghost">
                   Annulla
                 </Button>
-                <Button onClick={handleConfirm} variant="primary">
+                <Button onClick={handleConfirm} variant="primary" disabled={!isFormValid}>
                   Conferma
                 </Button>
               </div>

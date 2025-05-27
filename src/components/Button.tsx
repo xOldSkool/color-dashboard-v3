@@ -85,7 +85,7 @@ export default function Button({
   tooltip,
 }: ButtonProps) {
   const openModal = useModalStore((state) => state.openModal);
-  const baseStyles = 'flex flex-row items-center gap-2 rounded-lg text-lg font-medium transition-colors duration-200 cursor-pointer relative';
+  const baseStyles = 'flex flex-row items-center gap-2 rounded-lg text-lg font-medium transition-colors duration-200 relative';
 
   const variantStyles: Record<Variant, string> = {
     primary: 'bg-[var(--bg-btn-primary)] text-[var(--text-btn-primary)] hover:bg-[var(--hover-btn-primary)] px-3 py-2',
@@ -128,7 +128,10 @@ export default function Button({
   const buttonElement = (
     <button
       type={type}
-      className={clsx(baseStyles, variantStyles[variant], className, (isLoading || disabled) && 'opacity-50 cursor-not-allowed')}
+      className={clsx(baseStyles, variantStyles[variant], className, {
+        'opacity-50 cursor-not-allowed': isLoading || disabled,
+        'cursor-pointer': !(isLoading || disabled),
+      })}
       onClick={handleClick}
       disabled={disabled || isLoading}
     >

@@ -29,6 +29,8 @@ export interface ModalState {
   modals: Record<ModalKey, boolean>;
   submitHandlers: Record<ModalKey, () => Promise<void>>;
   resetHandlers: Record<ModalKey, () => void>;
+  formValid: Record<ModalKey, boolean>;
+  setFormValid: (key: ModalKey, isValid: boolean) => void;
   openModal: (key: ModalKey) => void;
   closeModal: (key: ModalKey) => void;
   registerHandler: (key: ModalKey, handlers: Handler) => void;
@@ -55,12 +57,13 @@ export const useModalStore = create<ModalState>((set) => ({
   },
   submitHandlers: {} as Record<ModalKey, () => Promise<void>>,
   resetHandlers: {} as Record<ModalKey, () => void>,
-
+  formValid: {} as Record<ModalKey, boolean>,
   openModal: (key) => set((state) => ({ modals: { ...state.modals, [key]: true } })),
   closeModal: (key) => {
     useTableStore.getState().clearAll();
     set((state) => ({ modals: { ...state.modals, [key]: false } }));
   },
+  setFormValid: (key, isValid) => set((state) => ({ formValid: { ...state.formValid, [key]: isValid } })),
   registerHandler: (key, handlers) =>
     set((state) => {
       const wrappedSubmit = handlers.submit
