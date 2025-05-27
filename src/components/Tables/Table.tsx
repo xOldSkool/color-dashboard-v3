@@ -7,7 +7,7 @@ import { BaseItem, TableProps } from '@/types/tablesTypes';
 import { useTableStore } from '@/store/useTableStore';
 import { TableColumn } from '@/types/constantsTypes';
 import TableBody from './TableBody';
-import TableToolbar from './Toolbar/TableToolbar';
+import TableToolbar from './TableToolbar';
 
 // USO DEL COMPONENTE TABLE:
 // <TableClient

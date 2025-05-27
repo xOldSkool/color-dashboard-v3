@@ -26,7 +26,8 @@
   "qtConsegnataProduzione": 0,
   "pantoneGroupId": "P186C_b85b8a",
   "basi": [
-  { "nome": "Base1", "label": "Bianco UV", "valore": 1.5, "codiceFornitore": "XYZ123", "tipo": "UV", "codiceColore": "1234" },
-  { "nome": "Base2", "label": "Nero EB", "valore": 0.35, "codiceFornitore": "ABC456", "tipo": "EB", "codiceColore": "5678" }
-]
+    { "name": "opaqueWhite", "label": "Bianco UV", "valore": 1.5, "codiceFornitore": "XYZ123", "tipo": "UV", "codiceColore": "1234" },
+    { "name": "black", "label": "Nero EB", "valore": 0.35, "codiceFornitore": "ABC456", "tipo": "EB", "codiceColore": "5678" }
+  ],
+  "basiNormalizzate": "stringaconlebasinormalizzate"
 }

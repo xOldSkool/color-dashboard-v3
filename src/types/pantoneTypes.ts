@@ -1,16 +1,5 @@
 import { ObjectId } from 'mongodb';
 
-export interface BasiPantone {
-  nome: string;
-  label: string;
-  valore: number;
-  codiceFornitore: string;
-  codiceColore: string;
-  tipo: string;
-  quantita: number;
-  fornitore: string;
-}
-
 export interface Pantone {
   _id: ObjectId | string;
   nomePantone: string;
@@ -32,7 +21,6 @@ export interface Pantone {
   noteColore?: string;
   consumo: number;
   dose: number;
-  noteMagazzino?: string;
   daProdurre?: boolean;
   qtDaProdurre?: number;
   battuteDaProdurre?: number;
@@ -40,4 +28,15 @@ export interface Pantone {
   qtConsegnataProduzione?: number;
   pantoneGroupId: string;
   basi?: BasiPantone[]; // Basi opzionali (può non esserci o essere array vuoto)
+  basiNormalizzate?: string;
+}
+
+export interface BasiPantone {
+  name: string;
+  label: string;
+  codiceFornitore: string;
+  codiceColore: string;
+  tipo: string;
+  quantita: number;
+  fornitore: string;
 }

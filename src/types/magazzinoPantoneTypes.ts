@@ -7,7 +7,7 @@ export interface MovimentoMagazzino {
   causale: string;
 }
 
-export interface MagazzinoPantone {
+export interface MagazzinoPantoni {
   _id: ObjectId | string;
   pantoneGroupId: string;
   dispMagazzino: number;

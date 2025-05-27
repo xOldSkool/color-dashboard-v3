@@ -47,13 +47,6 @@ export const pantoneFieldsLeft: Field[] = [
     label: 'Stato',
     required: true,
   },
-  {
-    form: 'input',
-    type: 'number',
-    name: 'dispMagazzino',
-    label: 'Disponibilità magazzino',
-    placeholder: 'Inserisci quantità disponibile',
-  },
 ];
 
 export const pantoneFieldsCenter: Field[] = [

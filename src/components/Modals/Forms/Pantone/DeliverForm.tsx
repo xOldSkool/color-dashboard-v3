@@ -8,7 +8,7 @@ export default function DeliverForm({ pantone }: DeliverFormProps) {
   return (
     <div className="flex flex-col gap-4">
       <p>
-        <strong>Quantità disponibile a magazzino:</strong> {/* {pantone.dispMagazzino} */}
+        <strong>Quantità disponibile a magazzino:</strong> {/*{pantone.dispMagazzino} */}
       </p>
       <input
         id="qtConsegnata"

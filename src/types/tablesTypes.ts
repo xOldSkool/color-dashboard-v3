@@ -1,9 +1,9 @@
 import { TableColumn } from './constantsTypes';
-import { MagazzinoPantone } from './magazzinoPantoneTypes';
+import { MagazzinoPantoni } from './magazzinoPantoneTypes';
 import { Materiale } from './materialeTypes';
 import { Pantone } from './pantoneTypes';
 
-export type BaseItem = Pantone | MagazzinoPantone | Materiale;
+export type BaseItem = Pantone | MagazzinoPantoni | Materiale;
 
 export interface TableBodyProps<T extends BaseItem> {
   data: T[];

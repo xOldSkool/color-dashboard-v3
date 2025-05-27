@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
-import './globals.css';
+import '@/app/globals.css';
 import Sidebar from '@/components/Sidebar/Sidebar';
+import ModalManager from '@/components/Modals/ModalManager';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -28,7 +29,7 @@ export default function RootLayout({
           </aside>
           <main className="flex-1 w-screen bg-[var(--background)] overflow-auto py-6 px-8">{children}</main>
         </div>
-        {/* <ModalManager /> */}
+        <ModalManager />
       </body>
     </html>
   );
