@@ -14,7 +14,7 @@ export interface Pantone {
   fornitoreCarta: string;
   passoCarta: number;
   hCarta: number;
-  hex: string;
+  hex?: string;
   stato: string;
   tipo: string;
   descrizione: string;
@@ -57,7 +57,7 @@ export interface RawPantone {
   tipoCarta?: string;
   fornitoreCarta?: string;
   tipo?: string;
-  descrizione: string;
+  descrizione?: string;
   consegnatoProduzione?: boolean;
   qtConsegnataProduzione?: number;
   pantoneGroupId: string;

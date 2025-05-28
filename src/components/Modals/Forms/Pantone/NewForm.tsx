@@ -10,7 +10,7 @@ import { BaseMateriale } from '@/types/materialeTypes';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useCallback } from 'react';
 
-interface FormData {
+export interface FormData {
   [key: string]: string | number | undefined;
 }
 
@@ -21,8 +21,10 @@ export default function NewForm() {
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
+
   const basiFiltrate =
     !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
+
   const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
     if (!acc[base.name]) acc[base.name] = [];
     acc[base.name].push(base);
@@ -102,7 +104,6 @@ export default function NewForm() {
         fornitoreCarta: String(formData.fornitoreCarta || ''),
         passoCarta: Number(formData.passoCarta) || 0,
         hCarta: Number(formData.hCarta) || 0,
-        hex: String(formData.hex || ''),
         stato: String(formData.stato || ''),
         tipo: String(formData.tipo || ''),
         descrizione: String(formData.descrizione || ''),

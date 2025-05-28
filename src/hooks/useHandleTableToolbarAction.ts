@@ -1,6 +1,8 @@
 import { BaseItem } from '@/types/tablesTypes';
 import { useTableStore } from '@/store/useTableStore';
 import { ModalKey, useModalStore } from '@/store/useModalStore';
+import { Pantone } from '@/types/pantoneTypes';
+import { Materiale } from '@/types/materialeTypes';
 
 export function useHandleTableToolbarAction<T extends BaseItem>(data: T[]) {
   const { selectedRows, setSelectedPantoni, setSelectedMateriali } = useTableStore();
@@ -14,9 +16,9 @@ export function useHandleTableToolbarAction<T extends BaseItem>(data: T[]) {
     }
 
     if (itemKey === 'pantoni') {
-      setSelectedPantoni(selected.map((item) => item._id.toString()));
+      setSelectedPantoni(selected as Pantone[]);
     } else {
-      setSelectedMateriali(selected.map((item) => item._id.toString()));
+      setSelectedMateriali(selected as Materiale[]);
     }
 
     openModal(modalKey);

@@ -1,18 +1,20 @@
 'use client';
+import { Materiale } from '@/types/materialeTypes';
+import { Pantone } from '@/types/pantoneTypes';
 import { create } from 'zustand';
 
 interface TableState {
   selectedRows: string[];
-  selectedPantoni: string[];
-  selectedMateriali: string[];
+  selectedPantoni: Pantone[];
+  selectedMateriali: Materiale[];
   searchQuery: string;
   visibleUserCols: string[]; // Non usato, ma lascialo per compatibilità
   visibleUserColsMap: Record<string, string[]>;
   selectedTableKey: string | null;
 
   toggleSelection: (id: string) => void;
-  setSelectedPantoni: (pantoni: string[]) => void;
-  setSelectedMateriali: (materiali: string[]) => void;
+  setSelectedPantoni: (pantoni: Pantone[]) => void;
+  setSelectedMateriali: (materiali: Materiale[]) => void;
   setSearchQuery: (value: string) => void;
   setVisibleUserCols: (tableKey: string, cols: string[]) => void;
   getVisibleUserCols: (tableKey: string) => string[];

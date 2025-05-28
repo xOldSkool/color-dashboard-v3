@@ -11,7 +11,7 @@ export const BasiPantoneSchema = z.object({
 });
 
 export const PantoneSchema = z.object({
-  _id: z.union([z.string(), z.any()]).optional(), // ObjectId (server) - stringa (client)
+  _id: z.union([z.string(), z.any()]), // ObjectId (server) - stringa (client)
   nomePantone: z.string().refine(
     (val) => {
       if (val.startsWith('P')) {
@@ -26,7 +26,7 @@ export const PantoneSchema = z.object({
     }
   ),
   variante: z.string().min(1, 'La variante è obbligatoria'),
-  dataCreazione: z.union([z.string(), z.date()]).optional(), // ISO - Date
+  dataCreazione: z.union([z.string(), z.date()]), // ISO - Date
   articolo: z.string().min(1),
   is: z.string().min(1),
   cliente: z.string().min(1),
