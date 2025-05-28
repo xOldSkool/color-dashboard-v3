@@ -26,7 +26,8 @@ export const PantoneSchema = z.object({
     }
   ),
   variante: z.string().min(1, 'La variante è obbligatoria'),
-  dataCreazione: z.union([z.string(), z.date()]), // ISO - Date
+  dataCreazione: z.union([z.string(), z.date()]),
+  ultimoUso: z.union([z.string(), z.date()]), // ISO - Date
   articolo: z.string().min(1),
   is: z.string().min(1),
   cliente: z.string().min(1),
@@ -36,10 +37,13 @@ export const PantoneSchema = z.object({
   fornitoreCarta: z.string().min(1),
   passoCarta: z.number().nonnegative(),
   hCarta: z.number().nonnegative(),
-  hex: z.string().regex(/^#([0-9A-Fa-f]{6})$/, 'Formato colore esadecimale non valido'),
-  stato: z.string().min(1),
+  hex: z
+    .string()
+    .regex(/^#([0-9A-Fa-f]{6})$/, 'Formato colore esadecimale non valido')
+    .optional(),
+  stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
   tipo: z.enum(['EB', 'UV']),
-  descrizione: z.string().min(1),
+  descrizione: z.string(),
   noteColore: z.string().optional(),
   consumo: z.number().nonnegative(),
   dose: z.number().nonnegative(),
@@ -48,7 +52,7 @@ export const PantoneSchema = z.object({
   battuteDaProdurre: z.number().optional(),
   consegnatoProduzione: z.boolean().optional(),
   qtConsegnataProduzione: z.number().optional(),
-  pantoneGroupId: z.string().min(1, 'pantoneGroupId è obbligatorio'),
+  pantoneGroupId: z.string(),
   basi: z.array(BasiPantoneSchema).optional(),
   basiNormalizzate: z.string().optional(),
 });

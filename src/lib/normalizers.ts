@@ -4,7 +4,7 @@ import { Pantone, RawPantone } from '@/types/pantoneTypes';
 export function normalizePantone(raw: RawPantone): Pantone {
   return {
     // _id da ObjectId a string
-    _id: raw._id.toString(),
+    _id: raw._id!.toString(),
 
     // stringhe o numeri semplici
     nomePantone: String(raw.nomePantone),
@@ -16,10 +16,10 @@ export function normalizePantone(raw: RawPantone): Pantone {
     articolo: String(raw.articolo ?? ''),
     is: String(raw.is ?? ''),
     cliente: String(raw.cliente ?? ''),
-    stato: String(raw.stato ?? ''),
+    stato: raw.stato === 'In uso' || raw.stato === 'Obsoleto' || raw.stato === 'Da verificare' ? raw.stato : 'Da verificare',
     tipoCarta: String(raw.tipoCarta ?? ''),
     fornitoreCarta: String(raw.fornitoreCarta ?? ''),
-    tipo: String(raw.tipo ?? ''),
+    tipo: raw.tipo === 'EB' || raw.tipo === 'UV' ? raw.tipo : 'EB',
     descrizione: String(raw.descrizione ?? ''),
     consegnatoProduzione: Boolean(raw.consegnatoProduzione),
     qtConsegnataProduzione: Number(raw.qtConsegnataProduzione ?? 0),
@@ -42,6 +42,7 @@ export function normalizePantone(raw: RawPantone): Pantone {
     hex: String(raw.hex ?? ''),
 
     dataCreazione: raw.dataCreazione ? new Date(raw.dataCreazione).toISOString() : '',
+    ultimoUso: raw.ultimoUso ? new Date(raw.ultimoUso).toISOString() : '',
   };
 }
 
@@ -55,7 +56,7 @@ export function normalizeMateriali(raws: RawMateriale[]): Materiale[] {
       raw;
 
     return {
-      _id: _id.toString(),
+      _id: _id!.toString(),
       name,
       stato,
       label,

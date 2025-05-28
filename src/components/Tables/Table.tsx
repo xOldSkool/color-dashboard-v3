@@ -13,7 +13,7 @@ import TableToolbar from './TableToolbar';
 // <TableClient
 //   items={[]}               // array di oggetti da visualizzare (pantoni o materiali)
 //   config={[]}              // array di colonne visibili (es. ['nomePantone', 'cliente', ...])
-//   tableKey="pantoni"       // chiave della tabella per gestire colonne, filtri e comportamenti (es. 'pantoni', 'materiali', 'urgenti', ...)
+//   tableKey="pantoni"       // chiave della tabella per gestire colonne, filtri e comportamenti (es. 'pantoni', 'materiali')
 //   rows={25}                // numero di righe per pagina (opzionale, default: 25)
 //   filterFn={(item) => ...} // funzione personalizzata di filtro degli item (opzionale)
 // />

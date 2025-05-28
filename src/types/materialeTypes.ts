@@ -10,7 +10,7 @@ export interface MovimentoMateriale {
 }
 
 export interface Materiale {
-  _id: ObjectId | string;
+  _id?: ObjectId | string;
   name: string;
   label: string;
   codiceColore?: string;
@@ -31,17 +31,17 @@ export type BaseMateriale = Pick<
 >;
 
 export interface RawMateriale {
-  _id: string | ObjectId;
+  _id?: string | ObjectId;
   name: string;
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   label: string;
-  codiceColore: string;
-  codiceFornitore: string;
+  codiceColore?: string;
+  codiceFornitore?: string;
   quantita: number;
   fornitore: string;
   tipo: 'carico' | 'scarico';
   utilizzo: 'Base' | 'Materiale';
-  noteMateriale: string;
+  noteMateriale?: string;
   dataCreazione: string | Date;
-  movimenti: MovimentoMateriale[];
+  movimenti?: MovimentoMateriale[];
 }

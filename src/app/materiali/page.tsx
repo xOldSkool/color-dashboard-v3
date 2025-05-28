@@ -1,8 +1,8 @@
 import Button from '@/components/Button';
 import TableClient from '@/components/Tables/Table';
 import { CONFIG_MATERIALI } from '@/constants/defaultColumns';
-import { getAllMateriali } from '@/lib/materiali';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
+import { getAllMateriali } from '@/lib/materiali/db';
 import { normalizeMateriali } from '@/lib/normalizers';
 
 export default async function MaterialiPage() {

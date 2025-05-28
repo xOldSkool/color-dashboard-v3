@@ -5,11 +5,14 @@ import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/normalizers';
 
-export default async function PantonePage({ params }) {
+export default async function PantonePage({ params }: { params: { id: string } }) {
   const db = await connectToDatabase();
   const raw = await getAllPantoni(db);
   const pantoni = normalizePantoni(raw);
   const pantone = pantoni.find((p) => p._id === params.id);
+  function formatDate(value: string | Date): string {
+    return value instanceof Date ? value.toLocaleDateString() : value;
+  }
 
   if (!pantone) return <p>Pantone non trovato</p>;
 
@@ -22,28 +25,28 @@ export default async function PantonePage({ params }) {
         </h1>
         <div className="flex flex-row gap-2 justify-end">
           <Button
-            iconName="Send"
+            iconName="send"
             variant="primary"
             // onClick={handleDeliverClick}
           >
             Consegna
           </Button>
           <Button
-            iconName="PaintBucket"
+            iconName="paintBucket"
             variant="primary"
             // onClick={handleProduceClick}
           >
             Componi
           </Button>
           <Button
-            iconName="SquarePen"
+            iconName="edit"
             variant="secondary"
             // onClick={handleEditClick}
           >
             Modifica
           </Button>
           <Button
-            iconName="Trash2"
+            iconName="delete"
             variant="danger"
             // onClick={handleDeleteClick}
           >
@@ -108,16 +111,16 @@ export default async function PantonePage({ params }) {
               </li>
               <li className="flex flex-row gap-2">
                 <span className="font-bold">Ultimo uso:</span>
-                {pantone.ultimoUso}
+                {formatDate(pantone.ultimoUso)}
               </li>
               <li className="flex flex-row gap-2">
                 <span className="font-bold">Data creazione:</span>
-                {pantone.dataCreazione}
+                {formatDate(pantone.dataCreazione)}
               </li>
-              <li className="flex flex-row gap-2">
+              {/* <li className="flex flex-row gap-2">
                 <span className="font-bold">Disponibilità magazzino:</span>
                 {pantone.dispMagazzino} kg
-              </li>
+              </li> */}
               <li className="flex flex-row gap-2">
                 <span className="font-bold">Descrizione:</span>
                 {pantone.descrizione}
@@ -131,12 +134,12 @@ export default async function PantonePage({ params }) {
           <div className="grid">
             <h2 className="text-3xl font-semibold mb-2">Ricetta</h2>
             <div className="flex flex-col text-xl">
-              {pantone.basi.map(({ nome, label, valore }) => (
-                <div key={nome}>
-                  {valore > 0 ? (
+              {pantone.basi?.map(({ name, label, quantita }, idx) => (
+                <div key={name ?? idx}>
+                  {quantita > 0 ? (
                     <div>
                       <span className="font-semibold">{label}: </span>
-                      <span>{valore} kg</span>
+                      <span>{quantita} kg</span>
                     </div>
                   ) : null}
                 </div>
@@ -149,8 +152,8 @@ export default async function PantonePage({ params }) {
             <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteArticolo}</div>
             <h3 className="text-xl">Note colore</h3>
             <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteColore}</div>
-            <h3 className="text-xl">Note magazzino</h3>
-            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteMagazzino}</div>
+            {/* <h3 className="text-xl">Note magazzino</h3>
+            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteMagazzino}</div> */}
           </div>
         </div>
       </div>

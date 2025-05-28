@@ -6,7 +6,7 @@ interface ProduceFormProps {
   pantone: Pantone;
 }
 
-export default function ProduceForm({ pantone }: ProduceFormProps) {
+export default function ProducePantoneForm({ pantone }: ProduceFormProps) {
   const [battute, setBattute] = useState(0);
   const [urgente, setUrgente] = useState(false);
   const basiFiltrate = useMemo(() => {

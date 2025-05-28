@@ -148,7 +148,7 @@ export const materialeFieldsCreate: Field[] = [
   {
     form: 'input',
     type: 'text',
-    name: 'nome',
+    name: 'name',
     label: 'Nome',
     placeholder: 'Inserisci nome',
     required: true,
@@ -167,6 +167,7 @@ export const materialeFieldsCreate: Field[] = [
     name: 'codiceColore',
     label: 'Codice colore',
     placeholder: 'Inserisci codice colore',
+    required: true,
   },
   {
     form: 'input',
@@ -174,6 +175,7 @@ export const materialeFieldsCreate: Field[] = [
     name: 'codiceFornitore',
     label: 'Codice fornitore',
     placeholder: 'Inserisci codice fornitore',
+    required: true,
   },
   {
     form: 'input',

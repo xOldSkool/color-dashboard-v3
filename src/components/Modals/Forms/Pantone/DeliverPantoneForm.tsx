@@ -4,7 +4,7 @@ interface DeliverFormProps {
   pantone: Pantone;
 }
 
-export default function DeliverForm({ pantone }: DeliverFormProps) {
+export default function DeliverPantoneForm({ pantone }: DeliverFormProps) {
   return (
     <div className="flex flex-col gap-4">
       <p>

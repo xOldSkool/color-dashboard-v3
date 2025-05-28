@@ -47,7 +47,7 @@ type IconName =
   | 'package'
   | 'archiveRestore'
   | 'copy'
-  | 'trash'
+  | 'delete'
   | 'edit'
   | 'clipboard'
   | 'filter'
@@ -104,7 +104,7 @@ export default function Button({
     package: Package,
     archiveRestore: ArchiveRestore,
     copy: Copy,
-    trash: Trash2,
+    delete: Trash2,
     edit: SquarePen,
     clipboard: ClipboardList,
     filter: ListFilter,

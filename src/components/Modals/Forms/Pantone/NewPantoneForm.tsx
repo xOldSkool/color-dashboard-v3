@@ -1,24 +1,25 @@
 'use client';
-
 import InputMap from '@/components/InputMap';
 import Loader from '@/components/Loader';
 import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
 import { useBasiMateriali } from '@/hooks/useMateriali';
-import { useUpdatePantone } from '@/hooks/usePantone';
-import { pantoneToFormData } from '@/lib/adapter';
+import { useCreatePantone } from '@/hooks/usePantone';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { BaseMateriale } from '@/types/materialeTypes';
-import { Pantone } from '@/types/pantoneTypes';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { getEnumValue } from '@/utils/getEnumValues';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 
-interface EditFormProps {
-  pantone: Pantone;
+export interface FormData {
+  [key: string]: string | number | undefined;
 }
 
-export default function EditForm({ pantone }: EditFormProps) {
-  const { update } = useUpdatePantone();
-  const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
+export default function NewPantoneForm() {
+  const router = useRouter();
+  const { createPantone } = useCreatePantone();
+  const [formData, setFormData] = useState<FormData>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
@@ -33,12 +34,14 @@ export default function EditForm({ pantone }: EditFormProps) {
     return acc;
   }, {});
 
-  // Precaricamento formData con pantone originale
   useEffect(() => {
-    if (pantone) {
-      setFormData(pantoneToFormData(pantone));
-    }
-  }, [pantone]);
+    const requiredFields = [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes].filter((field) => field.required);
+    const isValid = requiredFields.every((field) => {
+      const value = formData[field.name];
+      return value !== undefined && value !== '' && value !== null;
+    });
+    useModalStore.getState().setFormValid('newPantone', isValid);
+  }, [formData, basi]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -48,6 +51,24 @@ export default function EditForm({ pantone }: EditFormProps) {
       [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
     }));
   };
+
+  useEffect(() => {
+    // Somma tutte le quantità inserite nelle basi
+    const doseTotale = Object.entries(formData)
+      .filter(([key]) => key.startsWith('valore_'))
+      .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
+    // Aggiorna il campo dose solo se è diverso
+    if (formData.dose !== doseTotale) {
+      setFormData((prev) => ({ ...prev, dose: doseTotale }));
+    }
+  }, [formData]);
+
+  const pantone: Record<string, string | number | undefined> = {};
+  for (const [key, value] of Object.entries(formData)) {
+    if (!key.startsWith('fornitore_') && !key.startsWith('valore_')) {
+      pantone[key] = value;
+    }
+  }
 
   const basiFinali = Object.entries(basiRaggruppatePerName)
     .map(([nomeBase, basiArr]) => {
@@ -71,29 +92,77 @@ export default function EditForm({ pantone }: EditFormProps) {
 
   const submit = useCallback(async () => {
     try {
-      const aggiornato = {
-        ...pantone,
-        ...formData,
+      // Costruisci l'oggetto Pantone rispettando il tipo richiesto
+      const nuovoPantone = {
+        nomePantone: String(formData.nomePantone || ''),
+        variante: String(formData.variante || ''),
+        dataCreazione: new Date().toISOString(),
+        ultimoUso: '',
+        articolo: String(formData.articolo || ''),
+        is: String(formData.is || ''),
+        cliente: String(formData.cliente || ''),
+        noteArticolo: String(formData.noteArticolo || ''),
+        urgente: Boolean(formData.urgente) && formData.urgente !== 'false',
+        tipoCarta: String(formData.tipoCarta || ''),
+        fornitoreCarta: String(formData.fornitoreCarta || ''),
+        passoCarta: Number(formData.passoCarta) || 0,
+        hCarta: Number(formData.hCarta) || 0,
+        stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
+        tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
+        descrizione: String(formData.descrizione || ''),
+        noteColore: String(formData.noteColore || ''),
+        consumo: Number(formData.consumo) || 0,
+        dose: Number(formData.dose) || 0,
+        daProdurre: Boolean(formData.daProdurre) && formData.daProdurre !== 'false',
+        qtDaProdurre: Number(formData.qtDaProdurre) || 0,
+        battuteDaProdurre: Number(formData.battuteDaProdurre) || 0,
+        consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
+        qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
+        pantoneGroupId: String(formData.pantoneGroupId || ''),
+        basi: basiFinali,
+        basiNormalizzate: '', // Se serve, aggiungi la logica
       };
 
-      const validation = PantoneSchema.safeParse(aggiornato);
+      // Validazione con Zod
+      const validation = PantoneSchema.safeParse(nuovoPantone);
       if (!validation.success) {
-        alert('Errore di validazione:\n' + validation.error.issues.map((e) => e.message).join('\n'));
+        // Mostra errore (puoi usare un toast, alert, setState, ecc.)
+        alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
         return false;
       }
 
-      await update(pantone._id.toString(), aggiornato);
+      await createPantone(nuovoPantone);
       setErrorMessage(null);
+      router.refresh();
       return true;
-    } catch (err) {
-      console.error('Errore durante il submit', err);
+    } catch (error) {
+      console.error('Errore durante il submit:', error);
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [pantone, formData, basiFinali, update]);
+  }, [formData, basiFinali, createPantone]);
+
+  const reset = useCallback(() => {
+    const iniziale: { [key: string]: string | number } = {};
+    [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes, ...basi.map((b) => ({ name: b.name }))].forEach((field) => {
+      iniziale[field.name] = ''; // resettiamo tutto a stringa vuota
+    });
+    setFormData(iniziale);
+  }, [basi]);
+
+  const submitRef = useRef(submit);
+  const resetRef = useRef(reset);
 
   useEffect(() => {
-    useModalStore.getState().registerHandler('editPantone', { submit: () => submit() });
+    submitRef.current = submit;
+    resetRef.current = reset;
+  }, [submit, reset]);
+
+  useEffect(() => {
+    useModalStore.getState().registerHandler('newPantone', {
+      submit: () => submitRef.current(),
+      reset: () => resetRef.current(),
+    });
   }, []);
 
   return (
@@ -119,7 +188,7 @@ export default function EditForm({ pantone }: EditFormProps) {
               <div className="grid grid-cols-4 gap-2">
                 {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
                   const fornitoriDisponibili = basi.map((b) => ({
-                    id: b._id.toString(),
+                    id: b._id!.toString(),
                     label: b.label,
                     fornitore: b.fornitore,
                     codiceColore: b.codiceColore,

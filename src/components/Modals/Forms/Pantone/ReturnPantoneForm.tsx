@@ -4,7 +4,7 @@ interface ReturnFormProps {
   pantone: Pantone;
 }
 
-export default function ReturnForm({ pantone }: ReturnFormProps) {
+export default function ReturnPantoneForm({ pantone }: ReturnFormProps) {
   return (
     <div className="flex flex-col gap-4">
       <p>

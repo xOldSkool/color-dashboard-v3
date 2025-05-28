@@ -4,8 +4,8 @@ import { MATERIALI_COLUMNS, PANTONE_COLUMNS, SHOWABLE_MATERIALI_COLS, SHOWABLE_P
 import { useTableStore } from '@/store/useTableStore';
 import { JSX } from 'react';
 
-type TableKey = 'materiali' | 'pantoni';
-interface ColumnSelectorProps {
+export type TableKey = 'materiali' | 'pantoni';
+export interface ColumnSelectorProps {
   tableKey: TableKey;
 }
 

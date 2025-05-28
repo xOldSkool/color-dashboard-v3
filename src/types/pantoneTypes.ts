@@ -1,10 +1,11 @@
 import { ObjectId } from 'mongodb';
 
 export interface Pantone {
-  _id: ObjectId | string;
+  _id?: ObjectId | string;
   nomePantone: string;
   variante: string;
   dataCreazione: Date | string;
+  ultimoUso: Date | string;
   articolo: string;
   is: string;
   cliente: string;
@@ -15,8 +16,8 @@ export interface Pantone {
   passoCarta: number;
   hCarta: number;
   hex?: string;
-  stato: string;
-  tipo: string;
+  stato: 'In uso' | 'Obsoleto' | 'Da verificare';
+  tipo: 'EB' | 'UV';
   descrizione: string;
   noteColore?: string;
   consumo: number;
@@ -42,9 +43,8 @@ export interface BasiPantone {
 }
 
 export interface RawPantone {
-  _id: string | ObjectId;
+  _id?: string | ObjectId;
   nomePantone?: string;
-  dispMagazzino?: number;
   passoCarta?: number;
   hCarta?: number;
   consumo?: number;
@@ -53,14 +53,14 @@ export interface RawPantone {
   articolo?: string;
   is?: string;
   cliente?: string;
-  stato?: string;
+  stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   tipoCarta?: string;
   fornitoreCarta?: string;
-  tipo?: string;
+  tipo?: 'EB' | 'UV';
   descrizione?: string;
   consegnatoProduzione?: boolean;
   qtConsegnataProduzione?: number;
-  pantoneGroupId: string;
+  pantoneGroupId?: string;
   daProdurre?: boolean;
   qtDaProdurre?: number;
   battuteDaProdurre?: number;
@@ -68,5 +68,6 @@ export interface RawPantone {
   basi?: BasiPantone[];
   hex?: string;
   dataCreazione?: string | Date;
+  ultimoUso: Date | string;
   movimentiMagazzino?: { tipo: string; quantita: number; data: string | Date; causale: string }[];
 }

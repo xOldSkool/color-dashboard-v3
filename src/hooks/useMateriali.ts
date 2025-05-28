@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BaseMateriale } from '@/types/materialeTypes';
+import { BaseMateriale, Materiale } from '@/types/materialeTypes';
 
 export const useBasiMateriali = (tipo?: string) => {
   const [basi, setBasi] = useState<BaseMateriale[]>([]);
@@ -44,3 +44,18 @@ export const useBasiMateriali = (tipo?: string) => {
 
   return { basi, loading, error };
 };
+
+export function useCreateMateriale() {
+  const createMateriale = async (materiale: Materiale): Promise<Materiale> => {
+    const response = await axios.post<Materiale>('/api/materiali', materiale);
+    return response.data;
+  };
+  return { createMateriale };
+}
+
+export function useUpdateMateriale() {
+  const updateMateriale = async (id: string, updateData: Partial<Omit<Materiale, '_id'>>) => {
+    await axios.patch<Materiale>(`/api/materiali/${id}`, updateData);
+  };
+  return { updateMateriale };
+}
