@@ -11,13 +11,14 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useCallback } from 'react';
 import { Pantone } from '@/types/pantoneTypes';
 import { pantoneToFormData } from '@/lib/adapter';
+import { getEnumValue } from '@/utils/getEnumValues';
 
 interface DuplicatePantoneProps {
   pantone: Pantone;
 }
 
 export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
-  const { create } = useCreatePantone();
+  const { createPantone } = useCreatePantone();
   const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -89,7 +90,6 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
   const submit = useCallback(async () => {
     try {
       const nuovoPantone = {
-        _id: '', // Sarà generato dal backend
         nomePantone: String(formData.nomePantone || ''),
         variante: String(formData.variante || ''),
         dataCreazione: new Date().toISOString(),
@@ -103,8 +103,8 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         fornitoreCarta: String(formData.fornitoreCarta || ''),
         passoCarta: Number(formData.passoCarta) || 0,
         hCarta: Number(formData.hCarta) || 0,
-        stato: String(formData.stato || ''),
-        tipo: String(formData.tipo || ''),
+        stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
+        tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         descrizione: String(formData.descrizione || ''),
         noteColore: String(formData.noteColore || ''),
         consumo: Number(formData.consumo) || 0,
@@ -114,9 +114,9 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         battuteDaProdurre: Number(formData.battuteDaProdurre) || 0,
         consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
-        pantoneGroupId: '', // sarà generato dal backend
+        pantoneGroupId: String(formData.pantoneGroupId || ''),
         basi: basiFinali,
-        basiNormalizzate: '',
+        basiNormalizzate: '', // Se serve, aggiungi la logica
       };
 
       const validation = PantoneSchema.safeParse(nuovoPantone);
@@ -125,7 +125,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         return false;
       }
 
-      await create(nuovoPantone);
+      await createPantone(nuovoPantone);
       setErrorMessage(null);
       return true;
     } catch (error) {
@@ -133,7 +133,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [formData, basiFinali, create]);
+  }, [formData, basiFinali, createPantone]);
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};
@@ -180,7 +180,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
               <div className="grid grid-cols-4 gap-2">
                 {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
                   const fornitoriDisponibili = basi.map((b) => ({
-                    id: b._id.toString(),
+                    id: b._id!.toString(),
                     label: b.label,
                     fornitore: b.fornitore,
                     codiceColore: b.codiceColore,

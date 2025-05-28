@@ -122,7 +122,7 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
     return sortOrder === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
   });
 
-  const allIds: string[] = sortedData.map((item) => item._id.toString());
+  const allIds: string[] = sortedData.map((item) => item._id!.toString());
   const allSelected: boolean = allIds.every((id) => selectedRows.includes(id));
 
   return (
