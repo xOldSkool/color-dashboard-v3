@@ -55,7 +55,7 @@ export function useCreateMateriale() {
 
 export function useUpdateMateriale() {
   const updateMateriale = async (id: string, updateData: Partial<Omit<Materiale, '_id'>>) => {
-    await axios.patch<Materiale>(`/api/materiali/${id}`, updateData);
+    await axios.patch<Materiale>(`/api/materiali/`, { id, ...updateData });
   };
   return { updateMateriale };
 }

@@ -10,6 +10,7 @@ import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { BaseMateriale } from '@/types/materialeTypes';
 import { Pantone } from '@/types/pantoneTypes';
+import { useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 
 interface EditFormProps {
@@ -17,6 +18,7 @@ interface EditFormProps {
 }
 
 export default function EditPantoneForm({ pantone }: EditFormProps) {
+  const router = useRouter();
   const { updatePantone } = useUpdatePantone();
   const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -82,12 +84,13 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
 
       const validation = PantoneSchema.safeParse(aggiornato);
       if (!validation.success) {
-        alert('Errore di validazione:\n' + validation.error.issues.map((e) => e.message).join('\n'));
+        alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
         return false;
       }
 
       await updatePantone(pantone._id.toString(), aggiornato);
       setErrorMessage(null);
+      router.refresh();
       return true;
     } catch (err) {
       console.error('Errore durante il submit', err);
@@ -96,8 +99,10 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     }
   }, [pantone, formData, basiFinali, updatePantone]);
 
+  const reset = useCallback(() => setFormData({}), []);
+
   useEffect(() => {
-    useModalStore.getState().registerHandler('editPantone', { submit: () => submit() });
+    useModalStore.getState().registerHandler('editPantone', { submit: () => submit(), reset: () => reset });
   }, []);
 
   return (

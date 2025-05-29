@@ -5,6 +5,8 @@ export interface MovimentoMateriale {
   quantita: number;
   data: Date | string;
   noteOperatore?: string;
+  DDT?: string;
+  dataDDT?: Date | string;
   causale: string;
   riferimentoPantone?: string;
 }
@@ -17,7 +19,7 @@ export interface Materiale {
   codiceFornitore?: string;
   quantita: number;
   fornitore: string;
-  tipo: 'carico' | 'scarico';
+  tipo: 'EB' | 'UV';
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   utilizzo: 'Base' | 'Materiale';
   noteMateriale?: string;
@@ -39,7 +41,7 @@ export interface RawMateriale {
   codiceFornitore?: string;
   quantita: number;
   fornitore: string;
-  tipo: 'carico' | 'scarico';
+  tipo: 'EB' | 'UV';
   utilizzo: 'Base' | 'Materiale';
   noteMateriale?: string;
   dataCreazione: string | Date;

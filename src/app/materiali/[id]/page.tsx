@@ -1,10 +1,10 @@
 import Button from '@/components/Button';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
-import { getAllMateriali } from '@/lib/materiali';
+import { getAllMateriali } from '@/lib/materiali/db';
 import { normalizeMateriali } from '@/lib/normalizers';
 
-export default async function MaterialePage({ params }) {
-  const id = params.id;
+export default async function MaterialePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const db = await connectToDatabase();
   const raw = await getAllMateriali(db);
   const materiali = normalizeMateriali(raw);
@@ -53,7 +53,7 @@ export default async function MaterialePage({ params }) {
             {materiale.movimenti.map((mov, index) => (
               <li key={index} className="bg-[var(--hover-btn-ghost)] p-3 rounded-lg text-lg">
                 <strong>{mov.tipo}</strong> • {mov.quantita} kg • {new Date(mov.data).toLocaleDateString()}
-                {mov.note && ` • ${mov.note}`}
+                {mov.noteOperatore && ` • ${mov.noteOperatore}`}
                 {mov.causale && `• ${mov.causale}`}
               </li>
             ))}

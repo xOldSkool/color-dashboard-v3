@@ -14,7 +14,9 @@
     {
       "tipo": "carico",
       "quantita": 100,
-      "data": "2025-03-15T09:00:00.000Z",
+      "dataInserimento": "2025-03-15T09:00:00.000Z",
+      "DDT": "1021531",
+      "dataDDT": "2025-03-15T09:00:00.000Z",
       "noteOperatore": "",
       "causale": "Arrivo fornitore"
     },

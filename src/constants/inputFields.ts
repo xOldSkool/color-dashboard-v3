@@ -215,7 +215,41 @@ export const materialeFieldsCreate: Field[] = [
   },
 ];
 
-export const materialeFieldsMovimento: Field[] = [
+export const materialeFieldsMovimentoLoad: Field[] = [
+  {
+    form: 'input',
+    type: 'number',
+    name: 'quantita',
+    label: 'Quantità',
+    placeholder: 'Inserisci quantità',
+    required: true,
+  },
+  {
+    form: 'input',
+    type: 'number',
+    name: 'DDT',
+    label: 'Numero DDT',
+    placeholder: 'Inserisci il numero del DDT',
+    required: true,
+  },
+  {
+    form: 'input',
+    type: 'date',
+    name: 'dataDDT',
+    label: 'Data DDT',
+    placeholder: 'Inserisci data del DDT',
+    required: true,
+  },
+  {
+    form: 'textarea',
+    name: 'noteOperatore',
+    label: 'Note operatore',
+    placeholder: 'Eventuali annotazioni',
+    rows: 3,
+  },
+];
+
+export const materialeFieldsMovimentoUnload: Field[] = [
   {
     form: 'input',
     type: 'number',

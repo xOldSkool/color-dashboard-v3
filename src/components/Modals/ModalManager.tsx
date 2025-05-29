@@ -10,11 +10,14 @@ import ProducePantoneForm from './Forms/Pantone/ProducePantoneForm';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import NewMaterialeForm from './Forms/Materiali/NewMaterialeForm';
+import EditMaterialeForm from './Forms/Materiali/EditMaterialeForm';
+import LoadMaterialeForm from './Forms/Materiali/LoadMaterialeForm';
+import UnloadMaterialeForm from './Forms/Materiali/UnloadMaterialeForm';
 
 export default function ModalManager() {
   const hasRegisteredProduceHandler = useRef(false);
   const router = useRouter();
-  const { selectedPantoni, selectedTableKey, setSelectedPantoni } = useTableStore();
+  const { selectedPantoni, selectedTableKey, setSelectedPantoni, selectedMateriali } = useTableStore();
   const { modals, closeModal, openModal, registerHandler } = useModalStore();
 
   useEffect(() => {
@@ -113,9 +116,26 @@ export default function ModalManager() {
       {/* SEZIONE MATERIALI */}
       {/* SEZIONE MATERIALI */}
       {/* SEZIONE MATERIALI */}
+
       {modals.newMateriale && (
         <Modal title="Crea materiale" modalKey="newMateriale" onClose={() => closeModal('newMateriale')}>
           <NewMaterialeForm />
+        </Modal>
+      )}
+      {modals.editMateriale && (
+        <Modal title="Modifica Materiale" modalKey="editMateriale" onClose={() => closeModal('editMateriale')}>
+          <EditMaterialeForm materiale={selectedMateriali[0]} />
+        </Modal>
+      )}
+      {modals.loadMateriale && (
+        <Modal title="Carica materiale" modalKey="loadMateriale" onClose={() => closeModal('loadMateriale')}>
+          <LoadMaterialeForm materiale={selectedMateriali[0]} />
+        </Modal>
+      )}
+
+      {modals.unloadMateriale && (
+        <Modal title="Scarica materiale" modalKey="unloadMateriale" onClose={() => closeModal('unloadMateriale')}>
+          <UnloadMaterialeForm materiale={selectedMateriali[0]} />
         </Modal>
       )}
     </>

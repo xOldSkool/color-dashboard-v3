@@ -1,23 +1,32 @@
 'use client';
 import InputMap from '@/components/InputMap';
 import { materialeFieldsCreate } from '@/constants/inputFields';
-import { useCreateMateriale } from '@/hooks/useMateriali';
+import { useUpdateMateriale } from '@/hooks/useMateriali';
 import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { getEnumValue } from '@/utils/getEnumValues';
+import { Materiale } from '@/types/materialeTypes';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useCallback } from 'react';
+import { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
+import { materialeToFormData } from '@/lib/adapter';
 
-export interface FormData {
-  [key: string]: string | number | undefined;
+interface EditMaterialeFormProps {
+  materiale: Materiale;
 }
 
-export default function NewMaterialeForm() {
+export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps) {
   const router = useRouter();
-  const { createMateriale } = useCreateMateriale();
-  const [formData, setFormData] = useState<FormData>({});
+  const { updateMateriale } = useUpdateMateriale();
+  const [formData, setFormData] = useState<{ [key: string]: string | number | undefined }>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  console.log('materiale ricevuto:', materiale);
+
+  // Precaricamento formData con materiale originale
+  useEffect(() => {
+    if (materiale) {
+      setFormData(materialeToFormData(materiale));
+    }
+  }, [materiale]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -30,8 +39,11 @@ export default function NewMaterialeForm() {
 
   const submit = useCallback(async () => {
     try {
-      // Costruisci l'oggetto Materiale
-      const nuovoMateriale = {
+      if (!materiale._id) {
+        setErrorMessage('ID materiale mancante.');
+        return false;
+      }
+      const materialeAggiornato = {
         name: String(formData.name),
         label: String(formData.label || ''),
         codiceColore: String(formData.codiceColore || ''),
@@ -42,19 +54,16 @@ export default function NewMaterialeForm() {
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
         utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale'] as const, 'Base'),
         noteMateriale: String(formData.noteMateriale || ''),
-        dataCreazione: new Date().toISOString(),
-        movimenti: [], // oppure logica per aggiungere movimenti
       };
 
       // Validazione con Zod
-      const validation = MaterialeSchema.safeParse(nuovoMateriale);
+      const validation = MaterialeSchema.safeParse(materialeAggiornato);
       if (!validation.success) {
-        // Mostra errore (puoi usare un toast, alert, setState, ecc.)
-        alert('Errore di validazione:\n' + validation.error.issues.map((e) => e.message).join('\n'));
+        setErrorMessage('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
         return false;
       }
 
-      await createMateriale(nuovoMateriale);
+      await updateMateriale(materiale._id.toString(), materialeAggiornato);
       setErrorMessage(null);
       router.refresh();
       return true;
@@ -63,15 +72,24 @@ export default function NewMaterialeForm() {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [formData, createMateriale]);
+  }, [formData, updateMateriale, materiale, router]);
 
   const reset = useCallback(() => {
-    const iniziale: { [key: string]: string | number } = {};
-    [...materialeFieldsCreate].forEach((field) => {
-      iniziale[field.name] = ''; // resettiamo tutto a stringa vuota
-    });
-    setFormData(iniziale);
-  }, []);
+    if (materiale) {
+      setFormData({
+        name: materiale.name,
+        label: materiale.label || '',
+        codiceColore: materiale.codiceColore || '',
+        codiceFornitore: materiale.codiceFornitore || '',
+        quantita: materiale.quantita || 0,
+        fornitore: materiale.fornitore || '',
+        tipo: materiale.tipo || '',
+        stato: materiale.stato || '',
+        utilizzo: materiale.utilizzo || '',
+        noteMateriale: materiale.noteMateriale || '',
+      });
+    }
+  }, [materiale]);
 
   const submitRef = useRef(submit);
   const resetRef = useRef(reset);
@@ -82,7 +100,7 @@ export default function NewMaterialeForm() {
   }, [submit, reset]);
 
   useEffect(() => {
-    useModalStore.getState().registerHandler('newMateriale', {
+    useModalStore.getState().registerHandler('editMateriale', {
       submit: () => submitRef.current(),
       reset: () => resetRef.current(),
     });

@@ -51,7 +51,7 @@ export default function Navbar(): JSX.Element {
       {navItems.map(({ href, label, icon: Icon }) => {
         const isActive = path === href;
         const link = (
-          <Link href={href} className={`${isActive ? linkClassesActive : linkClasses} ${!isOpen && 'justify-center'}`}>
+          <Link href={href} prefetch={true} className={`${isActive ? linkClassesActive : linkClasses} ${!isOpen && 'justify-center'}`}>
             <Icon className={`${isActive ? iconClassesActive : iconClasses} ${isOpen && 'mr-3'}`} />
             {isOpen && <span>{label}</span>}
           </Link>
