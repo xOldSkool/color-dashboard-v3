@@ -42,7 +42,7 @@ export default function TableBody<T extends BaseItem>({
       </div>
 
       {data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((item) => {
-        const id = item._id.toString();
+        const id = item._id!.toString();
         return (
           <div
             key={id}
@@ -68,8 +68,8 @@ export default function TableBody<T extends BaseItem>({
               return (
                 <div key={col.key} className={`px-2 ${isBasi || isMovimenti ? 'text-left items-start' : 'text-center justify-center'} flex`}>
                   {isHex && 'hex' in item ? (
-                    <HexToBoxColor hex={item.hex} />
-                  ) : isBasi && 'basi' in item && Array.isArray(item.basi) && item.basi.filter((base) => base.valore > 0).length ? (
+                    <HexToBoxColor hex={item.hex!} />
+                  ) : isBasi && 'basi' in item && Array.isArray(item.basi) && item.basi.filter((base) => base.quantita > 0).length ? (
                     <div className="flex flex-col justify-center">
                       {tableKey === 'da-produrre' && item.qtDaProdurre && item.dose && (
                         <div className="flex flex-col mb-1 self-start text-xs gap-1">
@@ -84,14 +84,14 @@ export default function TableBody<T extends BaseItem>({
                         </div>
                       )}
                       {item.basi
-                        .filter((base) => base.valore > 0)
+                        .filter((base) => base.quantita > 0)
                         .map((base) => {
                           const totale =
                             tableKey === 'da-produrre' && item.qtDaProdurre
-                              ? ((base.valore * item.qtDaProdurre) / item.dose).toFixed(3)
-                              : base.valore.toFixed(3);
+                              ? ((base.quantita * item.qtDaProdurre) / item.dose).toFixed(3)
+                              : base.quantita.toFixed(3);
                           return (
-                            <div key={base.nome} className="text-sm">
+                            <div key={base.name} className="text-sm">
                               <span className="font-bold">{base.label}</span>: {totale}
                             </div>
                           );
