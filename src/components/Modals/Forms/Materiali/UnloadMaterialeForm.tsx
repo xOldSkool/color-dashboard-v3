@@ -1,13 +1,13 @@
 'use client';
 import { materialeFieldsMovimentoUnload } from '@/constants/inputFields';
 import { useUpdateMateriale } from '@/hooks/useMateriali';
-import { MaterialeSchema } from '@/schemas/MaterialeSchema';
+import { MaterialeSchemaOpzionale } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { Materiale } from '@/types/materialeTypes';
 import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
-type FormState = {
+type FormDataState = {
   [key: string]: string;
 };
 
@@ -15,19 +15,19 @@ interface UnloadMaterialeFormProps {
   materiale?: Materiale;
 }
 
-export default function UnloadMaterialeForm({ materiale }: UnloadMaterialeFormProps) {
+export default function UnloadMaterialeFormData({ materiale }: UnloadMaterialeFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState<FormState>({});
+  const [formData, setFormData] = useState<FormDataState>({});
   const { closeModal, registerHandler } = useModalStore();
   const { updateMateriale } = useUpdateMateriale();
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // 3. Stato errore
-  const formRef = useRef<FormState>({});
+  const formDataRef = useRef<FormDataState>({});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => {
+    setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      formRef.current = updated;
+      formDataRef.current = updated;
       return updated;
     });
   };
@@ -35,22 +35,26 @@ export default function UnloadMaterialeForm({ materiale }: UnloadMaterialeFormPr
   const submit = useCallback(async () => {
     setErrorMessage(null);
     if (!materiale || !materiale._id) return false;
+    const currentFormData = formDataRef.current;
     const movimento = {
-      ...form,
-      quantita: Number(form.quantita),
+      ...currentFormData,
+      quantita: Number(currentFormData.quantita),
       data: new Date().toISOString(),
-      tipo: getEnumValue(form.tipo, ['carico', 'scarico'] as const, 'scarico'),
-      noteOperatore: form.noteOperatore,
-      causale: 'Vedi note operatore',
+      tipo: getEnumValue(currentFormData.tipo, ['carico', 'scarico'] as const, 'scarico'),
+      noteOperatore: currentFormData.noteOperatore,
+      causale: currentFormData.noteOperatore,
+      DDT: '',
+      dataDDT: '',
+      fromUnload: true,
     };
-    const nuovaQuantita = materiale.quantita + movimento.quantita;
+    const nuovaQuantita = materiale.quantita - movimento.quantita;
     const materialeAggiornato = {
       ...materiale,
       quantita: nuovaQuantita,
       movimenti: [...(materiale.movimenti || []), movimento],
     };
 
-    const validation = MaterialeSchema.safeParse(materialeAggiornato);
+    const validation = MaterialeSchemaOpzionale.safeParse(materialeAggiornato);
     if (!validation.success) {
       setErrorMessage('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
@@ -64,9 +68,9 @@ export default function UnloadMaterialeForm({ materiale }: UnloadMaterialeFormPr
     router.refresh();
     closeModal('unloadMateriale');
     return true;
-  }, [form, materiale, updateMateriale, router, closeModal]);
+  }, [materiale, updateMateriale, router, closeModal]);
 
-  const reset = useCallback(() => setForm({}), []);
+  const reset = useCallback(() => setFormData({}), []);
 
   useEffect(() => {
     registerHandler('unloadMateriale', {
@@ -92,7 +96,7 @@ export default function UnloadMaterialeForm({ materiale }: UnloadMaterialeFormPr
               required={field.required}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
-              value={form[field.name] || ''}
+              value={formData[field.name] || ''}
             />
           ) : (
             <textarea
@@ -101,7 +105,7 @@ export default function UnloadMaterialeForm({ materiale }: UnloadMaterialeFormPr
               placeholder={field.placeholder}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
-              value={form[field.name] || ''}
+              value={formData[field.name] || ''}
             />
           )}
         </div>

@@ -10,7 +10,7 @@ import TableBody from './TableBody';
 import TableToolbar from './TableToolbar';
 
 // USO DEL COMPONENTE TABLE:
-// <TableClient
+// <Table
 //   items={[]}               // array di oggetti da visualizzare (pantoni o materiali)
 //   config={[]}              // array di colonne visibili (es. ['nomePantone', 'cliente', ...])
 //   tableKey="pantoni"       // chiave della tabella per gestire colonne, filtri e comportamenti (es. 'pantoni', 'materiali')

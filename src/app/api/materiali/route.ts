@@ -1,5 +1,5 @@
 import { connectToDatabase } from '@/lib/connectToMongoDb';
-import { MaterialeSchema } from '@/schemas/MaterialeSchema';
+import { MaterialeSchema, MaterialeSchemaOpzionale } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
     const db = await connectToDatabase();
     const collection = db.collection<Materiale>('materiali');
     const rawData = await request.json();
-    const { id, ...updateFields } = rawData;
+    const { id, fromUnload, ...updateFields } = rawData;
 
     if (!id) {
       return NextResponse.json({ error: 'ID del materiale non fornito' }, { status: 400 });
@@ -51,8 +51,10 @@ export async function PATCH(request: Request) {
     };
 
     // Validazione Zod
-    const validation = MaterialeSchema.safeParse(aggiornato);
+    const schema = fromUnload ? MaterialeSchemaOpzionale : MaterialeSchema;
+    const validation = schema.safeParse(aggiornato);
     if (!validation.success) {
+      console.error('Validation error:', validation.error.issues, aggiornato);
       return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
     }
 

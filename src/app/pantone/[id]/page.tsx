@@ -1,9 +1,9 @@
 import Button from '@/components/Button';
-import TableClient from '@/components/Tables/Table';
 import { CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/normalizers';
+import Table from '@/components/Tables/Table';
 
 export default async function PantonePage({ params }: { params: { id: string } }) {
   const db = await connectToDatabase();
@@ -159,7 +159,7 @@ export default async function PantonePage({ params }: { params: { id: string } }
       </div>
 
       {/* TABELLA CON nomePantone UGUALE */}
-      <TableClient
+      <Table
         config={CONFIG_SCHEDA_PANTONE}
         tableKey="scheda-pantone"
         rows={10}

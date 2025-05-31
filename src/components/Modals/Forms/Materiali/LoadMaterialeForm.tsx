@@ -8,7 +8,7 @@ import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 
-type FormState = {
+type FormDataState = {
   [key: string]: string;
 };
 
@@ -16,19 +16,19 @@ interface LoadMaterialeFormProps {
   materiale: Materiale;
 }
 
-export default function LoadMaterialeForm({ materiale }: LoadMaterialeFormProps) {
+export default function LoadMaterialeForms({ materiale }: LoadMaterialeFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState<FormState>({});
+  const [formData, setFormData] = useState<FormDataState>({});
   const { closeModal, registerHandler } = useModalStore();
   const { updateMateriale } = useUpdateMateriale();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const formRef = useRef<FormState>({});
+  const formDataRef = useRef<FormDataState>({});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => {
+    setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      formRef.current = updated;
+      formDataRef.current = updated;
       return updated;
     });
   };
@@ -36,16 +36,17 @@ export default function LoadMaterialeForm({ materiale }: LoadMaterialeFormProps)
   const submit = useCallback(async () => {
     setErrorMessage(null);
     if (!materiale || !materiale._id) return false;
-    const currentForm = formRef.current;
+    const currentFormData = formDataRef.current;
     const movimento = {
-      ...currentForm,
-      quantita: Number(currentForm.quantita),
+      ...currentFormData,
+      quantita: Number(currentFormData.quantita),
       data: new Date().toISOString(),
-      tipo: getEnumValue(currentForm.tipo, ['carico', 'scarico'] as const, 'carico'),
-      noteOperatore: currentForm.noteOperatore,
+      tipo: getEnumValue(currentFormData.tipo, ['carico', 'scarico'] as const, 'carico'),
+      noteOperatore: currentFormData.noteOperatore,
       causale: 'Arrivo fornitore',
-      DDT: currentForm.DDT,
-      dataDDT: currentForm.dataDDT,
+      DDT: currentFormData.DDT,
+      dataDDT: currentFormData.dataDDT,
+      fromUnload: false,
     };
     const nuovaQuantita = materiale.quantita + movimento.quantita;
     const materialeAggiornato = {
@@ -70,7 +71,7 @@ export default function LoadMaterialeForm({ materiale }: LoadMaterialeFormProps)
     return true;
   }, [materiale, updateMateriale, router, closeModal]);
 
-  const reset = useCallback(() => setForm({}), []);
+  const reset = useCallback(() => setFormData({}), []);
 
   useEffect(() => {
     registerHandler('loadMateriale', {
@@ -98,7 +99,7 @@ export default function LoadMaterialeForm({ materiale }: LoadMaterialeFormProps)
               required={field.required}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
-              value={form[field.name] || ''}
+              value={formData[field.name] || ''}
             />
           ) : (
             <textarea
@@ -107,7 +108,7 @@ export default function LoadMaterialeForm({ materiale }: LoadMaterialeFormProps)
               placeholder={field.placeholder}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
-              value={form[field.name] || ''}
+              value={formData[field.name] || ''}
             />
           )}
         </div>
