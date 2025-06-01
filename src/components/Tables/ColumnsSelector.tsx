@@ -1,10 +1,18 @@
 'use client';
 
-import { MATERIALI_COLUMNS, PANTONE_COLUMNS, SHOWABLE_MATERIALI_COLS, SHOWABLE_PANTONE_COLS } from '@/constants/defaultColumns';
+import {
+  MATERIALI_COLUMNS,
+  MOVIMENTI_MATERIALE_COLUMNS,
+  PANTONE_COLUMNS,
+  SHOWABLE_MATERIALI_COLS,
+  SHOWABLE_MOVIMENTI_MATERIALE_COLS,
+  SHOWABLE_PANTONE_COLS,
+} from '@/constants/defaultColumns';
 import { useTableStore } from '@/store/useTableStore';
+import { TableColumn } from '@/types/constantsTypes';
 import { JSX } from 'react';
 
-export type TableKey = 'materiali' | 'pantoni';
+export type TableKey = 'ricettario' | 'magazzino' | 'materiali' | 'movimenti-materiale';
 export interface ColumnSelectorProps {
   tableKey: TableKey;
 }
@@ -24,37 +32,31 @@ export default function ColumnSelector({ tableKey }: ColumnSelectorProps): JSX.E
     }
   };
 
+  let columns: TableColumn[] = [];
+  if (tableKey === 'materiali') {
+    columns = SHOWABLE_MATERIALI_COLS.map((key) => MATERIALI_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn => Boolean(c));
+  } else if (tableKey === 'ricettario' || tableKey === 'magazzino') {
+    columns = SHOWABLE_PANTONE_COLS.map((key) => PANTONE_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn => Boolean(c));
+  } else if (tableKey === 'movimenti-materiale') {
+    columns = SHOWABLE_MOVIMENTI_MATERIALE_COLS.map((key) => MOVIMENTI_MATERIALE_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn =>
+      Boolean(c)
+    );
+  }
+
   return (
     <div className="p-4 w-full">
       <p className="font-semibold mb-2 text-lg">Seleziona le colonne da visualizzare nella tabella:</p>
       <ul className="grid grid-cols-3 gap-2">
-        {tableKey === 'materiali'
-          ? SHOWABLE_MATERIALI_COLS.map((key) => {
-              const col = MATERIALI_COLUMNS.find((c) => c.key === key);
-              if (!col) return null;
-
-              return (
-                <li key={key}>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={visibleUserCols.includes(key)} onChange={() => toggleColumn(key)} />
-                    {col.label}
-                  </label>
-                </li>
-              );
-            })
-          : SHOWABLE_PANTONE_COLS.map((key) => {
-              const col = PANTONE_COLUMNS.find((c) => c.key === key);
-              if (!col) return null;
-
-              return (
-                <li key={key}>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={visibleUserCols.includes(key)} onChange={() => toggleColumn(key)} />
-                    {col.label}
-                  </label>
-                </li>
-              );
-            })}
+        {columns.map((col) =>
+          col ? (
+            <li key={col.key}>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={visibleUserCols.includes(col.key)} onChange={() => toggleColumn(col.key)} />
+                {col.label}
+              </label>
+            </li>
+          ) : null
+        )}
       </ul>
     </div>
   );

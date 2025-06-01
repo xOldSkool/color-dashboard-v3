@@ -30,7 +30,7 @@ export function normalizePantone(raw: RawPantone): Pantone {
     urgente: Boolean(raw.urgente ?? false),
     basi: Array.isArray(raw.basi)
       ? raw.basi.map((b) => ({
-          name: String(b.name),
+          nomeMateriale: String(b.nomeMateriale),
           label: String(b.label),
           codiceFornitore: String(b.codiceFornitore),
           codiceColore: String(b.codiceColore),
@@ -52,12 +52,25 @@ export function normalizePantoni(rawList: RawPantone[]): Pantone[] {
 
 export function normalizeMateriali(raws: RawMateriale[]): Materiale[] {
   return raws.map((raw) => {
-    const { _id, name, stato, label, codiceColore, codiceFornitore, quantita, fornitore, tipo, utilizzo, noteMateriale, dataCreazione, movimenti } =
-      raw;
+    const {
+      _id,
+      nomeMateriale,
+      stato,
+      label,
+      codiceColore,
+      codiceFornitore,
+      quantita,
+      fornitore,
+      tipo,
+      utilizzo,
+      noteMateriale,
+      dataCreazione,
+      movimenti,
+    } = raw;
 
     return {
       _id: _id!.toString(),
-      name,
+      nomeMateriale,
       stato,
       label,
       codiceColore,
@@ -71,4 +84,12 @@ export function normalizeMateriali(raws: RawMateriale[]): Materiale[] {
       movimenti,
     };
   });
+}
+
+export function normalizeMovimenti(materiale: Materiale) {
+  return (materiale.movimenti ?? []).map((mov, idx) => ({
+    ...mov,
+    _id: `${materiale._id}_mov_${idx}`,
+    materialeId: materiale._id, // opzionale, se vuoi tracciare il materiale di origine
+  }));
 }

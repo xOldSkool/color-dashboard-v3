@@ -13,13 +13,40 @@ import NewMaterialeForm from './Forms/Materiali/NewMaterialeForm';
 import EditMaterialeForm from './Forms/Materiali/EditMaterialeForm';
 import LoadMaterialeForm from './Forms/Materiali/LoadMaterialeForm';
 import UnloadMaterialeForm from './Forms/Materiali/UnloadMaterialeForm';
+import { useDeletePantone } from '@/hooks/usePantone';
 
 export default function ModalManager() {
-  const hasRegisteredProduceHandler = useRef(false);
   const router = useRouter();
-  const { selectedPantoni, selectedTableKey, setSelectedPantoni, selectedMateriali } = useTableStore();
+  const { selectedPantoni, selectedTableKey, setSelectedPantoni, selectedMateriali, clearAll } = useTableStore();
   const { modals, closeModal, openModal, registerHandler } = useModalStore();
+  const { removePantone } = useDeletePantone();
 
+  const hasRegisteredProduceHandler = useRef(false);
+  const hasRegisteredDeleteHandler = useRef(false);
+
+  // DELETE PANTONE
+  useEffect(() => {
+    if (modals.deletePantone && !hasRegisteredDeleteHandler.current) {
+      registerHandler('deletePantone', {
+        submit: async () => {
+          try {
+            await removePantone(selectedPantoni.map((p) => p._id?.toString()).filter((id): id is string => typeof id === 'string'));
+            clearAll();
+            closeModal('deletePantone');
+            router.refresh();
+          } catch (error) {
+            console.error('Errore durante eliminazione:', error);
+          }
+        },
+      });
+      hasRegisteredDeleteHandler.current = true;
+    }
+    if (!modals.deletePantone) {
+      hasRegisteredDeleteHandler.current = false;
+    }
+  }, [modals.deletePantone]);
+
+  // PRODUCE PANTONE
   useEffect(() => {
     if (modals.producePantone && !hasRegisteredProduceHandler.current) {
       registerHandler('producePantone', {

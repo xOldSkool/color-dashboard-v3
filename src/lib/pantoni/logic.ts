@@ -6,8 +6,8 @@ import { Collection, Db, ObjectId } from 'mongodb';
 export function normalizzaBasi(basi: BasiPantone[] = []): string {
   return basi
     .filter((b) => b.quantita > 0)
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((b) => `${b.name}:${b.label}:${b.quantita}:${b.fornitore}:${b.tipo}:${b.codiceColore}`)
+    .sort((a, b) => a.nomeMateriale.localeCompare(b.nomeMateriale))
+    .map((b) => `${b.nomeMateriale}:${b.label}:${b.quantita}:${b.fornitore}:${b.tipo}:${b.codiceColore}`)
     .join('|');
 }
 
@@ -41,7 +41,7 @@ export async function insertMagazzinoIfNotExists(db: Db, groupId: string) {
 // Funzione ausiliaria per estrarre le basi da un payload
 export function estraiBasi(payload: Record<string, string | number>, basi: BaseMateriale[]): { nome: string; label: string; quantita: number }[] {
   return basi
-    .map(({ name, label }) => ({
+    .map(({ nomeMateriale: name, label }) => ({
       nome: name,
       label,
       quantita: parseFloat(String(payload[name])) || 0,

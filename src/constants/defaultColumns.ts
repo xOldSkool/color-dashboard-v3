@@ -478,6 +478,16 @@ export const MATERIALI_COLUMNS: TableColumn[] = [
   },
 ];
 
+export const MOVIMENTI_MATERIALE_COLUMNS: TableColumn[] = [
+  { key: 'quantita', label: 'Quantità', sortable: true, visibleByDefault_COLS: true, hideable: true },
+  { key: 'DDT', label: 'DDT', sortable: true, visibleByDefault_COLS: true, hideable: true },
+  { key: 'dataDDT', label: 'Data DDT', sortable: true, visibleByDefault_COLS: true, hideable: true },
+  { key: 'data', label: 'Data Movimento', sortable: true, visibleByDefault_COLS: true, hideable: true },
+  { key: 'tipo', label: 'Tipo', sortable: true, visibleByDefault_COLS: true, hideable: true },
+  { key: 'causale', label: 'Causale', sortable: true, visibleByDefault_COLS: true, hideable: true },
+  { key: 'noteOperatore', label: 'Note Operatore', sortable: true, visibleByDefault_COLS: true, hideable: true },
+];
+
 export const SHOWABLE_PANTONE_COLS: string[] = [
   'nomePantone',
   'variante',
@@ -521,12 +531,15 @@ export const SHOWABLE_MATERIALI_COLS: string[] = [
   'movimenti',
 ];
 
+export const SHOWABLE_MOVIMENTI_MATERIALE_COLS: string[] = ['quantita', 'DDT', 'dataDDT', 'data', 'tipo', 'causale', 'noteOperatore'];
+
 export const DEFAULT_COLS: string[] = ['hex', 'nomePantone', 'variante', 'articolo', 'is', 'cliente', 'tipo', 'consumo', 'dose', 'dispMagazzino'];
 export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'urgente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
 export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino'];
 export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
 export const CONFIG_SCHEDA_PANTONE: string[] = ['variante', 'articolo', 'passoCarta', 'hCarta', 'dose', 'consumo', 'dispMagazzino'];
 export const CONFIG_MATERIALI: string[] = ['label', 'codiceColore', 'fornitore', 'tipo', 'quantita', 'utilizzo', 'stato'];
+export const CONFIG_MOVIMENTI_MATERIALE: string[] = ['tipo', 'quantita', 'causale', 'data', 'noteOperatore', 'DDT', 'dataDDT'];
 
 export const visibleColumns = DEFAULT_COLS.map((key) => PANTONE_COLUMNS.find((col) => col.key === key)); //scorre ogni chiave in DEFAULT_COLS e per ogni chiave (key) cerca nell'array PANTONE_COLUMNS l'oggetto con quella chiave (key). "!" serve a dire che si trova sempre un valore diverso da undefined
 

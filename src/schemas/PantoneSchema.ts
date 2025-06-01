@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 
 export const BasiPantoneSchema = z.object({
-  name: z.string(),
+  nomeMateriale: z.string(),
   label: z.string(),
   codiceFornitore: z.string(),
   codiceColore: z.string(),
@@ -29,7 +29,7 @@ export const PantoneSchema = z.object({
   dataCreazione: z.union([z.string(), z.date()]),
   ultimoUso: z.union([z.string(), z.date()]), // ISO - Date
   articolo: z.string().min(1),
-  is: z.string().min(1),
+  is: z.string().optional(),
   cliente: z.string().min(1),
   noteArticolo: z.string().optional(),
   urgente: z.boolean(),

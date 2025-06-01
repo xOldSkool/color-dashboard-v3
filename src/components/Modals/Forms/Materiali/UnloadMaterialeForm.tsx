@@ -12,13 +12,14 @@ type FormDataState = {
 };
 
 interface UnloadMaterialeFormProps {
-  materiale?: Materiale;
+  materiale: Materiale;
 }
 
-export default function UnloadMaterialeFormData({ materiale }: UnloadMaterialeFormProps) {
+export default function UnloadMaterialeFormData({ materiale: materialeProp }: UnloadMaterialeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormDataState>({});
-  const { closeModal, registerHandler } = useModalStore();
+  const { modalData, closeModal, registerHandler } = useModalStore();
+  const materiale = materialeProp ?? (modalData as Materiale | undefined);
   const { updateMateriale } = useUpdateMateriale();
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // 3. Stato errore
   const formDataRef = useRef<FormDataState>({});
@@ -79,11 +80,13 @@ export default function UnloadMaterialeFormData({ materiale }: UnloadMaterialeFo
     });
   }, []);
 
+  if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
+
   return (
     <form className="space-y-4">
       {errorMessage && <p className="text-red-500 whitespace-pre-line">{errorMessage}</p>}
       <p className="text-sm text-gray-500">
-        Quantità attuale: <strong>{materiale?.quantita}</strong> kg
+        Quantità attuale: <strong>{materiale.quantita}</strong> kg
       </p>
       {materialeFieldsMovimentoUnload.map((field) => (
         <div key={field.name}>

@@ -12,8 +12,8 @@ export function pantoneToFormData(pantone: Pantone): Record<string, string | num
   });
 
   pantone.basi?.forEach((b) => {
-    formData[`fornitore_${b.name}`] = b.fornitore;
-    formData[`valore_${b.name}`] = b.quantita;
+    formData[`fornitore_${b.nomeMateriale}`] = b.fornitore;
+    formData[`valore_${b.nomeMateriale}`] = b.quantita;
   });
 
   return formData;

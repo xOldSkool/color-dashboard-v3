@@ -30,7 +30,6 @@ export const pantoneFieldsLeft: Field[] = [
     name: 'is',
     label: 'IS',
     placeholder: 'Inserisci IS',
-    required: true,
   },
   {
     form: 'input',
@@ -150,7 +149,7 @@ export const materialeFieldsCreate: Field[] = [
     type: 'text',
     name: 'name',
     label: 'Nome',
-    placeholder: 'Inserisci nome',
+    placeholder: 'Inserito automaticamente',
     required: true,
   },
   {

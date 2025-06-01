@@ -12,12 +12,14 @@ import { useCallback } from 'react';
 import { Pantone } from '@/types/pantoneTypes';
 import { pantoneToFormData } from '@/lib/adapter';
 import { getEnumValue } from '@/utils/getEnumValues';
+import { useRouter } from 'next/navigation';
 
 interface DuplicatePantoneProps {
   pantone: Pantone;
 }
 
 export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
+  const router = useRouter();
   const { createPantone } = useCreatePantone();
   const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -36,8 +38,8 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
     !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
 
   const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
-    if (!acc[base.name]) acc[base.name] = [];
-    acc[base.name].push(base);
+    if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
+    acc[base.nomeMateriale].push(base);
     return acc;
   }, {});
 
@@ -51,11 +53,11 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
   }, [formData, basi]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     const cleanedValue = value.replace(',', '.');
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
+      [name]: cleanedValue,
     }));
   };
 
@@ -76,7 +78,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
       const valoreInserito = formData[`valore_${nomeBase}`];
       const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
       return {
-        name: baseSelezionata.name,
+        nomeMateriale: baseSelezionata.nomeMateriale,
         label: baseSelezionata.label,
         quantita: Number(valoreInserito) || 0,
         codiceFornitore: String(baseSelezionata.codiceFornitore || ''),
@@ -127,6 +129,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
 
       await createPantone(nuovoPantone);
       setErrorMessage(null);
+      router.refresh();
       return true;
     } catch (error) {
       console.error('Errore durante il submit:', error);
@@ -137,7 +140,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};
-    [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes, ...basi.map((b) => ({ name: b.name }))].forEach((field) => {
+    [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes, ...basi.map((b) => ({ name: b.nomeMateriale }))].forEach((field) => {
       iniziale[field.name] = ''; // resettiamo tutto a stringa vuota
     });
     setFormData(iniziale);

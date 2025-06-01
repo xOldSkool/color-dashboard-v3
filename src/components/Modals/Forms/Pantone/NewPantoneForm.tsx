@@ -29,8 +29,8 @@ export default function NewPantoneForm() {
     !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
 
   const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
-    if (!acc[base.name]) acc[base.name] = [];
-    acc[base.name].push(base);
+    if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
+    acc[base.nomeMateriale].push(base);
     return acc;
   }, {});
 
@@ -44,11 +44,11 @@ export default function NewPantoneForm() {
   }, [formData, basi]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     const cleanedValue = value.replace(',', '.');
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
+      [name]: cleanedValue,
     }));
   };
 
@@ -79,7 +79,7 @@ export default function NewPantoneForm() {
       // Trovo il documento della base corrispondente al fornitore selezionato
       const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
       return {
-        name: baseSelezionata.name,
+        nomeMateriale: baseSelezionata.nomeMateriale,
         label: baseSelezionata.label,
         quantita: Number(valoreInserito) || 0, // sempre number
         codiceFornitore: String(baseSelezionata.codiceFornitore || ''),
@@ -97,7 +97,7 @@ export default function NewPantoneForm() {
         nomePantone: String(formData.nomePantone || ''),
         variante: String(formData.variante || ''),
         dataCreazione: new Date().toISOString(),
-        ultimoUso: '',
+        ultimoUso: String(''),
         articolo: String(formData.articolo || ''),
         is: String(formData.is || ''),
         cliente: String(formData.cliente || ''),
@@ -120,7 +120,7 @@ export default function NewPantoneForm() {
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
         pantoneGroupId: String(formData.pantoneGroupId || ''),
         basi: basiFinali,
-        basiNormalizzate: '', // Se serve, aggiungi la logica
+        basiNormalizzate: String(''), // Se serve, aggiungi la logica
       };
 
       // Validazione con Zod
@@ -144,7 +144,7 @@ export default function NewPantoneForm() {
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};
-    [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes, ...basi.map((b) => ({ name: b.name }))].forEach((field) => {
+    [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes, ...basi.map((b) => ({ name: b.nomeMateriale }))].forEach((field) => {
       iniziale[field.name] = ''; // resettiamo tutto a stringa vuota
     });
     setFormData(iniziale);

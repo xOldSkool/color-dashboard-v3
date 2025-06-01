@@ -27,7 +27,7 @@ export default function RootLayout({
           <aside>
             <Sidebar />
           </aside>
-          <main className="flex-1 w-screen bg-[var(--background)] overflow-auto py-6 px-8">{children}</main>
+          <main className="flex-1 w-screen bg-[var(--background)] overflow-auto px-4">{children}</main>
         </div>
         <ModalManager />
       </body>

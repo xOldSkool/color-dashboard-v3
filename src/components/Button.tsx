@@ -7,19 +7,19 @@ import {
   ArchiveRestore,
   ClipboardList,
   Copy,
-  Download,
-  Grid2x2Plus,
   ListFilter,
   Loader2,
   LucideIcon,
   Minus,
   Package,
+  PackageMinus,
+  PackagePlus,
   PaintBucket,
   Plus,
+  RefreshCcwDot,
   Send,
   SquarePen,
   Trash2,
-  Upload,
 } from 'lucide-react';
 
 // USO DEL COMPONENTE BUTTON:
@@ -53,7 +53,8 @@ type IconName =
   | 'filter'
   | 'loadin'
   | 'loadout'
-  | 'loadnew';
+  | 'loadnew'
+  | 'transfer';
 
 interface ButtonProps {
   children?: ReactNode;
@@ -108,9 +109,10 @@ export default function Button({
     edit: SquarePen,
     clipboard: ClipboardList,
     filter: ListFilter,
-    loadin: Download,
-    loadout: Upload,
-    loadnew: Grid2x2Plus,
+    loadin: PackagePlus,
+    loadout: PackageMinus,
+    loadnew: Package,
+    transfer: RefreshCcwDot,
   };
 
   const handleClick = () => {

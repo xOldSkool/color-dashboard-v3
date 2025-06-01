@@ -4,14 +4,13 @@ import {
   ClipboardList,
   Columns3Cog,
   Copy,
-  Download,
   ListFilter,
-  PackageIcon,
+  PackageMinus,
+  PackagePlus,
   PaintBucket,
   Send,
   SquarePen,
   Trash2,
-  Upload,
 } from 'lucide-react';
 
 import { useRouter } from 'next/navigation';
@@ -77,7 +76,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 onClick={() => handleAction('producePantone')}
               ></Button>
             )}
-            {tableKey !== 'materiali' && (
+            {tableKey !== 'materiali' && tableKey !== 'movimenti-materiale' && tableKey !== 'da-produrre' && tableKey !== 'consegnati-produzione' && (
               <Button
                 icon={Send}
                 tooltip="Consegna"
@@ -88,7 +87,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
             )}
             {tableKey === 'da-produrre' && (
               <Button
-                icon={PackageIcon}
+                iconName="transfer"
                 tooltip="Trasferisci"
                 variant="toolbar"
                 iconClass="size-8 hover:text-[var(--accent)]"
@@ -98,14 +97,14 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
             {tableKey === 'materiali' && (
               <>
                 <Button
-                  icon={Download}
+                  icon={PackagePlus}
                   tooltip="Carico"
                   variant="toolbar"
                   iconClass="size-8 hover:text-[var(--accent)]"
                   onClick={() => handleAction('loadMateriale', 1, 1, 'materiali')}
                 />
                 <Button
-                  icon={Upload}
+                  icon={PackageMinus}
                   tooltip="Scarico"
                   variant="toolbar"
                   iconClass="size-8 hover:text-[var(--accent)]"
@@ -113,13 +112,15 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 />
               </>
             )}
-            <Button
-              icon={ClipboardList}
-              tooltip="Apri scheda"
-              variant="toolbar"
-              iconClass={'size-8 hover:text-[var(--accent)]'}
-              onClick={handleViewClick}
-            ></Button>
+            {tableKey !== 'movimenti-materiale' && (
+              <Button
+                icon={ClipboardList}
+                tooltip="Apri scheda"
+                variant="toolbar"
+                iconClass={'size-8 hover:text-[var(--accent)]'}
+                onClick={handleViewClick}
+              ></Button>
+            )}
             {(tableKey === 'ricettario' || tableKey === 'magazzino') && (
               <Button
                 icon={SquarePen}

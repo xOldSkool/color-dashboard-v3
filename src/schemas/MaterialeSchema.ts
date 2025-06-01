@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const MaterialeSchema = z.object({
   _id: z.union([z.string(), z.any()]),
-  name: z.string().min(1, 'Il nome è obbligatorio'),
+  nomeMateriale: z.string().min(1, 'Il nome è obbligatorio'),
   label: z.string().min(1, 'La label è obbligatoria'),
   codiceColore: z.string().optional().nullable(),
   codiceFornitore: z.string().optional().nullable(),
@@ -31,7 +31,7 @@ export const MaterialeSchema = z.object({
 
 export const MaterialeSchemaOpzionale = z.object({
   _id: z.union([z.string(), z.any()]),
-  name: z.string().min(1, 'Il nome è obbligatorio'),
+  nomeMateriale: z.string().min(1, 'Il nome è obbligatorio'),
   label: z.string().min(1, 'La label è obbligatoria'),
   codiceColore: z.string().optional().nullable(),
   codiceFornitore: z.string().optional().nullable(),

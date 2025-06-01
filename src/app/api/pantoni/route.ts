@@ -78,11 +78,41 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
     }
 
-    await collection.updateOne({ _id: new ObjectId(id) }, { $set: validation.data });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _id, ...noIdData } = validation.data;
+    await collection.updateOne({ _id: new ObjectId(id) }, { $set: noIdData });
 
     return NextResponse.json({ message: 'Pantone aggiornato con successo!', id }, { status: 200 });
   } catch (error) {
     console.error('Errore aggiornamento Pantone:', error);
     return NextResponse.json({ error: 'Errore aggiornamento Pantone' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const db = await connectToDatabase();
+    const collection = db.collection<Pantone>('pantoni');
+    const body = await req.json();
+
+    let ids: string[] = [];
+    if (body.ids && Array.isArray(body.ids)) {
+      ids = body.ids;
+    } else if (body.id) {
+      ids = [body.id];
+    } else {
+      return NextResponse.json({ error: 'ID non fornito' }, { status: 400 });
+    }
+
+    // DEBUG: logga gli id ricevuti
+    console.log('DELETE Pantoni ids:', ids);
+
+    const objectIds = ids.map((id) => new ObjectId(id));
+    const result = await collection.deleteMany({ _id: { $in: objectIds } });
+
+    return NextResponse.json({ success: result.deletedCount > 0 });
+  } catch (error) {
+    console.error('Errore eliminazione Pantone:', error);
+    return NextResponse.json({ error: 'Errore eliminazione Pantone' }, { status: 500 });
   }
 }

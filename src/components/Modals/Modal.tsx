@@ -2,7 +2,7 @@
 import { X } from 'lucide-react';
 import Button from '../Button';
 import { ModalKey, useModalStore } from '@/store/useModalStore';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 interface ModalProps {
   title: string;
@@ -26,9 +26,12 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
   const submitHandlers = useModalStore((state) => state.submitHandlers);
   const resetHandlers = useModalStore((state) => state.resetHandlers);
   const isFormValid = useModalStore((state) => state.formValid[modalKey] ?? true);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const handleConfirm = async () => {
+    setSubmitLoading(true);
     const success = await submitHandlers[modalKey]?.(); // aspetta il risultato
+    setSubmitLoading(false);
     if (success) {
       onClose(); // chiude la modale solo se submit ha successo
     }
@@ -75,7 +78,7 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
                 <Button onClick={onClose} variant="ghost">
                   Annulla
                 </Button>
-                <Button onClick={handleConfirm} variant="primary" disabled={!isFormValid}>
+                <Button onClick={handleConfirm} variant="primary" disabled={!isFormValid || submitLoading} isLoading={submitLoading}>
                   Conferma
                 </Button>
               </div>

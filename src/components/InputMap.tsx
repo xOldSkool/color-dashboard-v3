@@ -24,6 +24,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
 
         if (!tag) return null;
 
+        const isDisabled = field.name === 'dose' || field.name === 'name';
         const commonProps = {
           type: field.form === 'input' ? field.type : undefined,
           name: field.name,
@@ -32,8 +33,8 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
           onChange: handleChange,
           placeholder: field.placeholder || '0',
           rows: field.form === 'textarea' ? field.rows || undefined : undefined,
-          disabled: field.name === 'dose',
-          className: 'w-full p-2 rounded bg-zinc-600 text-white focus:outline-none',
+          disabled: isDisabled,
+          className: 'w-full p-2 rounded bg-zinc-600 text-white focus:outline-none' + (isDisabled ? ' cursor-not-allowed' : ''),
         };
 
         if (tag === 'select') {

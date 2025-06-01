@@ -33,7 +33,7 @@ export interface Pantone {
 }
 
 export interface BasiPantone {
-  name: string;
+  nomeMateriale: string;
   label: string;
   codiceFornitore: string;
   codiceColore: string;

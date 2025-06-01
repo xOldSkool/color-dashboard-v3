@@ -5,6 +5,7 @@ import { useCreateMateriale } from '@/hooks/useMateriali';
 import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { getEnumValue } from '@/utils/getEnumValues';
+import toCamelCase from '@/utils/toCamelCase';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useCallback } from 'react';
@@ -22,17 +23,24 @@ export default function NewMaterialeForm() {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const cleanedValue = value.replace(',', '.');
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
-    }));
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
+      };
+      // Se cambia label, aggiorna anche name in camelCase
+      if (name === 'label') {
+        updated.name = toCamelCase(cleanedValue);
+      }
+      return updated;
+    });
   };
 
   const submit = useCallback(async () => {
     try {
       // Costruisci l'oggetto Materiale
       const nuovoMateriale = {
-        name: String(formData.name),
+        nomeMateriale: String(formData.name),
         label: String(formData.label || ''),
         codiceColore: String(formData.codiceColore || ''),
         codiceFornitore: String(formData.codiceFornitore || ''),

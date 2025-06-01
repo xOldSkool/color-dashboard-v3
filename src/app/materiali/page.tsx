@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Button from '@/components/Button';
 import { Table } from '@/components/ClientWrapper';
 import { CONFIG_MATERIALI } from '@/constants/defaultColumns';
@@ -15,7 +16,7 @@ export default async function MaterialiPage() {
       <div className="flex flex-row justify-between items-center gap-2">
         <h1 className="text-4xl font-semibold">Materiali</h1>
         <div className="flex flex-row gap-2">
-          <Button modalKey="newMateriale" iconName="plus" variant="primary">
+          <Button modalKey="newMateriale" iconName="loadnew" variant="primary">
             Crea Materiale
           </Button>
         </div>

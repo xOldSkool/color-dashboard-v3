@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 
 export interface MovimentoMateriale {
+  _id?: string;
   tipo: 'carico' | 'scarico';
   quantita: number;
   data: Date | string;
@@ -13,7 +14,7 @@ export interface MovimentoMateriale {
 
 export interface Materiale {
   _id?: ObjectId | string;
-  name: string;
+  nomeMateriale: string;
   label: string;
   codiceColore?: string;
   codiceFornitore?: string;
@@ -29,12 +30,12 @@ export interface Materiale {
 
 export type BaseMateriale = Pick<
   Materiale,
-  'name' | 'label' | 'quantita' | 'codiceColore' | 'codiceFornitore' | 'fornitore' | 'tipo' | 'stato' | 'utilizzo' | '_id'
+  'nomeMateriale' | 'label' | 'quantita' | 'codiceColore' | 'codiceFornitore' | 'fornitore' | 'tipo' | 'stato' | 'utilizzo' | '_id'
 >;
 
 export interface RawMateriale {
   _id?: string | ObjectId;
-  name: string;
+  nomeMateriale: string;
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   label: string;
   codiceColore?: string;

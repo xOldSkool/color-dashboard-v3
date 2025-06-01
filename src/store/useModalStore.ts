@@ -1,6 +1,8 @@
 'use client';
 import { create } from 'zustand';
 import { useTableStore } from './useTableStore';
+import { Materiale } from '@/types/materialeTypes';
+import { Pantone } from '@/types/pantoneTypes';
 
 export type ModalKey =
   | 'newPantone'
@@ -25,13 +27,16 @@ type Handler = {
   reset?: () => void;
 };
 
+type ModalData = Materiale | Pantone | string | null;
+
 export interface ModalState {
   modals: Record<ModalKey, boolean>;
   submitHandlers: Record<ModalKey, () => Promise<boolean>>;
   resetHandlers: Record<ModalKey, () => void>;
   formValid: Record<ModalKey, boolean>;
+  modalData: ModalData;
   setFormValid: (key: ModalKey, isValid: boolean) => void;
-  openModal: (key: ModalKey) => void;
+  openModal: (key: ModalKey, data?: ModalData) => void;
   closeModal: (key: ModalKey) => void;
   registerHandler: (key: ModalKey, handlers: Handler) => void;
 }
@@ -58,10 +63,19 @@ export const useModalStore = create<ModalState>((set) => ({
   submitHandlers: {} as Record<ModalKey, () => Promise<boolean>>,
   resetHandlers: {} as Record<ModalKey, () => void>,
   formValid: {} as Record<ModalKey, boolean>,
-  openModal: (key) => set((state) => ({ modals: { ...state.modals, [key]: true } })),
+  modalData: null,
+  openModal: (key, data) => {
+    // Aggiorna la selezione solo se il dato è un Pantone o un Materiale
+    if (data && typeof data === 'object') {
+      if ('nomePantone' in data) {
+        useTableStore.getState().setSelectedPantoni([data]);
+      }
+    }
+    set((state) => ({ modals: { ...state.modals, [key]: true }, modalData: data ?? null }));
+  },
   closeModal: (key) => {
     useTableStore.getState().clearAll();
-    set((state) => ({ modals: { ...state.modals, [key]: false } }));
+    set((state) => ({ modals: { ...state.modals, [key]: false }, modalData: null }));
   },
   setFormValid: (key, isValid) => set((state) => ({ formValid: { ...state.formValid, [key]: isValid } })),
   registerHandler: (key, handlers) =>

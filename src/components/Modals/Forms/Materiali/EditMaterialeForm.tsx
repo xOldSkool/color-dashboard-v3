@@ -44,7 +44,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         return false;
       }
       const materialeAggiornato = {
-        name: String(formData.name),
+        nomeMateriale: String(formData.name),
         label: String(formData.label || ''),
         codiceColore: String(formData.codiceColore || ''),
         codiceFornitore: String(formData.codiceFornitore || ''),
@@ -77,7 +77,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
   const reset = useCallback(() => {
     if (materiale) {
       setFormData({
-        name: materiale.name,
+        nomeMateriale: materiale.nomeMateriale,
         label: materiale.label || '',
         codiceColore: materiale.codiceColore || '',
         codiceFornitore: materiale.codiceFornitore || '',

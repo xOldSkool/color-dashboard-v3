@@ -37,7 +37,7 @@ export default function ProducePantoneForm({ pantone }: ProduceFormProps) {
         </h3>
         <ul className="space-y-1">
           {basiFiltrate.map((b) => (
-            <li key={b.name} className="flex justify-between">
+            <li key={b.nomeMateriale} className="flex justify-between">
               <span>{b.label}</span>
               <span>{b.quantita} kg</span>
             </li>
@@ -71,7 +71,7 @@ export default function ProducePantoneForm({ pantone }: ProduceFormProps) {
         </h3>
         <ul className="space-y-1">
           {risultati.map((b) => (
-            <li key={b.name} className="flex justify-between">
+            <li key={b.nomeMateriale} className="flex justify-between">
               <span>{b.label}</span>
               <span>{b.totale} kg</span>
             </li>

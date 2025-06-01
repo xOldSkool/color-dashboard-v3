@@ -2,6 +2,7 @@ import { BaseItem, TableBodyProps } from '@/types/tablesTypes';
 import { ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 import HexToBoxColor from '../HexToBoxColor';
 import { JSX } from 'react';
+import dateToItalia from '@/utils/dateToItalia';
 
 export default function TableBody<T extends BaseItem>({
   data,
@@ -64,6 +65,7 @@ export default function TableBody<T extends BaseItem>({
               const isBasi = col.key === 'basi';
               const isMovimenti = col.key === 'movimentiMagazzino';
               const isHex = col.key === 'hex';
+              const isUV = col.key === 'tipo';
 
               return (
                 <div key={col.key} className={`px-2 ${isBasi || isMovimenti ? 'text-left items-start' : 'text-center justify-center'} flex`}>
@@ -91,23 +93,33 @@ export default function TableBody<T extends BaseItem>({
                               ? ((base.quantita * item.qtDaProdurre) / item.dose).toFixed(3)
                               : base.quantita.toFixed(3);
                           return (
-                            <div key={base.name} className="text-sm">
+                            <div key={base.nomeMateriale} className="text-sm">
                               <span className="font-bold">{base.label}</span>: {totale}
                             </div>
                           );
                         })}
                     </div>
-                  ) : isMovimenti && 'movimentiMagazzino' in item && Array.isArray(item.movimentiMagazzino) && item.movimentiMagazzino.length ? (
-                    <div className="flex flex-col text-sm">
-                      {item.movimentiMagazzino.map((mov, index) => (
-                        <div key={index}>
-                          <span className="font-bold">{mov.tipo}</span> • {mov.quantita} pz •{' '}
-                          <span className="italic">{new Date(mov.data).toLocaleDateString()}</span>
-                        </div>
-                      ))}
-                    </div>
+                  ) : isMovimenti && 'movimentiMagazzino' in item ? (
+                    Array.isArray(item.movimentiMagazzino) && item.movimentiMagazzino.length ? (
+                      <div className="flex flex-col text-sm">
+                        {item.movimentiMagazzino.map((mov, index) => (
+                          <div key={index}>
+                            <span className="font-bold">{mov.tipo}</span> • {mov.quantita} pz •{' '}
+                            <span className="italic">{new Date(mov.data).toLocaleDateString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="italic text-gray-400">Nessun movimento</span>
+                    )
+                  ) : isUV ? (
+                    <span className={item[col.key as keyof T] === 'UV' ? 'text-purple-500' : ''}>
+                      {dateToItalia(col.key as string, item[col.key as keyof T]) || '-'}
+                    </span>
+                  ) : typeof item[col.key as keyof T] === 'object' && item[col.key as keyof T] !== null ? (
+                    <span className="italic text-gray-400">-</span>
                   ) : (
-                    item[col.key as keyof T]?.toString() || '-'
+                    dateToItalia(col.key as string, item[col.key as keyof T]) || '-'
                   )}
                 </div>
               );

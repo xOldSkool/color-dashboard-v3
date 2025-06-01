@@ -1,20 +1,18 @@
-import Button from '@/components/Button';
+export const dynamic = 'force-dynamic';
 import { CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/normalizers';
 import Table from '@/components/Tables/Table';
+import PantoneActions from './actions';
 
 export default async function PantonePage({ params }: { params: { id: string } }) {
   const db = await connectToDatabase();
   const raw = await getAllPantoni(db);
   const pantoni = normalizePantoni(raw);
   const pantone = pantoni.find((p) => p._id === params.id);
-  function formatDate(value: string | Date): string {
-    return value instanceof Date ? value.toLocaleDateString() : value;
-  }
 
-  if (!pantone) return <p>Pantone non trovato</p>;
+  if (!pantone) return <p>Pantone non trovato. Contattare lo sviluppatore!</p>;
 
   return (
     <div className="p-6 mx-auto">
@@ -23,36 +21,7 @@ export default async function PantonePage({ params }: { params: { id: string } }
         <h1 className="text-4xl font-medium">
           Scheda pantone <span className="font-bold">{pantone.nomePantone}</span>
         </h1>
-        <div className="flex flex-row gap-2 justify-end">
-          <Button
-            iconName="send"
-            variant="primary"
-            // onClick={handleDeliverClick}
-          >
-            Consegna
-          </Button>
-          <Button
-            iconName="paintBucket"
-            variant="primary"
-            // onClick={handleProduceClick}
-          >
-            Componi
-          </Button>
-          <Button
-            iconName="edit"
-            variant="secondary"
-            // onClick={handleEditClick}
-          >
-            Modifica
-          </Button>
-          <Button
-            iconName="delete"
-            variant="danger"
-            // onClick={handleDeleteClick}
-          >
-            Elimina
-          </Button>
-        </div>
+        <PantoneActions pantone={pantone} />
       </div>
 
       <div className="flex flex-col mb-5">
@@ -111,11 +80,11 @@ export default async function PantonePage({ params }: { params: { id: string } }
               </li>
               <li className="flex flex-row gap-2">
                 <span className="font-bold">Ultimo uso:</span>
-                {formatDate(pantone.ultimoUso)}
+                {new Date(pantone.ultimoUso).toLocaleString('it-IT').replace(',', ' -')}
               </li>
               <li className="flex flex-row gap-2">
                 <span className="font-bold">Data creazione:</span>
-                {formatDate(pantone.dataCreazione)}
+                {new Date(pantone.dataCreazione).toLocaleString('it-IT').replace(',', ' -')}
               </li>
               {/* <li className="flex flex-row gap-2">
                 <span className="font-bold">Disponibilità magazzino:</span>
@@ -134,8 +103,8 @@ export default async function PantonePage({ params }: { params: { id: string } }
           <div className="grid">
             <h2 className="text-3xl font-semibold mb-2">Ricetta</h2>
             <div className="flex flex-col text-xl">
-              {pantone.basi?.map(({ name, label, quantita }, idx) => (
-                <div key={name ?? idx}>
+              {pantone.basi?.map(({ nomeMateriale, label, quantita }, idx) => (
+                <div key={nomeMateriale ?? idx}>
                   {quantita > 0 ? (
                     <div>
                       <span className="font-semibold">{label}: </span>
@@ -163,7 +132,7 @@ export default async function PantonePage({ params }: { params: { id: string } }
         config={CONFIG_SCHEDA_PANTONE}
         tableKey="scheda-pantone"
         rows={10}
-        items={pantoni.filter((p) => p.nomePantone === pantone.nomePantone && p._id !== pantone._id)}
+        items={pantoni.filter((p) => p.pantoneGroupId === pantone.pantoneGroupId && p._id !== pantone._id)}
       />
     </div>
   );

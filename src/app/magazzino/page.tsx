@@ -11,8 +11,9 @@ export default async function Magazzino() {
   const pantoni = normalizePantoni(raw);
 
   return (
-    <>
+    <div className="p-4">
+      <h1 className="text-4xl font-semibold">Magazzino</h1>
       <Table items={pantoni} config={CONFIG_MAGAZZINO} tableKey="magazzino" />
-    </>
+    </div>
   );
 }

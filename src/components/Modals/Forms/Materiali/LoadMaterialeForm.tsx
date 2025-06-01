@@ -16,10 +16,11 @@ interface LoadMaterialeFormProps {
   materiale: Materiale;
 }
 
-export default function LoadMaterialeForms({ materiale }: LoadMaterialeFormProps) {
+export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMaterialeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormDataState>({});
-  const { closeModal, registerHandler } = useModalStore();
+  const { modalData, closeModal, registerHandler } = useModalStore();
+  const materiale = materialeProp ?? (modalData as Materiale | undefined);
   const { updateMateriale } = useUpdateMateriale();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formDataRef = useRef<FormDataState>({});

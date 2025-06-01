@@ -18,8 +18,8 @@ export const useBasiMateriali = (tipo?: string) => {
       try {
         const response = await axios.get<BaseMateriale[]>(`/api/materiali?tipo=${encodeURIComponent(tipo)}`);
         const data = response.data.map((m) => ({
-          name: m.name,
-          label: m.label || m.name,
+          nomeMateriale: m.nomeMateriale,
+          label: m.label || m.nomeMateriale,
           codiceColore: m.codiceColore,
           codiceFornitore: m.codiceFornitore,
           fornitore: m.fornitore,
