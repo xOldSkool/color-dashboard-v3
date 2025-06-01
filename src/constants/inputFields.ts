@@ -46,6 +46,13 @@ export const pantoneFieldsLeft: Field[] = [
     label: 'Stato',
     required: true,
   },
+  {
+    form: 'select',
+    options: ['Seleziona...', 'EB', 'UV'],
+    name: 'tipo',
+    label: 'Tipo',
+    required: true,
+  },
 ];
 
 export const pantoneFieldsCenter: Field[] = [
@@ -96,13 +103,6 @@ export const pantoneFieldsCenter: Field[] = [
     placeholder: 'Inserisci dose',
     required: true,
   },
-  {
-    form: 'select',
-    options: ['Seleziona...', 'EB', 'UV'],
-    name: 'tipo',
-    label: 'Tipo',
-    required: true,
-  },
 ];
 
 export const pantoneNotes: Field[] = [
@@ -111,28 +111,28 @@ export const pantoneNotes: Field[] = [
     name: 'descrizione',
     label: 'Descrizione',
     placeholder: 'Inserisci descrizione',
-    rows: 4,
+    rows: 3,
   },
   {
     form: 'textarea',
     name: 'noteArticolo',
     label: 'Note articolo',
     placeholder: "Inserisci note per l'articolo",
-    rows: 4,
+    rows: 3,
   },
   {
     form: 'textarea',
     name: 'noteColore',
     label: 'Note colore',
     placeholder: 'Inserisci note per il colore',
-    rows: 4,
+    rows: 3,
   },
   {
     form: 'textarea',
     name: 'noteMagazzino',
     label: 'Note magazzino',
     placeholder: 'Inserisci note per il magazzino',
-    rows: 4,
+    rows: 3,
   },
 ];
 

@@ -168,11 +168,17 @@ export default function NewPantoneForm() {
   return (
     <form className="w-6xl">
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-2">
         <div className="grid grid-cols-3 gap-2">
-          <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
-          <InputMap fields={pantoneFieldsCenter} formData={formData} handleChange={handleChange} />
-          <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} />
+          <div>
+            <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
+          </div>
+          <div>
+            <InputMap fields={pantoneFieldsCenter} formData={formData} handleChange={handleChange} />
+          </div>
+          <div>
+            <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} />
+          </div>
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold mt-5">Composizione</h2>
