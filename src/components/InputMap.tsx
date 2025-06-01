@@ -17,7 +17,7 @@ interface InputMapProps {
 
 export default function InputMap({ fields, formData, handleChange }: InputMapProps): JSX.Element {
   return (
-    <>
+    <div>
       {fields.map((field, index) => {
         const tag: 'input' | 'textarea' | 'select' | null =
           field.form === 'input' ? 'input' : field.form === 'textarea' ? 'textarea' : field.form === 'select' ? 'select' : null;
@@ -59,6 +59,6 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
