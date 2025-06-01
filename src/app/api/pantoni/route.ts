@@ -1,6 +1,6 @@
 import { getHexFromPantone } from '@/components/PantoneToHex';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
-import { generaPantoneGroupId, normalizzaBasi } from '@/lib/pantoni/logic';
+import { generaPantoneGroupId, insertMagazzinoIfNotExists, normalizzaBasi } from '@/lib/pantoni/logic';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { Pantone } from '@/types/pantoneTypes';
 import { ObjectId } from 'mongodb';
@@ -23,6 +23,10 @@ export async function POST(req: Request) {
       basiNormalizzate,
       dataCreazione,
     };
+    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo);
+    if (rawData.noteMagazzino) {
+      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId }, { $set: { noteMagazzino: rawData.noteMagazzino } });
+    }
 
     // Validazione Zod sul payload
     const validation = PantoneSchema.safeParse(nuovoPantone);
@@ -63,6 +67,10 @@ export async function PATCH(req: Request) {
     if (updatedNomePantone !== existingPantone.nomePantone || basiNormalizzate !== existingPantone.basiNormalizzate) {
       pantoneGroupId = await generaPantoneGroupId(db, { ...existingPantone, ...updateFields, basi: updatedBasi });
     }
+    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo);
+    if (updateFields.noteMagazzino) {
+      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId }, { $set: { noteMagazzino: updateFields.noteMagazzino } });
+    }
 
     const aggiornato: Pantone = {
       ...existingPantone,
@@ -93,6 +101,7 @@ export async function DELETE(req: Request) {
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Pantone>('pantoni');
+    const magazzinoCollection = db.collection('magazzinoPantoni');
     const body = await req.json();
 
     let ids: string[] = [];
@@ -104,11 +113,21 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'ID non fornito' }, { status: 400 });
     }
 
-    // DEBUG: logga gli id ricevuti
-    console.log('DELETE Pantoni ids:', ids);
-
+    // Trova i pantoni da eliminare per recuperare i loro pantoneGroupId
     const objectIds = ids.map((id) => new ObjectId(id));
+    const pantoniToDelete = await collection.find({ _id: { $in: objectIds } }).toArray();
+    const groupIdsToCheck = [...new Set(pantoniToDelete.map((p) => p.pantoneGroupId))];
+
+    // Elimina i pantoni
     const result = await collection.deleteMany({ _id: { $in: objectIds } });
+
+    // Per ogni pantoneGroupId, elimina il magazzino se non ci sono più pantoni che lo usano
+    for (const groupId of groupIdsToCheck) {
+      const count = await collection.countDocuments({ pantoneGroupId: groupId });
+      if (count === 0) {
+        await magazzinoCollection.deleteOne({ pantoneGroupId: groupId });
+      }
+    }
 
     return NextResponse.json({ success: result.deletedCount > 0 });
   } catch (error) {

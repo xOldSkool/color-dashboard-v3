@@ -26,13 +26,14 @@ export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promi
 }
 
 // 👌 Funzione per creare il magazzino solo se non esiste
-export async function insertMagazzinoIfNotExists(db: Db, groupId: string) {
+export async function insertMagazzinoIfNotExists(db: Db, groupId: string, tipo: string) {
   const collection: Collection<MagazzinoPantoni> = db.collection('magazzinoPantoni');
   const esiste = await collection.findOne({ pantoneGroupId: groupId });
   if (!esiste) {
     return await db.collection('magazzinoPantoni').insertOne({
       pantoneGroupId: groupId,
       dispMagazzino: 0,
+      tipo: tipo ?? 'EB',
       movimenti: [],
     });
   }

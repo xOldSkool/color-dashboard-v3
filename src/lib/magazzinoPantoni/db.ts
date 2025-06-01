@@ -1,36 +1,36 @@
+import { MagazzinoPantoni } from '@/types/magazzinoPantoneTypes';
 import { Db, ObjectId, InsertOneResult, InsertManyResult, UpdateResult, DeleteResult, UpdateFilter, UpdateOptions } from 'mongodb';
-import { MagazzinoPantone } from '@/types/magazzinoPantoneTypes';
 
-// Recupera tutti i record magazzinoPantone
-export async function getAllMagazzinoPantone(db: Db): Promise<MagazzinoPantone[]> {
-  return await db.collection<MagazzinoPantone>('magazzinoPantoni').find({}).toArray();
+// Recupera tutti i record magazzinoPantoni
+export async function getAllMagazzinoPantoni(db: Db): Promise<MagazzinoPantoni[]> {
+  return await db.collection<MagazzinoPantoni>('magazzinoPantoni').find({}).toArray();
 }
 
-// Inserisce uno o più record magazzinoPantone
-export async function insertMagazzinoPantone(
+// Inserisce uno o più record magazzinoPantoni
+export async function insertMagazzinoPantoni(
   db: Db,
-  data: MagazzinoPantone | MagazzinoPantone[]
-): Promise<InsertOneResult<MagazzinoPantone> | InsertManyResult<MagazzinoPantone>> {
-  const collection = db.collection<MagazzinoPantone>('magazzinoPantoni');
+  data: MagazzinoPantoni | MagazzinoPantoni[]
+): Promise<InsertOneResult<MagazzinoPantoni> | InsertManyResult<MagazzinoPantoni>> {
+  const collection = db.collection<MagazzinoPantoni>('magazzinoPantoni');
   if (Array.isArray(data)) {
     return await collection.insertMany(data);
   }
   return await collection.insertOne(data);
 }
 
-// Aggiorna un record magazzinoPantone
-export async function updateMagazzinoPantone(
+// Aggiorna un record magazzinoPantoni
+export async function updateMagazzinoPantoni(
   db: Db,
-  query: Partial<MagazzinoPantone>,
-  update: UpdateFilter<MagazzinoPantone>,
+  query: Partial<MagazzinoPantoni>,
+  update: UpdateFilter<MagazzinoPantoni>,
   options?: UpdateOptions
 ): Promise<UpdateResult> {
-  return await db.collection<MagazzinoPantone>('magazzinoPantoni').updateOne(query, update, options);
+  return await db.collection<MagazzinoPantoni>('magazzinoPantoni').updateOne(query, update, options);
 }
 
-// Elimina uno o più record magazzinoPantone
-export async function deleteMagazzinoPantone(db: Db, filter: Partial<MagazzinoPantone> | ObjectId[]): Promise<DeleteResult> {
-  const collection = db.collection<MagazzinoPantone>('magazzinoPantoni');
+// Elimina uno o più record magazzinoPantoni
+export async function deleteMagazzinoPantoni(db: Db, filter: Partial<MagazzinoPantoni> | ObjectId[]): Promise<DeleteResult> {
+  const collection = db.collection<MagazzinoPantoni>('magazzinoPantoni');
   if (Array.isArray(filter)) {
     return await collection.deleteMany({ _id: { $in: filter } });
   } else {
@@ -38,12 +38,12 @@ export async function deleteMagazzinoPantone(db: Db, filter: Partial<MagazzinoPa
   }
 }
 
-// Recupera un record magazzinoPantone per id
-export async function getMagazzinoPantoneById(db: Db, id: string): Promise<MagazzinoPantone | null> {
-  return await db.collection<MagazzinoPantone>('magazzinoPantoni').findOne({ _id: new ObjectId(id) });
+// Recupera un record magazzinoPantoni per id
+export async function getMagazzinoPantoniById(db: Db, id: string): Promise<MagazzinoPantoni | null> {
+  return await db.collection<MagazzinoPantoni>('magazzinoPantoni').findOne({ _id: new ObjectId(id) });
 }
 
-// Recupera record magazzinoPantone tramite query
-export async function getMagazzinoPantoneByQuery(db: Db, query: Partial<MagazzinoPantone>): Promise<MagazzinoPantone[]> {
-  return await db.collection<MagazzinoPantone>('magazzinoPantoni').find(query).toArray();
+// Recupera record magazzinoPantoni tramite query
+export async function getMagazzinoPantoniByQuery(db: Db, query: Partial<MagazzinoPantoni>): Promise<MagazzinoPantoni[]> {
+  return await db.collection<MagazzinoPantoni>('magazzinoPantoni').find(query).toArray();
 }

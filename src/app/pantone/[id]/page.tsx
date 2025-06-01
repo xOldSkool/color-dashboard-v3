@@ -5,12 +5,15 @@ import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/normalizers';
 import Table from '@/components/Tables/Table';
 import PantoneActions from './actions';
+import { getAllMagazzinoPantoni } from '@/lib/magazzinoPantoni/db';
 
 export default async function PantonePage({ params }: { params: { id: string } }) {
   const db = await connectToDatabase();
   const raw = await getAllPantoni(db);
   const pantoni = normalizePantoni(raw);
   const pantone = pantoni.find((p) => p._id === params.id);
+  const magazzinoPantoni = await getAllMagazzinoPantoni(db);
+  const magazzino = magazzinoPantoni.find((m) => m.pantoneGroupId === pantone?.pantoneGroupId && m.tipo === pantone?.tipo);
 
   if (!pantone) return <p>Pantone non trovato. Contattare lo sviluppatore!</p>;
 
@@ -86,10 +89,10 @@ export default async function PantonePage({ params }: { params: { id: string } }
                 <span className="font-bold">Data creazione:</span>
                 {new Date(pantone.dataCreazione).toLocaleString('it-IT').replace(',', ' -')}
               </li>
-              {/* <li className="flex flex-row gap-2">
+              <li className="flex flex-row gap-2">
                 <span className="font-bold">Disponibilità magazzino:</span>
-                {pantone.dispMagazzino} kg
-              </li> */}
+                {magazzino?.dispMagazzino} kg
+              </li>
               <li className="flex flex-row gap-2">
                 <span className="font-bold">Descrizione:</span>
                 {pantone.descrizione}
@@ -121,8 +124,8 @@ export default async function PantonePage({ params }: { params: { id: string } }
             <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteArticolo}</div>
             <h3 className="text-xl">Note colore</h3>
             <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteColore}</div>
-            {/* <h3 className="text-xl">Note magazzino</h3>
-            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteMagazzino}</div> */}
+            <h3 className="text-xl">Note magazzino</h3>
+            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{magazzino?.noteMagazzino}</div>
           </div>
         </div>
       </div>

@@ -23,7 +23,6 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   const { updatePantone } = useUpdatePantone();
   const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  console.log('[render] formData.consumo:', formData['consumo']);
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
@@ -47,20 +46,26 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const cleanedValue = value.replace(',', '.');
-    console.log(`[handleChange] name: ${name}, value: ${value}, finalValue:`, cleanedValue);
     setFormData((prev) => ({
       ...prev,
       [name]: cleanedValue,
     }));
   };
 
+  useEffect(() => {
+    // Somma tutte le quantità inserite nelle basi
+    const doseTotale = Object.entries(formData)
+      .filter(([key]) => key.startsWith('valore_'))
+      .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
+    if (formData.dose !== doseTotale) {
+      setFormData((prev) => ({ ...prev, dose: doseTotale }));
+    }
+  }, [formData]);
+
   const basiFinali = Object.entries(basiRaggruppatePerName)
     .map(([nomeBase, basiArr]) => {
-      // Recupero il fornitore selezionato per questa base
       const fornitoreSelezionato = formData[`fornitore_${nomeBase}`];
-      // Recupero la quantità inserita per questa base
       const valoreInserito = formData[`valore_${nomeBase}`];
-      // Trovo il documento della base corrispondente al fornitore selezionato
       const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
       return {
         nomeMateriale: baseSelezionata.nomeMateriale,
@@ -79,6 +84,9 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     formDataRef.current = formData;
   }, [formData]);
 
+  console.log('basiFiltrate:', basiFiltrate);
+  console.log('basiFinali:', basiFinali);
+
   const submit = useCallback(async () => {
     const formData = formDataRef.current;
     try {
@@ -87,7 +95,6 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         setErrorMessage('ID Pantone mancante.');
         return false;
       }
-      console.log('formData.consumo:', formData.consumo);
       const aggiornato = {
         ...pantone,
         nomePantone: String(formData.nomePantone ?? pantone.nomePantone),
@@ -106,7 +113,7 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         descrizione: String(formData.descrizione ?? pantone.descrizione),
         noteColore: String(formData.noteColore ?? pantone.noteColore),
         consumo: Number(formData.consumo ?? pantone.consumo) || 0,
-        dose: Number(formData.dose ?? pantone.dose) || 0,
+        dose: parseFloat(Number(formData.dose ?? pantone.dose).toFixed(3)) || 0,
         daProdurre: formData.daProdurre !== undefined ? String(formData.daProdurre) === 'true' : (pantone.daProdurre ?? false),
         qtDaProdurre: Number(formData.qtDaProdurre ?? pantone.qtDaProdurre) || 0,
         battuteDaProdurre: Number(formData.battuteDaProdurre ?? pantone.battuteDaProdurre) || 0,
@@ -114,10 +121,9 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
           formData.consegnatoProduzione !== undefined ? String(formData.consegnatoProduzione) === 'true' : (pantone.consegnatoProduzione ?? false),
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione ?? pantone.qtConsegnataProduzione) || 0,
         pantoneGroupId: String(formData.pantoneGroupId ?? pantone.pantoneGroupId),
-        basi: basiFinali.length > 0 ? basiFinali : pantone.basi,
+        basi: basiFinali,
         basiNormalizzate: pantone.basiNormalizzate ?? '',
       };
-      console.log('formData.consumo:', formData.consumo);
       console.log('Invio aggiornato:', aggiornato);
 
       const validation = PantoneSchema.safeParse(aggiornato);
@@ -138,12 +144,22 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   }, [pantone, basiFinali, updatePantone]);
 
   const reset = useCallback(() => {
-    console.log('RESET chiamato');
     setFormData({});
   }, []);
 
+  const submitRef = useRef(submit);
+  const resetRef = useRef(reset);
+
   useEffect(() => {
-    useModalStore.getState().registerHandler('editPantone', { submit: () => submit(), reset: () => reset });
+    submitRef.current = submit;
+    resetRef.current = reset;
+  }, [submit, reset]);
+
+  useEffect(() => {
+    useModalStore.getState().registerHandler('editPantone', {
+      submit: () => submitRef.current(),
+      reset: () => resetRef.current(),
+    });
   }, []);
 
   return (

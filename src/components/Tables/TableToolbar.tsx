@@ -30,7 +30,15 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
   const handleViewClick = () => {
     if (selectedRows.length === 1) {
       const selectedId = selectedRows[0];
-      const path = tableKey === 'materiali' ? `/materiali/${selectedId}` : `/pantone/${selectedId}`;
+      let path = '';
+      if (tableKey === 'materiali') {
+        path = `/materiali/${selectedId}`;
+      } else if (tableKey === 'magazzino') {
+        const selectedItem = data.find((item) => item._id === selectedId) as { pantoneGroupId?: string };
+        path = `/magazzino/${selectedItem?.pantoneGroupId || selectedId}`;
+      } else {
+        path = `/pantone/${selectedId}`;
+      }
       router.push(path);
     } else {
       alert('Seleziona un solo elemento da visualizzare!');
@@ -76,15 +84,19 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 onClick={() => handleAction('producePantone')}
               ></Button>
             )}
-            {tableKey !== 'materiali' && tableKey !== 'movimenti-materiale' && tableKey !== 'da-produrre' && tableKey !== 'consegnati-produzione' && (
-              <Button
-                icon={Send}
-                tooltip="Consegna"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={() => handleAction('deliverPantone')}
-              ></Button>
-            )}
+            {tableKey !== 'materiali' &&
+              tableKey !== 'movimenti-materiale' &&
+              tableKey !== 'da-produrre' &&
+              tableKey !== 'consegnati-produzione' &&
+              tableKey !== 'magazzino-pantoni' && (
+                <Button
+                  icon={Send}
+                  tooltip="Consegna"
+                  variant="toolbar"
+                  iconClass={'size-8 hover:text-[var(--accent)]'}
+                  onClick={() => handleAction('deliverPantone')}
+                ></Button>
+              )}
             {tableKey === 'da-produrre' && (
               <Button
                 iconName="transfer"
@@ -121,7 +133,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 onClick={handleViewClick}
               ></Button>
             )}
-            {(tableKey === 'ricettario' || tableKey === 'magazzino') && (
+            {tableKey === 'ricettario' && (
               <Button
                 icon={SquarePen}
                 tooltip="Modifica"
@@ -159,7 +171,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 disabled={tableKey !== 'consegnati-produzione'}
               ></Button>
             )}
-            {(tableKey === 'ricettario' || tableKey === 'magazzino') && (
+            {tableKey === 'ricettario' && (
               <Button
                 icon={Trash2}
                 tooltip="Elimina"

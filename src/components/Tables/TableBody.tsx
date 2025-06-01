@@ -1,3 +1,4 @@
+'use client';
 import { BaseItem, TableBodyProps } from '@/types/tablesTypes';
 import { ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 import HexToBoxColor from '../HexToBoxColor';

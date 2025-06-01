@@ -1,9 +1,11 @@
 'use client';
 
 import {
+  MAGAZZINO_PANTONI_COLUMNS,
   MATERIALI_COLUMNS,
   MOVIMENTI_MATERIALE_COLUMNS,
   PANTONE_COLUMNS,
+  SHOWABLE_MAGAZZINO_PANTONE_COLS,
   SHOWABLE_MATERIALI_COLS,
   SHOWABLE_MOVIMENTI_MATERIALE_COLS,
   SHOWABLE_PANTONE_COLS,
@@ -12,7 +14,7 @@ import { useTableStore } from '@/store/useTableStore';
 import { TableColumn } from '@/types/constantsTypes';
 import { JSX } from 'react';
 
-export type TableKey = 'ricettario' | 'magazzino' | 'materiali' | 'movimenti-materiale';
+export type TableKey = 'ricettario' | 'magazzino' | 'materiali' | 'movimenti-materiale' | 'magazzino-pantoni';
 export interface ColumnSelectorProps {
   tableKey: TableKey;
 }
@@ -39,6 +41,10 @@ export default function ColumnSelector({ tableKey }: ColumnSelectorProps): JSX.E
     columns = SHOWABLE_PANTONE_COLS.map((key) => PANTONE_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn => Boolean(c));
   } else if (tableKey === 'movimenti-materiale') {
     columns = SHOWABLE_MOVIMENTI_MATERIALE_COLS.map((key) => MOVIMENTI_MATERIALE_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn =>
+      Boolean(c)
+    );
+  } else if (tableKey === 'magazzino-pantoni') {
+    columns = SHOWABLE_MAGAZZINO_PANTONE_COLS.map((key) => MAGAZZINO_PANTONI_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn =>
       Boolean(c)
     );
   }

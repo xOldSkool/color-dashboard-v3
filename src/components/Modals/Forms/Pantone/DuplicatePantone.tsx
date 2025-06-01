@@ -110,13 +110,14 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         descrizione: String(formData.descrizione || ''),
         noteColore: String(formData.noteColore || ''),
         consumo: Number(formData.consumo) || 0,
-        dose: Number(formData.dose) || 0,
+        dose: parseFloat(Number(formData.dose).toFixed(3)) || 0,
         daProdurre: Boolean(formData.daProdurre) && formData.daProdurre !== 'false',
         qtDaProdurre: Number(formData.qtDaProdurre) || 0,
         battuteDaProdurre: Number(formData.battuteDaProdurre) || 0,
         consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
         pantoneGroupId: String(formData.pantoneGroupId || ''),
+        noteMagazzino: String(formData.noteMagazzino || ''),
         basi: basiFinali,
         basiNormalizzate: '', // Se serve, aggiungi la logica
       };

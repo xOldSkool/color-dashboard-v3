@@ -128,7 +128,7 @@ export default function ModalManager() {
         </Modal>
       )}
       {modals.selectColumns && (
-        <Modal title="Seleziona Colonne" modalKey="selectColumns" onClose={() => closeModal('selectColumns')}>
+        <Modal title="Seleziona Colonne" modalKey="selectColumns" onClose={() => closeModal('selectColumns')} showFooter={false}>
           <ColumnSelector tableKey={selectedTableKey as TableKey} />
         </Modal>
       )}

@@ -5,6 +5,7 @@ export function pantoneToFormData(pantone: Pantone): Record<string, string | num
   const formData: Record<string, string | number | undefined> = {};
 
   Object.entries(pantone).forEach(([key, value]) => {
+    if (key === 'basi') return;
     if (value instanceof Date) formData[key] = value.toISOString();
     else if (typeof value === 'object' && value !== null && '_bsontype' in value) formData[key] = value.toString();
     else if (typeof value === 'string' || typeof value === 'number' || value === undefined) formData[key] = value;

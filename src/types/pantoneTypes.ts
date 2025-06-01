@@ -7,7 +7,7 @@ export interface Pantone {
   dataCreazione: Date | string;
   ultimoUso: Date | string;
   articolo: string;
-  is: string;
+  is?: string;
   cliente: string;
   noteArticolo?: string;
   urgente: boolean;
@@ -58,6 +58,8 @@ export interface RawPantone {
   fornitoreCarta?: string;
   tipo?: 'EB' | 'UV';
   descrizione?: string;
+  noteColore?: string;
+  noteArticolo?: string;
   consegnatoProduzione?: boolean;
   qtConsegnataProduzione?: number;
   pantoneGroupId?: string;

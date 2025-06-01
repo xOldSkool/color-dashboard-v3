@@ -11,7 +11,9 @@ export interface MagazzinoPantoni {
   _id: ObjectId | string;
   pantoneGroupId: string;
   dispMagazzino: number;
-  tipo: string;
+  tipo: 'EB' | 'UV';
   ultimoUso: Date | string;
+  noteMagazzino?: string;
+  count?: number;
   movimenti?: MovimentoMagazzino[];
 }
