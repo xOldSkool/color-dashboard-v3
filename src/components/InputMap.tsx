@@ -24,12 +24,19 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
 
         if (!tag) return null;
 
+        const rawValue = formData[field.name];
+        let displayValue: string | number = rawValue ?? '';
+        if (field.name === 'dose' && typeof rawValue === 'number') {
+          // Richiamo toFixed(3) SOLO se è davvero un number
+          displayValue = rawValue.toFixed(3);
+        }
+
         const isDisabled = field.name === 'dose' || field.name === 'name';
         const commonProps = {
           type: field.form === 'input' ? field.type : undefined,
           name: field.name,
           required: field.required,
-          value: formData[field.name] ?? '',
+          value: displayValue,
           onChange: handleChange,
           placeholder: field.placeholder || '0',
           rows: field.form === 'textarea' ? field.rows || undefined : undefined,

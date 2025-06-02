@@ -1,4 +1,0 @@
-DA FARE:
-- Aggiungere note magazzino, note colore e articolo.
-- Aggiungere tabella con pantoni ragruppati.
-- Implementare db 'magazzinoPantoni'.

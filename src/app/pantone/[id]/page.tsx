@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
@@ -120,12 +119,24 @@ export default async function PantonePage({ params }: { params: { id: string } }
           </div>
           <div className="grid gap-4">
             <h2 className="text-3xl font-semibold mb-2">Note</h2>
-            <h3 className="text-xl">Note articolo</h3>
-            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteArticolo}</div>
-            <h3 className="text-xl">Note colore</h3>
-            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{pantone.noteColore}</div>
-            <h3 className="text-xl">Note magazzino</h3>
-            <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-1">{magazzino?.noteMagazzino}</div>
+            {pantone?.noteArticolo?.trim() && (
+              <>
+                <h3 className="text-xl">Note articolo</h3>
+                <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-2">{pantone.noteArticolo}</div>
+              </>
+            )}
+            {pantone?.noteColore?.trim() && (
+              <>
+                <h3 className="text-xl">Note colore</h3>
+                <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-2">{pantone.noteColore}</div>
+              </>
+            )}
+            {magazzino?.noteMagazzino?.trim() && (
+              <>
+                <h3 className="text-xl">Note magazzino</h3>
+                <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-2">{magazzino.noteMagazzino}</div>
+              </>
+            )}
           </div>
         </div>
       </div>

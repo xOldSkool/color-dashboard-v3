@@ -5,8 +5,6 @@ import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
 import { normalizePantoni } from '@/lib/normalizers';
 import { getAllPantoni } from '@/lib/pantoni/db';
 
-export const dynamic = 'force-dynamic';
-
 export default async function MagazzinoPage({ params }: { params: { id: string } }) {
   const db = await connectToDatabase();
   const raw = await getAllPantoni(db);

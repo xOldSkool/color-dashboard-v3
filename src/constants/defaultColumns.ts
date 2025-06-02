@@ -633,7 +633,18 @@ export const SHOWABLE_MATERIALI_COLS: string[] = [
 
 export const SHOWABLE_MOVIMENTI_MATERIALE_COLS: string[] = ['quantita', 'DDT', 'dataDDT', 'data', 'tipo', 'causale', 'noteOperatore'];
 
-export const DEFAULT_COLS: string[] = ['hex', 'nomePantone', 'variante', 'articolo', 'is', 'cliente', 'tipo', 'consumo', 'dose', 'dispMagazzino'];
+export const DEFAULT_COLS: string[] = [
+  'hex',
+  'nomePantone',
+  'variante',
+  'articolo',
+  'cliente',
+  'tipo',
+  'consumo',
+  'dose',
+  'dispMagazzino',
+  'descrizione',
+];
 export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'urgente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
 export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino', 'count'];
 export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
