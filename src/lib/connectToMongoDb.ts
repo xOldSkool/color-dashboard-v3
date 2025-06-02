@@ -34,6 +34,7 @@ type clientPromise = Promise<MongoClient>;
 declare global {
   // Per evitare errori TypeScript nel contesto serverless
   // e per garantire che globalThis mantenga il client
+  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
