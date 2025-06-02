@@ -4,9 +4,9 @@ import { generaPantoneGroupId, insertMagazzinoIfNotExists, normalizzaBasi } from
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { Pantone } from '@/types/pantoneTypes';
 import { ObjectId } from 'mongodb';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Pantone>('pantoni');
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: NextRequest) {
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Pantone>('pantoni');
@@ -97,7 +97,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Pantone>('pantoni');

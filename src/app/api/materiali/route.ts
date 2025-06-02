@@ -2,7 +2,7 @@ import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { MaterialeSchema, MaterialeSchemaOpzionale } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { ObjectId } from 'mongodb';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
   const db = await connectToDatabase();
@@ -10,7 +10,7 @@ export async function GET() {
   return NextResponse.json(materiali);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Materiale>('materiali');
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Materiale>('materiali');
