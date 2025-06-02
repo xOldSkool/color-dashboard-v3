@@ -44,15 +44,15 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
     if (rows && rows !== rowsPerPage) {
       setRowsPerPage(rows);
     }
-  }, [rows]);
+  }, [rows, rowsPerPage]);
 
   useEffect(() => {
     setVisibleUserCols(tableKey, config);
-  }, [config, tableKey]);
+  }, [config, tableKey, setVisibleUserCols]);
 
   useEffect(() => {
     clearAll();
-  }, [pathname]);
+  }, [pathname, clearAll]);
 
   const handleSort = (key: string | number) => {
     if (sortKey === key) {

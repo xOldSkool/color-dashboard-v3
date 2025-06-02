@@ -71,7 +71,7 @@ export default function NewMaterialeForm() {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [formData, createMateriale]);
+  }, [router, formData, createMateriale]);
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};

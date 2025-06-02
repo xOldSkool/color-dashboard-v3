@@ -9,6 +9,7 @@ export default function DeliverPantoneForm({ pantone }: DeliverFormProps) {
     <div className="flex flex-col gap-4">
       <p>
         <strong>Quantità disponibile a magazzino:</strong> {/*{pantone.dispMagazzino} */}
+        {pantone.articolo}
       </p>
       <input
         id="qtConsegnata"

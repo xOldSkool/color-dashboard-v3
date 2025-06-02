@@ -78,7 +78,7 @@ export default function UnloadMaterialeFormData({ materiale: materialeProp }: Un
       submit,
       reset,
     });
-  }, []);
+  });
 
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 

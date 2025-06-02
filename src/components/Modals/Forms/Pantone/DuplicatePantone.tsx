@@ -137,7 +137,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [formData, basiFinali, createPantone]);
+  }, [router, formData, basiFinali, createPantone]);
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};

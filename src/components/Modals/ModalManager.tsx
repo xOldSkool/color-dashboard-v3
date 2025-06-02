@@ -44,7 +44,7 @@ export default function ModalManager() {
     if (!modals.deletePantone) {
       hasRegisteredDeleteHandler.current = false;
     }
-  }, [modals.deletePantone]);
+  }, [modals.deletePantone, clearAll, closeModal, registerHandler, removePantone, selectedPantoni, router]);
 
   // PRODUCE PANTONE
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function ModalManager() {
     if (!modals.producePantone) {
       hasRegisteredProduceHandler.current = false;
     }
-  }, [modals.producePantone]);
+  }, [modals.producePantone, closeModal, openModal, registerHandler, router, selectedPantoni, setSelectedPantoni]);
 
   if (!modals) return null;
 

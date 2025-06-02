@@ -141,7 +141,7 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [pantone, basiFinali, updatePantone]);
+  }, [router, pantone, basiFinali, updatePantone]);
 
   const reset = useCallback(() => {
     setFormData({});

@@ -79,7 +79,7 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
       submit,
       reset,
     });
-  }, []);
+  });
 
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 
