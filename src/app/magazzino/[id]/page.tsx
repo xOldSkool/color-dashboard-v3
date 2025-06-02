@@ -5,13 +5,14 @@ import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
 import { normalizePantoni } from '@/lib/normalizers';
 import { getAllPantoni } from '@/lib/pantoni/db';
 
-export default async function MagazzinoPage({ params }: { params: { id: string } }) {
+export default async function MagazzinoPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const db = await connectToDatabase();
   const raw = await getAllPantoni(db);
   const pantoni = normalizePantoni(raw);
   const magazzinoPantoni = await aggregateMagazzinoPantoni(db);
-  const gruppo = magazzinoPantoni.find((g) => g.pantoneGroupId === params.id);
-  const pantoniDelGruppo = pantoni.filter((p) => p.pantoneGroupId === params.id);
+  const gruppo = magazzinoPantoni.find((g) => g.pantoneGroupId === id);
+  const pantoniDelGruppo = pantoni.filter((p) => p.pantoneGroupId === id);
   const hex = pantoniDelGruppo[0]?.hex;
 
   if (!gruppo) return <p>Gruppo magazzino non trovato. Contattare lo sviluppatore!</p>;

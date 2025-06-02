@@ -6,11 +6,12 @@ import Table from '@/components/Tables/Table';
 import PantoneActions from './actions';
 import { getAllMagazzinoPantoni } from '@/lib/magazzinoPantoni/db';
 
-export default async function PantonePage({ params }: { params: { id: string } }) {
+export default async function PantonePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const db = await connectToDatabase();
   const raw = await getAllPantoni(db);
   const pantoni = normalizePantoni(raw);
-  const pantone = pantoni.find((p) => p._id === params.id);
+  const pantone = pantoni.find((p) => p._id === id);
   const magazzinoPantoni = await getAllMagazzinoPantoni(db);
   const magazzino = magazzinoPantoni.find((m) => m.pantoneGroupId === pantone?.pantoneGroupId && m.tipo === pantone?.tipo);
 
