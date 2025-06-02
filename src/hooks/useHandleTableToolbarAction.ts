@@ -9,7 +9,7 @@ export function useHandleTableToolbarAction<T extends BaseItem>(data: T[]) {
   const { openModal } = useModalStore();
 
   const handleAction = (modalKey: ModalKey, minSelection = 1, maxSelection = 1, itemKey: 'pantoni' | 'materiali' = 'pantoni') => {
-    const selected = data.filter((item) => selectedRows.includes(item._id.toString()));
+    const selected = data.filter((item) => selectedRows.includes(item._id!.toString()));
     if (selected.length < minSelection || selected.length > maxSelection) {
       alert(selected.length < minSelection ? `Seleziona almeno ${minSelection} elemento/i!` : `Seleziona al massimo ${maxSelection} elemento/i!`);
       return;
