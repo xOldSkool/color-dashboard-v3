@@ -76,7 +76,7 @@ export default function DeliverPantoneForm({ pantone, onSuccess }: DeliverFormPr
     } finally {
       setLoading(false);
     }
-  }, [formData, dispMagazzino, pantone, onSuccess, updatePantone, updateMagazzinoPantoni]);
+  }, [formData, dispMagazzino, pantone, onSuccess, updatePantone, updateMagazzinoPantoni, router]);
 
   // Reset logica
   const reset = useCallback(() => {
