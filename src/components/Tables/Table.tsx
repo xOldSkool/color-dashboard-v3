@@ -99,36 +99,31 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
     return matchesColumns || matchesBasi;
   });
 
-  const sortedData: T[] = [...queriedData].sort((a, b) => {
-    if (tableKey === 'urgenti' && 'urgente' in a && 'urgente' in b) {
-      if (a.urgente && !b.urgente) return -1;
-      if (!a.urgente && b.urgente) return 1;
-    }
-
+  // Applica ordinamento per sortKey/sortOrder
+  let sortedData: T[] = [...queriedData].sort((a, b) => {
     if (!sortKey) return 0;
-
     const aValue = a[sortKey as keyof T];
     const bValue = b[sortKey as keyof T];
-
-    // Se uno dei due è undefined o null, mandalo in fondo
     if (aValue == null) return 1;
     if (bValue == null) return -1;
-
-    // Ordinamento stringhe
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     }
-
-    // Ordinamento numerico
     if (typeof aValue === 'number' && typeof bValue === 'number') {
       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
     }
-
-    // Trasforma in stringa qualsiasi altro tipo (boolean, oggetti, ecc.)
     const aStr = String(aValue);
     const bStr = String(bValue);
     return sortOrder === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
   });
+
+  // Porta in cima gli urgenti SOLO se tableKey === 'da-produrre'
+  if (tableKey === 'da-produrre') {
+    sortedData = [
+      ...sortedData.filter((item) => 'urgente' in item && item.urgente === true),
+      ...sortedData.filter((item) => !('urgente' in item && item.urgente === true)),
+    ];
+  }
 
   const allIds: string[] = sortedData.map((item) => item._id!.toString());
   const allSelected: boolean = allIds.every((id) => selectedRows.includes(id));
