@@ -8,6 +8,7 @@ import { useTableStore } from '@/store/useTableStore';
 import { TableColumn } from '@/types/constantsTypes';
 import TableBody from './TableBody';
 import TableToolbar from './TableToolbar';
+import { ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 
 // USO DEL COMPONENTE TABLE:
 // <Table
@@ -134,21 +135,37 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
 
   return (
     <>
-      {/* search - filtri - bottoni azione */}
-      <TableToolbar data={sortedData} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage} tableKey={tableKey} />
-      <div className="border rounded-xl border-dashed border-[var(--border)]">
+      <div className="">
+        {/* Sticky wrapper per toolbar + header */}
+        <div className="sticky top-0 z-20 bg-[var(--background)] ">
+          <TableToolbar data={sortedData} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage} tableKey={tableKey} />
+          {/* HEADER TABELLA */}
+          <div className="grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] border border-dashed border-[var(--border)] text-center uppercase font-semibold bg-[var(--hover-btn-ghost)] py-4 rounded-t-xl">
+            <input type="checkbox" checked={allSelected} onChange={() => (allSelected ? clearAll() : selectAll(allIds))} className="m-auto size-4" />
+            {visibleColumns.map((col) => (
+              <div key={col.key.toString()} onClick={() => handleSort(col.key)} className="flex items-center justify-center cursor-pointer mx-1">
+                {col.label}
+                <span className="inline-block ms-1">
+                  {sortKey === col.key ? (
+                    sortOrder === 'asc' ? (
+                      <ArrowDownAZ className="size-5" />
+                    ) : (
+                      <ArrowUpAZ className="size-5" />
+                    )
+                  ) : (
+                    <ArrowDownAZ className="size-5 opacity-30" />
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* RIGHE TABELLA */}
         <TableBody
           data={sortedData}
           visibleColumns={visibleColumns}
-          sortKey={sortKey}
-          sortOrder={sortOrder}
-          handleSort={handleSort}
           toggleSelection={toggleSelection}
           isSelected={isSelected}
-          allSelected={allSelected}
-          selectAll={selectAll}
-          clearAll={clearAll}
-          allIds={allIds}
           tableKey={tableKey}
           currentPage={currentPage}
           rowsPerPage={rowsPerPage}
