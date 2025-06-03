@@ -18,7 +18,7 @@ interface UnloadMaterialeFormProps {
 export default function UnloadMaterialeFormData({ materiale: materialeProp }: UnloadMaterialeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormDataState>({});
-  const { modalData, closeModal, registerHandler } = useModalStore();
+  const { modalData, closeModal } = useModalStore();
   const materiale = materialeProp ?? (modalData as Materiale | undefined);
   const { updateMateriale } = useUpdateMateriale();
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // 3. Stato errore
@@ -73,12 +73,21 @@ export default function UnloadMaterialeFormData({ materiale: materialeProp }: Un
 
   const reset = useCallback(() => setFormData({}), []);
 
+  const submitRef = useRef(submit);
+  const resetRef = useRef(reset);
+
   useEffect(() => {
-    registerHandler('unloadMateriale', {
-      submit,
-      reset,
+    submitRef.current = submit;
+    resetRef.current = reset;
+  }, [submit, reset]);
+
+  useEffect(() => {
+    // Usa la funzione direttamente dallo store per evitare referenze che cambiano
+    useModalStore.getState().registerHandler('unloadMateriale', {
+      submit: () => submitRef.current(),
+      reset: () => resetRef.current(),
     });
-  });
+  }, []);
 
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 

@@ -19,7 +19,7 @@ interface LoadMaterialeFormProps {
 export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMaterialeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormDataState>({});
-  const { modalData, closeModal, registerHandler } = useModalStore();
+  const { modalData, closeModal } = useModalStore();
   const materiale = materialeProp ?? (modalData as Materiale | undefined);
   const { updateMateriale } = useUpdateMateriale();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -74,12 +74,21 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
 
   const reset = useCallback(() => setFormData({}), []);
 
+  const submitRef = useRef(submit);
+  const resetRef = useRef(reset);
+
   useEffect(() => {
-    registerHandler('loadMateriale', {
-      submit,
-      reset,
+    submitRef.current = submit;
+    resetRef.current = reset;
+  }, [submit, reset]);
+
+  useEffect(() => {
+    // Usa la funzione direttamente dallo store per evitare referenze che cambiano
+    useModalStore.getState().registerHandler('loadMateriale', {
+      submit: () => submitRef.current(),
+      reset: () => resetRef.current(),
     });
-  });
+  }, []);
 
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 

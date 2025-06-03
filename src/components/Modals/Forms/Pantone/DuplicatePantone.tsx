@@ -161,6 +161,7 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
       reset: () => resetRef.current(),
     });
   }, []);
+
   return (
     <form className="w-6xl">
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
