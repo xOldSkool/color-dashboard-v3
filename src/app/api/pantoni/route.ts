@@ -159,7 +159,7 @@ export async function PUT(req: NextRequest) {
     const schema = z.object({
       pantoneId: z.string(),
       battute: z.number().min(1),
-      urgente: z.boolean()
+      urgente: z.boolean(),
     });
     const validation = schema.safeParse(body);
     if (!validation.success) {

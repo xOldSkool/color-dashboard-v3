@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'pantoneGroupId e tipo sono obbligatori' }, { status: 400 });
     }
     const magazzinoPantoni = await getAllMagazzinoPantoni(db);
-    const found = magazzinoPantoni.find(m => m.pantoneGroupId === pantoneGroupId && m.tipo === tipo);
+    const found = magazzinoPantoni.find((m) => m.pantoneGroupId === pantoneGroupId && m.tipo === tipo);
     if (!found) {
       return NextResponse.json({ error: 'Magazzino non trovato' }, { status: 404 });
     }

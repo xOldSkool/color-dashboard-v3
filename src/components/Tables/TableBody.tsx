@@ -23,7 +23,7 @@ export default function TableBody<T extends BaseItem>({
 }: TableBodyProps<T>): JSX.Element {
   return (
     <>
-      <div className="grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] border-b border-dashed border-[var(--border)] text-center uppercase font-semibold bg-[var(--hover-btn-ghost)] py-4 rounded-t-xl">
+      <div className="grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] border-b border-dashed border-[var(--border)] text-center uppercase font-semibold bg-[var(--hover-btn-ghost)] py-4 rounded-t-xl sticky top-0 z-10">
         <input type="checkbox" checked={allSelected} onChange={() => (allSelected ? clearAll() : selectAll(allIds))} className="m-auto size-4" />
         {visibleColumns.map((col) => (
           <div key={col.key.toString()} onClick={() => handleSort(col.key)} className="flex items-center justify-center cursor-pointer mx-1">

@@ -1,6 +1,6 @@
 'use client';
 import { Pantone } from '@/types/pantoneTypes';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useProducePantone } from '@/hooks/usePantone';
 import { useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { calcolaProduzionePantone } from '@/lib/pantoni/calcoli';
@@ -28,10 +28,60 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
   const [urgente, setUrgente] = useState(false);
   const [result, setResult] = useState<null | { kgTotali: number; nDosi: number; basiRisultato: BasiRisultato[]; success: boolean }>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const { producePantone } = useProducePantone();
   const formRef = useRef<HTMLFormElement | null>(null);
   const router = useRouter();
+
+  const submitRef = useRef<() => Promise<boolean> | undefined>(undefined);
+  const resetRef = useRef<() => void | undefined>(undefined);
+
+  const submit = useCallback(async () => {
+    setError(null);
+    setResult(null);
+    try {
+      const res = await producePantone({ pantoneId: pantone._id as string, battute, urgente });
+      if (res.success) {
+        setResult(res);
+        router.refresh();
+        if (onSuccess) onSuccess();
+        return true;
+      } else {
+        setError(res.error || 'Errore generico');
+        return false;
+      }
+    } catch (err) {
+      let errorMsg = 'Errore generico';
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as { response?: { data?: { error?: string } } }).response?.data?.error === 'string'
+      ) {
+        errorMsg = (err as { response: { data: { error: string } } }).response.data.error;
+      }
+      setError(errorMsg);
+      return false;
+    }
+  }, [battute, urgente, onSuccess, producePantone, pantone._id, router]);
+
+  const reset = useCallback(() => {
+    setBattute(0);
+    setUrgente(false);
+    setResult(null);
+    setError(null);
+  }, []);
+
+  useEffect(() => {
+    submitRef.current = submit;
+    resetRef.current = reset;
+  }, [submit, reset]);
+
+  useEffect(() => {
+    useModalStore.getState().registerHandler('producePantone', {
+      submit: () => (submitRef.current ? Promise.resolve(submitRef.current()) : Promise.resolve(false)),
+      reset: () => resetRef.current?.(),
+    });
+  }, []);
 
   const { magazzinoPantone, loading: loadingMagazzino } = useMagazzinoPantoni({ pantoneGroupId: pantone.pantoneGroupId, tipo: pantone.tipo });
   const dispMagazzino = magazzinoPantone?.dispMagazzino ?? null;
@@ -47,32 +97,14 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
       dose: pantone.dose,
       battute,
       dispMagazzino: dispMagazzino || 0,
-      basi: pantone.basi || []
+      basi: pantone.basi || [],
     });
   }, [pantone.consumo, pantone.dose, battute, dispMagazzino, pantone.basi]);
 
   const risultati = basiRisultato.map((b) => ({
     ...b,
-    totale: b.kgRichiesti
+    totale: b.kgRichiesti,
   }));
-
-  useEffect(() => {
-    useModalStore.getState().registerHandler('producePantone', {
-      submit: async () => {
-        if (formRef.current) {
-          const event = new Event('submit', { bubbles: true, cancelable: true });
-          formRef.current.dispatchEvent(event);
-        }
-        return isLoading;
-      },
-      reset: () => {
-        setBattute(0);
-        setUrgente(false);
-        setResult(null);
-        setError(null);
-      },
-    });
-  }, [isLoading]);
 
   if (!pantone || !Array.isArray(pantone.basi)) {
     return <p className="text-red-500">Pantone non valido o incompleto</p>;
@@ -80,36 +112,15 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
 
   const onUrgenteChange = (e: React.ChangeEvent<HTMLInputElement>) => setUrgente(e.target.checked);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setResult(null);
-    setIsLoading(true);
-    try {
-      const res = await producePantone({ pantoneId: pantone._id as string, battute, urgente });
-      if (res.success) {
-        setResult(res);
-        router.refresh();
-        if (onSuccess) onSuccess();
-      } else setError(res.error || 'Errore generico');
-    } catch (err) {
-      let errorMsg = 'Errore generico';
-      if (
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { error?: string } } }).response?.data?.error === 'string'
-      ) {
-        errorMsg = (err as { response: { data: { error: string } } }).response.data.error;
-      }
-      setError(errorMsg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <form ref={formRef} className="flex flex-col gap-6 text-lg text-[var(--text)]" onSubmit={handleSubmit}>
+    <form
+      ref={formRef}
+      className="flex flex-col gap-6 text-lg text-[var(--text)]"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
       <div>
         <span className="font-semibold">Disponibilità magazzino:</span>{' '}
         <span className="underline">{loadingMagazzino ? '...' : dispMagazzino !== null ? dispMagazzino + ' kg' : '-'}</span>
@@ -146,7 +157,9 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
         <h3 className="font-semibold mb-2 text-xl">
           Totale quantità da preparare: <span className="underline">{kgTotali.toFixed(3)} kg</span>
         </h3>
-        <div className="text-base mb-2">N° dosi: <span className="underline">{nDosi.toFixed(2)}</span></div>
+        <div className="text-base mb-2">
+          N° dosi: <span className="underline">{nDosi.toFixed(2)}</span>
+        </div>
         <ul className="space-y-1">
           {risultati.map((b) => (
             <li key={b.nomeMateriale} className="flex justify-between">

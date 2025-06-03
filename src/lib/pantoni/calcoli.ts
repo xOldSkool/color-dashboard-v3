@@ -16,7 +16,13 @@ export interface CalcolaProduzionePantoneOutput {
   basiRisultato: Array<BasiPantone & { kgRichiesti: number }>;
 }
 
-export function calcolaProduzionePantone({ consumo, dose, battute, dispMagazzino = 0, basi }: CalcolaProduzionePantoneInput): CalcolaProduzionePantoneOutput {
+export function calcolaProduzionePantone({
+  consumo,
+  dose,
+  battute,
+  dispMagazzino = 0,
+  basi,
+}: CalcolaProduzionePantoneInput): CalcolaProduzionePantoneOutput {
   let kgTotali = (consumo * battute) / 1000;
   if (dispMagazzino > 0) {
     kgTotali = kgTotali - dispMagazzino;
@@ -25,7 +31,7 @@ export function calcolaProduzionePantone({ consumo, dose, battute, dispMagazzino
   const nDosi = dose > 0 ? kgTotali / dose : 0;
   const basiRisultato = basi.map((b) => ({
     ...b,
-    kgRichiesti: dose > 0 ? +(((b.quantita / dose) * kgTotali).toFixed(3)) : 0,
+    kgRichiesti: dose > 0 ? +((b.quantita / dose) * kgTotali).toFixed(3) : 0,
   }));
   return { kgTotali, nDosi, basiRisultato };
 }
