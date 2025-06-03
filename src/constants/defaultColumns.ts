@@ -192,14 +192,6 @@ export const PANTONE_COLUMNS: TableColumn[] = [
     hideable: true,
   },
   {
-    key: 'movimentiMagazzino',
-    label: 'Movimenti Magazzino',
-    sortable: false,
-    visibleByDefault_COLS: false,
-    hideable: true,
-    type: 'array',
-  },
-  {
     key: 'count',
     label: 'N° Pantoni',
     sortable: true,
@@ -612,7 +604,6 @@ export const SHOWABLE_PANTONE_COLS: string[] = [
   'qtConsegnataProduzione',
   'basi',
   'dispMagazzino',
-  'movimentiMagazzino',
   'count',
 ];
 export const SHOWABLE_MAGAZZINO_PANTONE_COLS: string[] = ['pantoneGroupId', 'dispMagazzino', 'tipo', 'ultimoUso', 'noteMagazzino', 'count'];
@@ -645,7 +636,7 @@ export const DEFAULT_COLS: string[] = [
   'dispMagazzino',
   'descrizione',
 ];
-export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'urgente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
+export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
 export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino', 'count'];
 export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
 export const CONFIG_SCHEDA_PANTONE: string[] = ['variante', 'articolo', 'passoCarta', 'hCarta', 'dose', 'consumo', 'dispMagazzino'];

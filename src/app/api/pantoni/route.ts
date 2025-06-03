@@ -1,12 +1,25 @@
 import { getHexFromPantone } from '@/components/PantoneToHex';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
-import { generaPantoneGroupId, insertMagazzinoIfNotExists, normalizzaBasi } from '@/lib/pantoni/logic';
+import { generaPantoneGroupId, insertMagazzinoIfNotExists, normalizzaBasi, produciPantone } from '@/lib/pantoni/logic';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { Pantone } from '@/types/pantoneTypes';
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+// API per annullare la produzione di un pantone
+// Spostata in /api/pantoni/undo-produce/route.ts
 export async function POST(req: NextRequest) {
+  // Support legacy POST for creation
+  // Se la url contiene 'undo-produce', restituisci errore (deve usare la nuova route)
+  let url = '';
+  if ('url' in req && typeof req.url === 'string') {
+    url = req.url;
+  }
+  if (url.includes('undo-produce')) {
+    return NextResponse.json({ error: 'Usa la route /api/pantoni/undo-produce' }, { status: 404 });
+  }
+
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Pantone>('pantoni');
@@ -133,5 +146,33 @@ export async function DELETE(req: NextRequest) {
   } catch (error) {
     console.error('Errore eliminazione Pantone:', error);
     return NextResponse.json({ error: 'Errore eliminazione Pantone' }, { status: 500 });
+  }
+}
+
+// API per la produzione di un pantone
+export async function PUT(req: NextRequest) {
+  // Rotta: /api/pantoni/produce
+  try {
+    const db = await connectToDatabase();
+    const body = await req.json();
+    // Validazione input
+    const schema = z.object({
+      pantoneId: z.string(),
+      battute: z.number().min(1),
+      urgente: z.boolean()
+    });
+    const validation = schema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
+    }
+    const { pantoneId, battute, urgente } = validation.data;
+    const result = await produciPantone({ db, pantoneId, battute, urgente });
+    if (!result.success) {
+      return NextResponse.json(result, { status: 400 });
+    }
+    return NextResponse.json(result, { status: 200 });
+  } catch (error) {
+    console.error('Errore produzione Pantone:', error);
+    return NextResponse.json({ error: 'Errore produzione Pantone' }, { status: 500 });
   }
 }

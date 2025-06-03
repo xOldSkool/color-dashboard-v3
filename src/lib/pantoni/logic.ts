@@ -1,7 +1,8 @@
 import { MagazzinoPantoni } from '@/types/magazzinoPantoneTypes';
-import { BaseMateriale } from '@/types/materialeTypes';
+import { BaseMateriale, Materiale, MovimentoMateriale } from '@/types/materialeTypes';
 import { BasiPantone, Pantone } from '@/types/pantoneTypes';
 import { Collection, Db, ObjectId } from 'mongodb';
+import { calcolaProduzionePantone } from './calcoli';
 
 export function normalizzaBasi(basi: BasiPantone[] = []): string {
   return basi
@@ -48,6 +49,160 @@ export function estraiBasi(payload: Record<string, string | number>, basi: BaseM
       quantita: parseFloat(String(payload[name])) || 0,
     }))
     .filter((b) => b.quantita > 0);
+}
+
+// Funzione principale per la composizione di un pantone
+export async function produciPantone({
+  db,
+  pantoneId,
+  battute,
+  urgente
+}: {
+  db: Db;
+  pantoneId: string;
+  battute: number;
+  urgente: boolean;
+}) {
+  // Recupera pantone
+  const pantone = await db.collection<Pantone>('pantoni').findOne({ _id: new ObjectId(pantoneId) });
+  if (!pantone) throw new Error('Pantone non trovato');
+  if (!pantone.basi || !Array.isArray(pantone.basi)) throw new Error('Pantone senza basi');
+
+  // Recupera dispMagazzino
+  const magazzinoPantone = await db.collection<MagazzinoPantoni>('magazzinoPantoni').findOne({ pantoneGroupId: pantone.pantoneGroupId, tipo: pantone.tipo });
+  const dispMagazzino = magazzinoPantone?.dispMagazzino || 0;
+
+  // Calcoli centralizzati
+  const { kgTotali, nDosi, basiRisultato } = calcolaProduzionePantone({
+    consumo: pantone.consumo,
+    dose: pantone.dose,
+    battute,
+    dispMagazzino,
+    basi: pantone.basi
+  });
+
+  // Verifica disponibilità basi in materiali
+  const materiali: Materiale[] = await db.collection<Materiale>('materiali').find({
+    nomeMateriale: { $in: basiRisultato.map((b) => b.nomeMateriale) }
+  }).toArray();
+  const basiNonDisponibili = basiRisultato.filter((b) => {
+    const mat = materiali.find((m) => m.nomeMateriale === b.nomeMateriale);
+    return !mat || mat.quantita < b.kgRichiesti;
+  });
+  if (basiNonDisponibili.length > 0) {
+    return {
+      success: false,
+      error: 'Basi non disponibili',
+      basiNonDisponibili: basiNonDisponibili.map((b) => ({ nomeMateriale: b.nomeMateriale, richiesti: b.kgRichiesti }))
+    };
+  }
+
+  // Aggiorna pantone
+  await db.collection<Pantone>('pantoni').updateOne(
+    { _id: new ObjectId(pantoneId) },
+    {
+      $set: {
+        daProdurre: true,
+        qtDaProdurre: kgTotali,
+        battuteDaProdurre: battute,
+        urgente
+      }
+    }
+  );
+
+  // Scarico materiali e movimenti
+  for (const b of basiRisultato) {
+    const materiale = materiali.find((m) => m.nomeMateriale === b.nomeMateriale);
+    if (!materiale) continue;
+    const nuovoMovimento: MovimentoMateriale = {
+      tipo: 'scarico',
+      quantita: b.kgRichiesti,
+      data: new Date(),
+      causale: `Uso produzione ${pantone.nomePantone}`,
+      riferimentoPantone: pantone.nomePantone
+    };
+    await db.collection<Materiale>('materiali').updateOne(
+      { _id: materiale._id },
+      {
+        $inc: { quantita: -b.kgRichiesti },
+        $push: { movimenti: nuovoMovimento }
+      }
+    );
+  }
+
+  return {
+    success: true,
+    kgTotali,
+    nDosi,
+    basiRisultato
+  };
+}
+
+// Funzione per annullare la produzione di un pantone e ripristinare i materiali
+export async function annullaProduzionePantone({
+  db,
+  pantoneId
+}: {
+  db: Db;
+  pantoneId: string;
+}) {
+  // Recupera pantone
+  const pantone = await db.collection<Pantone>('pantoni').findOne({ _id: new ObjectId(pantoneId) });
+  if (!pantone) throw new Error('Pantone non trovato');
+  if (!pantone.basi || !Array.isArray(pantone.basi)) throw new Error('Pantone senza basi');
+  if (!pantone.battuteDaProdurre || !pantone.daProdurre) throw new Error('Pantone non in stato "da produrre"');
+
+  // Recupera dispMagazzino
+  const magazzinoPantone = await db.collection<MagazzinoPantoni>('magazzinoPantoni').findOne({ pantoneGroupId: pantone.pantoneGroupId, tipo: pantone.tipo });
+  const dispMagazzino = magazzinoPantone?.dispMagazzino || 0;
+
+  // Calcoli centralizzati (usando le stesse battuteDaProdurre)
+  const { basiRisultato } = calcolaProduzionePantone({
+    consumo: pantone.consumo,
+    dose: pantone.dose,
+    battute: pantone.battuteDaProdurre,
+    dispMagazzino,
+    basi: pantone.basi
+  });
+
+  // Ripristina materiali e aggiungi movimento di carico
+  const materiali: Materiale[] = await db.collection<Materiale>('materiali').find({
+    nomeMateriale: { $in: basiRisultato.map((b) => b.nomeMateriale) }
+  }).toArray();
+
+  for (const b of basiRisultato) {
+    const materiale = materiali.find((m) => m.nomeMateriale === b.nomeMateriale);
+    if (!materiale) continue;
+    const nuovoMovimento: MovimentoMateriale = {
+      tipo: 'carico',
+      quantita: b.kgRichiesti,
+      data: new Date(),
+      causale: `Eliminata produzione ${pantone.nomePantone}`,
+      riferimentoPantone: pantone.nomePantone
+    };
+    await db.collection<Materiale>('materiali').updateOne(
+      { _id: materiale._id },
+      {
+        $inc: { quantita: b.kgRichiesti },
+        $push: { movimenti: nuovoMovimento }
+      }
+    );
+  }
+
+  // Aggiorna pantone: resetta stato produzione
+  await db.collection<Pantone>('pantoni').updateOne(
+    { _id: new ObjectId(pantoneId) },
+    {
+      $set: {
+        daProdurre: false,
+        qtDaProdurre: 0,
+        battuteDaProdurre: 0,
+        urgente: false
+      }
+    }
+  );
+
+  return { success: true };
 }
 
 // normalizzaBasi

@@ -26,3 +26,19 @@ export function useDeletePantone() {
   };
   return { removePantone };
 }
+
+export function useProducePantone() {
+  const producePantone = async ({ pantoneId, battute, urgente }: { pantoneId: string; battute: number; urgente: boolean }) => {
+    const response = await axios.put('/api/pantoni', { pantoneId, battute, urgente });
+    return response.data;
+  };
+  return { producePantone };
+}
+
+export function useUndoProducePantone() {
+  const undoProducePantone = async (pantoneId: string) => {
+    const response = await axios.post('/api/pantoni/undo-produce', { pantoneId });
+    return response.data;
+  };
+  return { undoProducePantone };
+}

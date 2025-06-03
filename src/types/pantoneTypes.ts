@@ -71,5 +71,4 @@ export interface RawPantone {
   hex?: string;
   dataCreazione?: string | Date;
   ultimoUso: Date | string;
-  movimentiMagazzino?: { tipo: string; quantita: number; data: string | Date; causale: string }[];
 }
