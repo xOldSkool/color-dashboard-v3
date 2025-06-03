@@ -15,6 +15,7 @@ import EditMaterialeForm from './Forms/Materiali/EditMaterialeForm';
 import LoadMaterialeForm from './Forms/Materiali/LoadMaterialeForm';
 import UnloadMaterialeForm from './Forms/Materiali/UnloadMaterialeForm';
 import { useDeletePantone } from '@/hooks/usePantone';
+import DeliverPantoneForm from './Forms/Pantone/DeliverPantoneForm';
 
 export default function ModalManager() {
   const router = useRouter();
@@ -93,6 +94,11 @@ export default function ModalManager() {
       {modals.removeFromToProduce && (
         <Modal title="Annulla produzione" modalKey="removeFromToProduce" onClose={() => closeModal('removeFromToProduce')}>
           <RemoveFromToProduceForm pantone={selectedPantoni[0]} />
+        </Modal>
+      )}
+      {modals.deliverPantone && (
+        <Modal title="Consegna Pantone" modalKey="deliverPantone" onClose={() => closeModal('deliverPantone')}>
+          <DeliverPantoneForm pantone={selectedPantoni[0]} />
         </Modal>
       )}
 

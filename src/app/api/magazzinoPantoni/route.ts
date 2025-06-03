@@ -22,3 +22,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Errore recupero magazzinoPantoni' }, { status: 500 });
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const db = await connectToDatabase();
+    const data = await req.json();
+    const { pantoneGroupId, tipo, dispMagazzino, ultimoUso, movimento } = data;
+    if (!pantoneGroupId || !tipo) {
+      return NextResponse.json({ error: 'pantoneGroupId e tipo sono obbligatori' }, { status: 400 });
+    }
+    const collection = db.collection('magazzinoPantoni');
+    const magazzino = await collection.findOne({ pantoneGroupId, tipo });
+    if (!magazzino) {
+      return NextResponse.json({ error: 'Magazzino non trovato' }, { status: 404 });
+    }
+    await collection.updateOne(
+      { pantoneGroupId, tipo },
+      movimento ? { $set: { dispMagazzino, ultimoUso }, $push: { movimenti: movimento } } : { $set: { dispMagazzino, ultimoUso } }
+    );
+    return NextResponse.json({ message: 'Magazzino aggiornato con successo!' }, { status: 200 });
+  } catch (error) {
+    console.error('Errore aggiornamento magazzinoPantoni:', error);
+    return NextResponse.json({ error: 'Errore aggiornamento magazzinoPantoni' }, { status: 500 });
+  }
+}
