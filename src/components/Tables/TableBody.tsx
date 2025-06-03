@@ -21,6 +21,12 @@ export default function TableBody<T extends BaseItem>({
   currentPage,
   rowsPerPage,
 }: TableBodyProps<T>): JSX.Element {
+  // Porta in cima gli elementi urgenti
+  const sortedData = [
+    ...data.filter((item) => 'urgente' in item && item.urgente === true),
+    ...data.filter((item) => !('urgente' in item && item.urgente === true)),
+  ];
+
   return (
     <>
       <div className="grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] border-b border-dashed border-[var(--border)] text-center uppercase font-semibold bg-[var(--hover-btn-ghost)] py-4 rounded-t-xl sticky top-0 z-10">
@@ -43,7 +49,7 @@ export default function TableBody<T extends BaseItem>({
         ))}
       </div>
 
-      {data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((item) => {
+      {sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((item) => {
         const id = item._id!.toString();
         // Evidenzia la riga se urgente=true
         const isUrgente = 'urgente' in item && item.urgente === true;
