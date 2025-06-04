@@ -8,3 +8,11 @@ Stack utilizzato:
 - Mongodb (atlas)
 
 Uso typescript in modalità strict, non usare 'any' da nessuna parte!
+
+Flusso per le richieste http:
+
+1. Funzioni CRUD in 'db.ts' in /lib
+2. Funzioni intermedie di gestione di payload (logica di business) in 'logic.ts' in /lib
+3. Rotte HTTP in 'route' in /api
+   3.1 Validazione zod
+4. Hook per richiamare API in /hooks

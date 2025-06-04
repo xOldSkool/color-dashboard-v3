@@ -20,14 +20,16 @@ export type ModalKey =
   | 'newMateriale'
   | 'loadMateriale'
   | 'unloadMateriale'
-  | 'editMateriale';
+  | 'editMateriale'
+  | 'returnPantonePartial'
+  | 'markPantoneAsConsumed';
 
 type Handler = {
   submit?: () => Promise<void | boolean>;
   reset?: () => void;
 };
 
-type ModalData = Materiale | Pantone | string | null;
+type ModalData = Materiale | Pantone | string | null | { pantone: Pantone; quantita: number; onSuccess?: () => void };
 
 export interface ModalState {
   modals: Record<ModalKey, boolean>;
@@ -59,6 +61,8 @@ export const useModalStore = create<ModalState>((set) => ({
     loadMateriale: false,
     unloadMateriale: false,
     editMateriale: false,
+    returnPantonePartial: false,
+    markPantoneAsConsumed: false,
   },
   submitHandlers: {} as Record<ModalKey, () => Promise<boolean>>,
   resetHandlers: {} as Record<ModalKey, () => void>,

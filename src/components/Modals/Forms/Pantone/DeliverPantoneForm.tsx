@@ -53,7 +53,7 @@ export default function DeliverPantoneForm({ pantone, onSuccess }: DeliverFormPr
     try {
       await updatePantone(String(pantone._id), {
         consegnatoProduzione: true,
-        qtConsegnataProduzione: quantita,
+        qtConsegnataProduzione: (pantone.qtConsegnataProduzione ?? 0) + quantita,
       });
       await updateMagazzinoPantoni({
         pantoneGroupId: pantone.pantoneGroupId,

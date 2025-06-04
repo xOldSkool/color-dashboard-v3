@@ -1,16 +1,9 @@
 import { MagazzinoPantoni } from '@/types/magazzinoPantoneTypes';
 import { BaseMateriale, Materiale, MovimentoMateriale } from '@/types/materialeTypes';
-import { BasiPantone, Pantone } from '@/types/pantoneTypes';
+import { Pantone } from '@/types/pantoneTypes';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { calcolaProduzionePantone } from './calcoli';
-
-export function normalizzaBasi(basi: BasiPantone[] = []): string {
-  return basi
-    .filter((b) => b.quantita > 0)
-    .sort((a, b) => a.nomeMateriale.localeCompare(b.nomeMateriale))
-    .map((b) => `${b.nomeMateriale}:${b.label}:${b.quantita}:${b.fornitore}:${b.tipo}:${b.codiceColore}`)
-    .join('|');
-}
+import { normalizzaBasi } from './normalizzaBasi';
 
 // Genera 'pantoneGroupId' in base a 'nomePantone' e 'basi'
 export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promise<string> {
@@ -198,11 +191,6 @@ export async function annullaProduzionePantone({ db, pantoneId }: { db: Db; pant
 
   return { success: true };
 }
-
-// normalizzaBasi
-// Scopo: Converte un array di oggetti { name, quantita } in una stringa normalizzata ordinata per name. Serve per confrontare le basi indipendentemente dall'ordine.
-
-// Perché? Quando confronti due composizioni di basi (ad esempio per capire se due pantoni sono uguali), l'ordine può cambiare. Ordinando e convertendo in stringa (name:quantita|...), il confronto è affidabile.
 
 // 🔑 assegnaPantoneGroupId
 // Scopo: Determina il pantoneGroupId da assegnare a un nuovo pantone, confrontandolo con quelli già esistenti con lo stesso nomePantone.

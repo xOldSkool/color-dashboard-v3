@@ -1,6 +1,7 @@
 'use client';
 import {
   ArchiveRestore,
+  CircleCheckBig,
   ClipboardList,
   Columns3Cog,
   Copy,
@@ -168,7 +169,15 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 variant="toolbar"
                 iconClass={'size-8 hover:text-[var(--accent)]'}
                 onClick={() => handleAction('returnPantone')}
-                disabled={tableKey !== 'consegnati-produzione'}
+              ></Button>
+            )}
+            {tableKey === 'consegnati-produzione' && (
+              <Button
+                icon={CircleCheckBig}
+                tooltip="Consumato"
+                variant="toolbar"
+                iconClass={'size-8 hover:text-[var(--accent)]'}
+                onClick={() => handleAction('markPantoneAsConsumed')}
               ></Button>
             )}
             {tableKey === 'ricettario' && (

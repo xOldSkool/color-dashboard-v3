@@ -1,6 +1,7 @@
 import { getHexFromPantone } from '@/components/PantoneToHex';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
-import { generaPantoneGroupId, insertMagazzinoIfNotExists, normalizzaBasi, produciPantone } from '@/lib/pantoni/logic';
+import { generaPantoneGroupId, insertMagazzinoIfNotExists, produciPantone } from '@/lib/pantoni/logic';
+import { normalizzaBasi } from '@/lib/pantoni/normalizzaBasi';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { Pantone } from '@/types/pantoneTypes';
 import { ObjectId } from 'mongodb';

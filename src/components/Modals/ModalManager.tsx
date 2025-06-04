@@ -16,6 +16,9 @@ import LoadMaterialeForm from './Forms/Materiali/LoadMaterialeForm';
 import UnloadMaterialeForm from './Forms/Materiali/UnloadMaterialeForm';
 import { useDeletePantone } from '@/hooks/usePantone';
 import DeliverPantoneForm from './Forms/Pantone/DeliverPantoneForm';
+import ReturnPantoneForm from './Forms/Pantone/ReturnPantoneForm';
+import ReturnPantonePartialModal from './Forms/Pantone/ReturnPantonePartialModal';
+import MarkPantoneAsConsumed from './Forms/Pantone/MarkPantoneAsConsumed';
 
 export default function ModalManager() {
   const router = useRouter();
@@ -99,6 +102,22 @@ export default function ModalManager() {
       {modals.deliverPantone && (
         <Modal title="Consegna Pantone" modalKey="deliverPantone" onClose={() => closeModal('deliverPantone')}>
           <DeliverPantoneForm pantone={selectedPantoni[0]} />
+        </Modal>
+      )}
+      {modals.returnPantone && (
+        <Modal title="Reso da produzione" modalKey="returnPantone" onClose={() => closeModal('returnPantone')}>
+          <ReturnPantoneForm pantone={selectedPantoni[0]} />
+        </Modal>
+      )}
+      {modals.returnPantonePartial && (
+        <Modal title="Rientro parziale" modalKey="returnPantonePartial" onClose={() => closeModal('returnPantonePartial')} showFooter={false}>
+          {/* @ts-expect-error modalData tipizzata dinamicamente */}
+          <ReturnPantonePartialModal {...(useModalStore.getState().modalData || {})} />
+        </Modal>
+      )}
+      {modals.markPantoneAsConsumed && (
+        <Modal title="Reso da produzione" modalKey="markPantoneAsConsumed" onClose={() => closeModal('markPantoneAsConsumed')}>
+          <MarkPantoneAsConsumed pantone={selectedPantoni[0]} />
         </Modal>
       )}
 
