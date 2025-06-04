@@ -19,7 +19,7 @@ export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promi
   return `${nuovoPantone.nomePantone}_${new ObjectId().toHexString().slice(-6)}`;
 }
 
-// 👌 Funzione per creare il magazzino solo se non esiste
+// Funzione per creare il magazzino solo se non esiste
 export async function insertMagazzinoIfNotExists(db: Db, groupId: string, tipo: string) {
   const collection: Collection<MagazzinoPantoni> = db.collection('magazzinoPantoni');
   const esiste = await collection.findOne({ pantoneGroupId: groupId });
@@ -102,17 +102,19 @@ export async function produciPantone({ db, pantoneId, battute, urgente }: { db: 
   for (const b of basiRisultato) {
     const materiale = materiali.find((m) => m.nomeMateriale === b.nomeMateriale);
     if (!materiale) continue;
+    const quantitaScarico = Math.round(b.kgRichiesti * 1000) / 1000;
     const nuovoMovimento: MovimentoMateriale = {
       tipo: 'scarico',
-      quantita: b.kgRichiesti,
+      quantita: quantitaScarico,
       data: new Date(),
       causale: `Uso produzione ${pantone.nomePantone}`,
       riferimentoPantone: pantone.nomePantone,
     };
+    const nuovaQuantita = parseFloat((materiale.quantita - quantitaScarico).toFixed(3));
     await db.collection<Materiale>('materiali').updateOne(
       { _id: materiale._id },
       {
-        $inc: { quantita: -b.kgRichiesti },
+        $set: { quantita: nuovaQuantita },
         $push: { movimenti: nuovoMovimento },
       }
     );
@@ -160,17 +162,19 @@ export async function annullaProduzionePantone({ db, pantoneId }: { db: Db; pant
   for (const b of basiRisultato) {
     const materiale = materiali.find((m) => m.nomeMateriale === b.nomeMateriale);
     if (!materiale) continue;
+    const quantitaCarico = Math.round(b.kgRichiesti * 1000) / 1000;
     const nuovoMovimento: MovimentoMateriale = {
       tipo: 'carico',
-      quantita: b.kgRichiesti,
+      quantita: quantitaCarico,
       data: new Date(),
       causale: `Eliminata produzione ${pantone.nomePantone}`,
       riferimentoPantone: pantone.nomePantone,
     };
+    const nuovaQuantita = parseFloat((materiale.quantita + quantitaCarico).toFixed(3));
     await db.collection<Materiale>('materiali').updateOne(
       { _id: materiale._id },
       {
-        $inc: { quantita: b.kgRichiesti },
+        $set: { quantita: nuovaQuantita },
         $push: { movimenti: nuovoMovimento },
       }
     );

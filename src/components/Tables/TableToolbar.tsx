@@ -65,161 +65,184 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
             placeholder="Cerca nell'elenco"
           />
           <div>
-            <Button
-              modalKey="filterPantone"
-              tooltip="Filtri"
-              icon={ListFilter}
-              variant="toolbar"
-              iconClass={'size-8 hover:text-[var(--accent)]'}
-            ></Button>
+            <Button modalKey="filterPantone" tooltip="Filtri" icon={ListFilter} variant="toolbar" iconClass={'size-8 hover:text-[var(--accent)]'} />
           </div>
         </div>
         <div>
           <div className="flex flex-row items-center gap-2">
-            {(tableKey === 'ricettario' || tableKey === 'magazzino') && (
-              <Button
-                icon={PaintBucket}
-                tooltip="Componi"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={() => handleAction('producePantone')}
-              ></Button>
-            )}
-            {tableKey !== 'materiali' &&
-              tableKey !== 'movimenti-materiale' &&
-              tableKey !== 'da-produrre' &&
-              tableKey !== 'consegnati-produzione' &&
-              tableKey !== 'magazzino-pantoni' && (
-                <Button
-                  icon={Send}
-                  tooltip="Consegna"
-                  variant="toolbar"
-                  iconClass={'size-8 hover:text-[var(--accent)]'}
-                  onClick={() => handleAction('deliverPantone')}
-                ></Button>
-              )}
-            {tableKey === 'da-produrre' && (
-              <Button
-                iconName="transfer"
-                tooltip="Trasferisci"
-                variant="toolbar"
-                iconClass="size-8 hover:text-[var(--accent)]"
-                onClick={() => handleAction('transferPantone')}
-              ></Button>
-            )}
-            {tableKey === 'materiali' && (
+            {tableKey === 'movimenti-magazzino' ? (
               <>
                 <Button
-                  icon={PackagePlus}
-                  tooltip="Carico"
+                  icon={Columns3Cog}
+                  tooltip="Modifica colonne"
+                  modalKey="selectColumns"
                   variant="toolbar"
-                  iconClass="size-8 hover:text-[var(--accent)]"
-                  onClick={() => handleAction('loadMateriale', 1, 1, 'materiali')}
+                  iconClass={'size-8 hover:text-[var(--accent)]'}
+                  onClick={handleSelectColumnsClick}
                 />
+                <div>
+                  <select
+                    className="h-9 border-1 border-dashed border-[var(--border)] rounded-lg bg-[var(--background)] cursor-pointer"
+                    onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                    value={rowsPerPage}
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+              </>
+            ) : (
+              <>
+                {(tableKey === 'ricettario' || tableKey === 'magazzino') && (
+                  <Button
+                    icon={PaintBucket}
+                    tooltip="Componi"
+                    variant="toolbar"
+                    iconClass={'size-8 hover:text-[var(--accent)]'}
+                    onClick={() => handleAction('producePantone')}
+                  ></Button>
+                )}
+                {tableKey !== 'materiali' &&
+                  tableKey !== 'movimenti-materiale' &&
+                  tableKey !== 'da-produrre' &&
+                  tableKey !== 'consegnati-produzione' &&
+                  tableKey !== 'magazzino-pantoni' && (
+                    <Button
+                      icon={Send}
+                      tooltip="Consegna"
+                      variant="toolbar"
+                      iconClass={'size-8 hover:text-[var(--accent)]'}
+                      onClick={() => handleAction('deliverPantone')}
+                    ></Button>
+                  )}
+                {tableKey === 'da-produrre' && (
+                  <Button
+                    iconName="transfer"
+                    tooltip="Trasferisci"
+                    variant="toolbar"
+                    iconClass="size-8 hover:text-[var(--accent)]"
+                    onClick={() => handleAction('transferPantone')}
+                  ></Button>
+                )}
+                {tableKey === 'materiali' && (
+                  <>
+                    <Button
+                      icon={PackagePlus}
+                      tooltip="Carico"
+                      variant="toolbar"
+                      iconClass="size-8 hover:text-[var(--accent)]"
+                      onClick={() => handleAction('loadMateriale', 1, 1, 'materiali')}
+                    />
+                    <Button
+                      icon={PackageMinus}
+                      tooltip="Scarico"
+                      variant="toolbar"
+                      iconClass="size-8 hover:text-[var(--accent)]"
+                      onClick={() => handleAction('unloadMateriale', 1, 1, 'materiali')}
+                    />
+                  </>
+                )}
+                {tableKey !== 'movimenti-materiale' && (
+                  <Button
+                    icon={ClipboardList}
+                    tooltip="Apri scheda"
+                    variant="toolbar"
+                    iconClass={'size-8 hover:text-[var(--accent)]'}
+                    onClick={handleViewClick}
+                  ></Button>
+                )}
+                {tableKey === 'ricettario' && (
+                  <Button
+                    icon={SquarePen}
+                    tooltip="Modifica"
+                    variant="toolbar"
+                    iconClass={'size-8 hover:text-[var(--accent)]'}
+                    onClick={() => handleAction('editPantone')}
+                  ></Button>
+                )}
+                {tableKey === 'materiali' && (
+                  <Button
+                    icon={SquarePen}
+                    tooltip="Modifica"
+                    variant="toolbar"
+                    iconClass={'size-8 hover:text-[var(--accent)]'}
+                    onClick={() => handleAction('editMateriale', 1, 1, 'materiali')}
+                  />
+                )}
+
+                {tableKey === 'ricettario' && (
+                  <Button
+                    icon={Copy}
+                    tooltip="Duplica"
+                    variant="toolbar"
+                    iconClass="size-8 hover:text-[var(--accent)]"
+                    onClick={() => handleAction('duplicatePantone')}
+                  />
+                )}
+                {tableKey === 'consegnati-produzione' && (
+                  <Button
+                    icon={ArchiveRestore}
+                    tooltip="Rientro Magazzino"
+                    variant="toolbar"
+                    iconClass={'size-8 hover:text-[var(--accent)]'}
+                    onClick={() => handleAction('returnPantone')}
+                  ></Button>
+                )}
+                {tableKey === 'consegnati-produzione' && (
+                  <Button
+                    icon={CircleCheckBig}
+                    tooltip="Consumato"
+                    variant="toolbar"
+                    iconClass={'size-8 hover:text-[var(--accent)]'}
+                    onClick={() => handleAction('markPantoneAsConsumed')}
+                  ></Button>
+                )}
+                {tableKey === 'ricettario' && (
+                  <Button
+                    icon={Trash2}
+                    tooltip="Elimina"
+                    variant="toolbar"
+                    iconClass="size-8 hover:text-red-700"
+                    onClick={() => handleAction('deletePantone', 1, Infinity)}
+                  ></Button>
+                )}
+                {tableKey === 'da-produrre' && (
+                  <Button
+                    icon={Trash2}
+                    tooltip="Rimuovi"
+                    variant="toolbar"
+                    iconClass="size-8 hover:text-red-700"
+                    onClick={() => handleAction('removeFromToProduce')}
+                  />
+                )}
                 <Button
-                  icon={PackageMinus}
-                  tooltip="Scarico"
+                  icon={Columns3Cog}
+                  tooltip="Modifica colonne"
+                  modalKey="selectColumns"
                   variant="toolbar"
-                  iconClass="size-8 hover:text-[var(--accent)]"
-                  onClick={() => handleAction('unloadMateriale', 1, 1, 'materiali')}
-                />
+                  iconClass={'size-8 hover:text-[var(--accent)]'}
+                  onClick={handleSelectColumnsClick}
+                ></Button>
+                <div>
+                  <select
+                    className="h-9 border-1 border-dashed border-[var(--border)] rounded-lg bg-[var(--background)] cursor-pointer"
+                    onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                    value={rowsPerPage}
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
               </>
             )}
-            {tableKey !== 'movimenti-materiale' && (
-              <Button
-                icon={ClipboardList}
-                tooltip="Apri scheda"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={handleViewClick}
-              ></Button>
-            )}
-            {tableKey === 'ricettario' && (
-              <Button
-                icon={SquarePen}
-                tooltip="Modifica"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={() => handleAction('editPantone')}
-              ></Button>
-            )}
-            {tableKey === 'materiali' && (
-              <Button
-                icon={SquarePen}
-                tooltip="Modifica"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={() => handleAction('editMateriale', 1, 1, 'materiali')}
-              />
-            )}
-
-            {tableKey === 'ricettario' && (
-              <Button
-                icon={Copy}
-                tooltip="Duplica"
-                variant="toolbar"
-                iconClass="size-8 hover:text-[var(--accent)]"
-                onClick={() => handleAction('duplicatePantone')}
-              />
-            )}
-            {tableKey === 'consegnati-produzione' && (
-              <Button
-                icon={ArchiveRestore}
-                tooltip="Rientro Magazzino"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={() => handleAction('returnPantone')}
-              ></Button>
-            )}
-            {tableKey === 'consegnati-produzione' && (
-              <Button
-                icon={CircleCheckBig}
-                tooltip="Consumato"
-                variant="toolbar"
-                iconClass={'size-8 hover:text-[var(--accent)]'}
-                onClick={() => handleAction('markPantoneAsConsumed')}
-              ></Button>
-            )}
-            {tableKey === 'ricettario' && (
-              <Button
-                icon={Trash2}
-                tooltip="Elimina"
-                variant="toolbar"
-                iconClass="size-8 hover:text-red-700"
-                onClick={() => handleAction('deletePantone', 1, Infinity)}
-              ></Button>
-            )}
-            {tableKey === 'da-produrre' && (
-              <Button
-                icon={Trash2}
-                tooltip="Rimuovi"
-                variant="toolbar"
-                iconClass="size-8 hover:text-red-700"
-                onClick={() => handleAction('removeFromToProduce')}
-              />
-            )}
-            <Button
-              icon={Columns3Cog}
-              tooltip="Modifica colonne"
-              modalKey="selectColumns"
-              variant="toolbar"
-              iconClass={'size-8 hover:text-[var(--accent)]'}
-              onClick={handleSelectColumnsClick}
-            ></Button>
-            <div>
-              <select
-                className="h-9 border-1 border-dashed border-[var(--border)] rounded-lg bg-[var(--background)] cursor-pointer"
-                onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                value={rowsPerPage}
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="75">75</option>
-                <option value="100">100</option>
-              </select>
-            </div>
           </div>
         </div>
       </div>

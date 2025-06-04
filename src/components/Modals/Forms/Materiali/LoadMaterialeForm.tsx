@@ -40,7 +40,7 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
     const currentFormData = formDataRef.current;
     const movimento = {
       ...currentFormData,
-      quantita: Number(currentFormData.quantita),
+      quantita: Math.round(Number(currentFormData.quantita) * 1000) / 1000,
       data: new Date().toISOString(),
       tipo: getEnumValue(currentFormData.tipo, ['carico', 'scarico'] as const, 'carico'),
       noteOperatore: currentFormData.noteOperatore,
@@ -49,7 +49,7 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
       dataDDT: currentFormData.dataDDT,
       fromUnload: false,
     };
-    const nuovaQuantita = materiale.quantita + movimento.quantita;
+    const nuovaQuantita = Math.round((materiale.quantita + movimento.quantita) * 1000) / 1000;
     const materialeAggiornato = {
       ...materiale,
       quantita: nuovaQuantita,

@@ -1,5 +1,5 @@
 import { Table } from '@/components/ClientWrapper';
-import { DEFAULT_COLS } from '@/constants/defaultColumns';
+import { CONFIG_MOVIMENTI_MAGAZZINO_PANTONE, DEFAULT_COLS } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
 import { normalizePantoni } from '@/lib/normalizers';
@@ -11,6 +11,9 @@ export default async function MagazzinoPage({ params }: { params: Promise<{ id: 
   const raw = await getAllPantoni(db);
   const pantoni = normalizePantoni(raw);
   const magazzinoPantoni = await aggregateMagazzinoPantoni(db);
+  // Recupera anche i movimenti dal documento magazzinoPantoni originale
+  const magazzinoRaw = await db.collection('magazzinoPantoni').find().toArray();
+  const gruppoRaw = magazzinoRaw.find((m) => m.pantoneGroupId === id);
   const gruppo = magazzinoPantoni.find((g) => g.pantoneGroupId === id);
   const pantoniDelGruppo = pantoni.filter((p) => p.pantoneGroupId === id);
   const hex = pantoniDelGruppo[0]?.hex;
@@ -58,6 +61,19 @@ export default async function MagazzinoPage({ params }: { params: Promise<{ id: 
 
       {/* TABELLA PANTONI DEL GRUPPO */}
       <Table items={pantoniDelGruppo} config={DEFAULT_COLS} tableKey="ricettario" />
+
+      {/* TABELLA MOVIMENTI MAGAZZINO */}
+      {Array.isArray(gruppoRaw?.movimenti) && gruppoRaw.movimenti.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-3xl font-semibold mb-2">Movimenti magazzino</h2>
+          <Table
+            items={gruppoRaw.movimenti.map((mov, idx) => ({ ...mov, _id: `${gruppoRaw._id ?? gruppoRaw.pantoneGroupId}_mov_${idx}` }))}
+            config={CONFIG_MOVIMENTI_MAGAZZINO_PANTONE}
+            tableKey="movimenti-magazzino"
+            rows={10}
+          />
+        </div>
+      )}
     </div>
   );
 }

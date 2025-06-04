@@ -1,5 +1,11 @@
 'use client';
-import { MAGAZZINO_PANTONI_COLUMNS, MATERIALI_COLUMNS, MOVIMENTI_MATERIALE_COLUMNS, PANTONE_COLUMNS } from '@/constants/defaultColumns';
+import {
+  MAGAZZINO_PANTONI_COLUMNS,
+  MATERIALI_COLUMNS,
+  MOVIMENTI_MAGAZZINO_COLUMNS,
+  MOVIMENTI_MATERIALE_COLUMNS,
+  PANTONE_COLUMNS,
+} from '@/constants/defaultColumns';
 import { JSX, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import TablePagination from './TablePagination';
@@ -71,7 +77,9 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
         ? MOVIMENTI_MATERIALE_COLUMNS
         : tableKey === 'magazzino-pantoni'
           ? MAGAZZINO_PANTONI_COLUMNS
-          : PANTONE_COLUMNS;
+          : tableKey === 'movimenti-magazzino'
+            ? MOVIMENTI_MAGAZZINO_COLUMNS
+            : PANTONE_COLUMNS;
 
   const visibleColumns: TableColumn[] = visibleUserCols
     .map((key) => ALL_COLUMNS.find((col) => col.key === key))

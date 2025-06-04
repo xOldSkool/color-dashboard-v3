@@ -39,7 +39,7 @@ export default function UnloadMaterialeFormData({ materiale: materialeProp }: Un
     const currentFormData = formDataRef.current;
     const movimento = {
       ...currentFormData,
-      quantita: Number(currentFormData.quantita),
+      quantita: Math.round(Number(currentFormData.quantita) * 1000) / 1000,
       data: new Date().toISOString(),
       tipo: getEnumValue(currentFormData.tipo, ['carico', 'scarico'] as const, 'scarico'),
       noteOperatore: currentFormData.noteOperatore,
@@ -48,7 +48,7 @@ export default function UnloadMaterialeFormData({ materiale: materialeProp }: Un
       dataDDT: '',
       fromUnload: true,
     };
-    const nuovaQuantita = materiale.quantita - movimento.quantita;
+    const nuovaQuantita = Math.round((materiale.quantita - movimento.quantita) * 1000) / 1000;
     const materialeAggiornato = {
       ...materiale,
       quantita: nuovaQuantita,

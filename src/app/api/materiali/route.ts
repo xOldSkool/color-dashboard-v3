@@ -16,6 +16,11 @@ export async function POST(request: NextRequest) {
     const collection = db.collection<Materiale>('materiali');
     const nuovoMateriale = await request.json();
 
+    // Arrotonda quantita a 3 decimali se presente
+    if (typeof nuovoMateriale.quantita === 'number') {
+      nuovoMateriale.quantita = Math.round(nuovoMateriale.quantita * 1000) / 1000;
+    }
+
     // Validazione Zod sul payload
     const validation = MaterialeSchema.safeParse(nuovoMateriale);
     if (!validation.success) {
@@ -35,6 +40,11 @@ export async function PATCH(request: NextRequest) {
     const collection = db.collection<Materiale>('materiali');
     const rawData = await request.json();
     const { id, fromUnload, ...updateFields } = rawData;
+
+    // Arrotonda quantita a 3 decimali se presente
+    if (typeof updateFields.quantita === 'number') {
+      updateFields.quantita = Math.round(updateFields.quantita * 1000) / 1000;
+    }
 
     if (!id) {
       return NextResponse.json({ error: 'ID del materiale non fornito' }, { status: 400 });

@@ -31,7 +31,7 @@ export function calcolaProduzionePantone({
   const nDosi = dose > 0 ? kgTotali / dose : 0;
   const basiRisultato = basi.map((b) => ({
     ...b,
-    kgRichiesti: dose > 0 ? +((b.quantita / dose) * kgTotali).toFixed(3) : 0,
+    kgRichiesti: dose > 0 ? +parseFloat(((b.quantita / dose) * kgTotali).toFixed(3)) : 0,
   }));
   return { kgTotali, nDosi, basiRisultato };
 }

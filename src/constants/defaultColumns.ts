@@ -606,7 +606,7 @@ export const SHOWABLE_PANTONE_COLS: string[] = [
   'dispMagazzino',
   'count',
 ];
-export const SHOWABLE_MAGAZZINO_PANTONE_COLS: string[] = ['pantoneGroupId', 'dispMagazzino', 'tipo', 'ultimoUso', 'noteMagazzino', 'count'];
+export const SHOWABLE_MAGAZZINO_PANTONE_COLS: string[] = ['tipo', 'quantita', 'data', 'causale'];
 
 export const SHOWABLE_MATERIALI_COLS: string[] = [
   'nome',
@@ -638,6 +638,7 @@ export const DEFAULT_COLS: string[] = [
 ];
 export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
 export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino', 'count'];
+export const CONFIG_MOVIMENTI_MAGAZZINO_PANTONE: string[] = ['dispMagazzino', 'quantita', 'tipo', 'data', 'causale'];
 export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
 export const CONFIG_SCHEDA_PANTONE: string[] = ['variante', 'articolo', 'passoCarta', 'hCarta', 'dose', 'consumo', 'dispMagazzino'];
 export const CONFIG_MATERIALI: string[] = ['label', 'codiceColore', 'fornitore', 'tipo', 'quantita', 'utilizzo', 'stato'];
