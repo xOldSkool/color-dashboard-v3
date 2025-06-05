@@ -1,6 +1,7 @@
 'use client';
 import InputMap from '@/components/InputMap';
 import Loader from '@/components/Loader';
+import { H3 } from '@/components/UI/Titles&Texts';
 import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
 import { useBasiMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
@@ -167,6 +168,7 @@ export default function NewPantoneForm() {
 
   return (
     <form className="w-6xl">
+      <H3 className="mb-2">Dettagli Pantone</H3>
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       <div className="grid grid-cols-1 gap-2">
         <div className="grid grid-cols-3 gap-2">
@@ -175,7 +177,7 @@ export default function NewPantoneForm() {
           <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} />
         </div>
         <div className="flex flex-col gap-5">
-          <h2 className="text-2xl font-semibold mt-5">Composizione</h2>
+          <H3 className="mt-5">Composizione</H3>
 
           {tipoSelezionato ? (
             loading ? (

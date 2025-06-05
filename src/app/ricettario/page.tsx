@@ -6,6 +6,7 @@ import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/normalizers';
 import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
 import { mergePantoniMagazzino } from '@/utils/mergePantoniMagazzino';
+import { H1 } from '@/components/UI/Titles&Texts';
 
 export default async function Ricettario() {
   const db = await connectToDatabase();
@@ -16,7 +17,7 @@ export default async function Ricettario() {
   return (
     <div className="p-4">
       <div className="flex flex-row justify-between items-center gap-2">
-        <h1 className="text-4xl font-semibold">Ricettario</h1>
+        <H1>Ricettario</H1>
 
         <Button modalKey="newPantone" iconName="plus" variant="primary">
           Crea nuovo Pantone

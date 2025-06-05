@@ -22,7 +22,7 @@ export interface Materiale {
   fornitore: string;
   tipo: 'EB' | 'UV';
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
-  utilizzo: 'Base' | 'Materiale';
+  utilizzo: 'Base' | 'Materiale' | 'Pantone';
   noteMateriale?: string;
   dataCreazione: Date | string;
   movimenti?: MovimentoMateriale[];
@@ -43,7 +43,7 @@ export interface RawMateriale {
   quantita: number;
   fornitore: string;
   tipo: 'EB' | 'UV';
-  utilizzo: 'Base' | 'Materiale';
+  utilizzo: 'Base' | 'Materiale' | 'Pantone';
   noteMateriale?: string;
   dataCreazione: string | Date;
   movimenti?: MovimentoMateriale[];

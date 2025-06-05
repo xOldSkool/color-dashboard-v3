@@ -7,6 +7,7 @@ import Image from 'next/image';
 import MaterialeActions from './actions';
 import { Table } from '@/components/ClientWrapper';
 import { CONFIG_MOVIMENTI_MATERIALE } from '@/constants/defaultColumns';
+import { H1, H2 } from '@/components/UI/Titles&Texts';
 
 export default async function MaterialePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,10 +23,10 @@ export default async function MaterialePage({ params }: { params: Promise<{ id: 
   return (
     <div className="p-6 mx-auto">
       <div className="flex flex-row justify-between items-center mb-10">
-        <h1 className="text-4xl font-medium">
+        <H1>
           Scheda materiale <span className="font-bold">{materiale.label}</span> - <span className="font-bold">{materiale.fornitore}</span>{' '}
           <span className="font-bold">{materiale.codiceColore}</span>
-        </h1>
+        </H1>
         <div className="flex flex-row gap-2">
           <MaterialeActions materiale={materiale} />
         </div>
@@ -61,7 +62,7 @@ export default async function MaterialePage({ params }: { params: Promise<{ id: 
       </div>
 
       <div className="mt-10">
-        <h2 className="text-2xl font-semibold mb-2">Movimenti</h2>
+        <H2>Movimenti</H2>
         {materiale.movimenti?.length ? (
           <Table items={movimenti} config={CONFIG_MOVIMENTI_MATERIALE} tableKey="movimenti-materiale"></Table>
         ) : (

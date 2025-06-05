@@ -6,6 +6,7 @@ import { Table } from '@/components/ClientWrapper';
 import {} from '@/utils/mergePantoniMagazzino';
 import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
 import { raggruppaPantoni } from '@/utils/raggruppaPantoni';
+import { H1 } from '@/components/UI/Titles&Texts';
 
 export default async function Magazzino() {
   const db = await connectToDatabase();
@@ -15,7 +16,7 @@ export default async function Magazzino() {
   const raggruppati = raggruppaPantoni(pantoni, magazzinoPantoni);
   return (
     <div className="p-4">
-      <h1 className="text-4xl font-semibold">Magazzino</h1>
+      <H1>Magazzino</H1>
       <Table items={raggruppati} config={CONFIG_MAGAZZINO} tableKey="magazzino" />
     </div>
   );

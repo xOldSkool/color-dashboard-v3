@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import Button from '../Button';
 import { ModalKey, useModalStore } from '@/store/useModalStore';
 import { ReactNode, useState } from 'react';
+import { H3 } from '../UI/Titles&Texts';
 
 interface ModalProps {
   title: string;
@@ -53,11 +54,11 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
           {/* header della modale */}
           <div className="flex items-center justify-between border-b-2 border-neutral-600">
             {/* titolo */}
-            <h2 className="text-xl font-semibold p-5 text-[var(--text)]">{title}</h2>
+            <H3 className="m-4 mt-5">{title}</H3>
             {/* bottone di chiusura */}
             <button
               onClick={onClose} // click sulla X = chiusura
-              className="text-[var(--text)] hover:text-[var(--accent)] text-xl cursor-pointer mr-4"
+              className="text-[var(--text)] hover:text-[var(--accent)] cursor-pointer mr-4"
             >
               <X />
             </button>

@@ -5,6 +5,7 @@ import { normalizePantoni } from '@/lib/normalizers';
 import Table from '@/components/Tables/Table';
 import PantoneActions from './actions';
 import { getAllMagazzinoPantoni } from '@/lib/magazzinoPantoni/db';
+import { H1 } from '@/components/UI/Titles&Texts';
 
 export default async function PantonePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,9 +22,9 @@ export default async function PantonePage({ params }: { params: Promise<{ id: st
     <div className="p-6 mx-auto">
       {/* INTESTAZIONE */}
       <div className="flex flex-row justify-between items-center mb-10">
-        <h1 className="text-4xl font-medium">
+        <H1>
           Scheda pantone <span className="font-bold">{pantone.nomePantone}</span>
-        </h1>
+        </H1>
         <PantoneActions pantone={pantone} />
       </div>
 

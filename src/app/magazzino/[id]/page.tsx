@@ -1,5 +1,5 @@
 import { Table } from '@/components/ClientWrapper';
-import { H2 } from '@/components/UI/Titles&Texts';
+import { H1, H2 } from '@/components/UI/Titles&Texts';
 import { CONFIG_MOVIMENTI_MAGAZZINO_PANTONE, CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
@@ -25,9 +25,9 @@ export default async function MagazzinoPage({ params }: { params: Promise<{ id: 
     <div className="p-6 mx-auto">
       {/* INTESTAZIONE */}
       <div className="flex flex-row justify-between items-center mb-10">
-        <h1 className="text-4xl font-medium">
+        <H1>
           Scheda magazzino <span className="font-bold">{gruppo.nomePantone || gruppo.pantoneGroupId}</span>
-        </h1>
+        </H1>
       </div>
 
       {/* DETTAGLI GRUPPO */}

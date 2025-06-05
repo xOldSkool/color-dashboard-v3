@@ -10,7 +10,7 @@ export const MaterialeSchema = z.object({
   fornitore: z.string().min(1, 'Il fornitore è obbligatorio'),
   tipo: z.enum(['EB', 'UV']),
   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
-  utilizzo: z.enum(['Base', 'Materiale']),
+  utilizzo: z.enum(['Base', 'Materiale', 'Pantone']),
   noteMateriale: z.string().optional().nullable(),
   dataCreazione: z.union([z.string(), z.date()]).optional(),
   movimenti: z
@@ -39,7 +39,7 @@ export const MaterialeSchemaOpzionale = z.object({
   fornitore: z.string().min(1, 'Il fornitore è obbligatorio'),
   tipo: z.enum(['EB', 'UV']),
   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
-  utilizzo: z.enum(['Base', 'Materiale']),
+  utilizzo: z.enum(['Base', 'Materiale', 'Pantone']),
   noteMateriale: z.string().optional().nullable(),
   dataCreazione: z.union([z.string(), z.date()]).optional(),
   movimenti: z
