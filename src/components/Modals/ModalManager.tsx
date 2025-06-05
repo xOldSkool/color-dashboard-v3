@@ -19,6 +19,7 @@ import DeliverPantoneForm from './Forms/Pantone/DeliverPantoneForm';
 import ReturnPantoneForm from './Forms/Pantone/ReturnPantoneForm';
 import ReturnPantonePartialModal from './Forms/Pantone/ReturnPantonePartialModal';
 import MarkPantoneAsConsumed from './Forms/Pantone/MarkPantoneAsConsumed';
+import TransferPantone from './Forms/Pantone/TransferPantone';
 
 export default function ModalManager() {
   const router = useRouter();
@@ -118,6 +119,11 @@ export default function ModalManager() {
       {modals.markPantoneAsConsumed && (
         <Modal title="Reso da produzione" modalKey="markPantoneAsConsumed" onClose={() => closeModal('markPantoneAsConsumed')}>
           <MarkPantoneAsConsumed pantone={selectedPantoni[0]} />
+        </Modal>
+      )}
+      {modals.transferPantone && (
+        <Modal title="Trasferisci pantone" modalKey="transferPantone" onClose={() => closeModal('transferPantone')}>
+          <TransferPantone pantone={selectedPantoni[0]} />
         </Modal>
       )}
 
