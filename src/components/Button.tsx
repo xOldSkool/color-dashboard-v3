@@ -89,11 +89,11 @@ export default function Button({
   const baseStyles = 'flex flex-row items-center gap-2 rounded-lg text-lg font-medium transition-colors duration-200 relative';
 
   const variantStyles: Record<Variant, string> = {
-    primary: 'bg-[var(--bg-btn-primary)] text-[var(--text-btn-primary)] hover:bg-[var(--hover-btn-primary)] px-3 py-2',
-    secondary: 'bg-[var(--bg-btn-secondary)] text-[var(--text-btn-secondary)] hover:bg-[var(--hover-btn-secondary)] px-3 py-2',
-    danger: 'bg-[var(--bg-btn-danger)] text-[var(--text-btn-danger)] hover:bg-[var(--hover-btn-danger)] px-3 py-2',
-    outline: 'border text-[var(--text-btn-outline)] hover:bg-[var(--hover-btn-outline)] border-[var(--border-btn-outline)] px-3 py-2',
-    ghost: 'bg-transparent text-[var(--text-btn-ghost)] hover:bg-[var(--hover-btn-ghost)] px-3 py-2',
+    primary: 'btn-primary px-3 py-2',
+    secondary: 'btn-secondary px-3 py-2',
+    danger: 'btn-danger px-3 py-2',
+    outline: 'btn-outline border px-3 py-2',
+    ghost: 'btn-ghost px-3 py-2',
     toolbar: 'bg-transparent',
   };
 

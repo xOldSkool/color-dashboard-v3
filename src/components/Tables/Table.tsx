@@ -143,10 +143,14 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
         <div className="sticky top-0 z-20 bg-[var(--background)] ">
           <TableToolbar data={sortedData} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage} tableKey={tableKey} />
           {/* HEADER TABELLA */}
-          <div className="grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] border border-dashed border-[var(--border)] text-center uppercase font-semibold bg-[var(--hover-btn-ghost)] py-4 rounded-t-xl">
+          <div className="grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] border border-dashed border-[var(--border)] text-center uppercase font-semibold bg-[var(--hover-foreground)] py-4 rounded-t-xl">
             <input type="checkbox" checked={allSelected} onChange={() => (allSelected ? clearAll() : selectAll(allIds))} className="m-auto size-4" />
             {visibleColumns.map((col) => (
-              <div key={col.key.toString()} onClick={() => handleSort(col.key)} className="flex items-center justify-center cursor-pointer mx-1">
+              <div
+                key={col.key.toString()}
+                onClick={() => handleSort(col.key)}
+                className="flex items-center justify-center cursor-pointer hover:text-[var(--accent)] mx-1"
+              >
                 {col.label}
                 <span className="inline-block ms-1">
                   {sortKey === col.key ? (
@@ -163,7 +167,7 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
             ))}
           </div>
         </div>
-        {/* RIGHE TABELLA */}
+        {/* BODY TABELLA */}
         <TableBody
           data={sortedData}
           visibleColumns={visibleColumns}

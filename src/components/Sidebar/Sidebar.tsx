@@ -14,15 +14,15 @@ export default function Sidebar(): JSX.Element {
     <div
       className={`${
         isOpen ? 'w-72' : 'w-20'
-      } min-h-screen bg-[var(--background)] p-3 relative duration-300 flex flex-col border-r-1 border-dashed border-[var(--border)]`}
+      } h-full bg-[var(--background)] p-3 relative duration-300 flex flex-col border-r-1 border-dashed border-[var(--border)]`}
     >
       <div
-        className="absolute cursor-pointer -end-5 top-6 bg-[var(--background)] hover:text-orange-400 rounded-full p-2 border-1 border-dashed border-[var(--border)]"
+        className="absolute cursor-pointer -end-5 top-6 bg-[var(--background)] hover:text-[var(--accent)] rounded-full p-2 border-1 border-dashed border-[var(--border)]"
         onClick={() => toggleSidebar()}
       >
         <ArrowLeft className={`size-6 ${!isOpen && 'rotate-180'}`} />
       </div>
-      <div className="absolute cursor-pointer -end-5 top-20 bg-[var(--background)] hover:text-orange-400 rounded-full p-2 border-1 border-dashed border-[var(--border)]">
+      <div className="absolute cursor-pointer -end-5 top-20 bg-[var(--background)] hover:text-[var(--accent)] rounded-full p-2 border-1 border-dashed border-[var(--border)]">
         <ThemeToggle />
       </div>
       <Image src={logo} alt="DSSMITH Logo" className={`h-28 mt-5 mb-10 self-center ${!isOpen && 'invisible'}`} height={112} />

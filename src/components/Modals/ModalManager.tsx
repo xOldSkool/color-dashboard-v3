@@ -23,8 +23,8 @@ import TransferPantone from './Forms/Pantone/TransferPantone';
 
 export default function ModalManager() {
   const router = useRouter();
-  const { selectedPantoni, selectedTableKey, /* setSelectedPantoni, */ selectedMateriali, clearAll } = useTableStore();
-  const { modals, closeModal, /* openModal, */ registerHandler } = useModalStore();
+  const { selectedPantoni, selectedTableKey, selectedMateriali, clearAll } = useTableStore();
+  const { modals, closeModal, registerHandler } = useModalStore();
   const { removePantone } = useDeletePantone();
 
   const hasRegisteredDeleteHandler = useRef(false);
@@ -96,7 +96,7 @@ export default function ModalManager() {
         </Modal>
       )}
       {modals.removeFromToProduce && (
-        <Modal title="Annulla produzione" modalKey="removeFromToProduce" onClose={() => closeModal('removeFromToProduce')}>
+        <Modal title="Annulla Produzione" modalKey="removeFromToProduce" onClose={() => closeModal('removeFromToProduce')}>
           <RemoveFromToProduceForm pantone={selectedPantoni[0]} />
         </Modal>
       )}
@@ -106,23 +106,23 @@ export default function ModalManager() {
         </Modal>
       )}
       {modals.returnPantone && (
-        <Modal title="Reso da produzione" modalKey="returnPantone" onClose={() => closeModal('returnPantone')}>
+        <Modal title="Reso da Produzione" modalKey="returnPantone" onClose={() => closeModal('returnPantone')}>
           <ReturnPantoneForm pantone={selectedPantoni[0]} />
         </Modal>
       )}
       {modals.returnPantonePartial && (
-        <Modal title="Rientro parziale" modalKey="returnPantonePartial" onClose={() => closeModal('returnPantonePartial')} showFooter={false}>
+        <Modal title="Rientro Parziale" modalKey="returnPantonePartial" onClose={() => closeModal('returnPantonePartial')} showFooter={false}>
           {/* @ts-expect-error modalData tipizzata dinamicamente */}
           <ReturnPantonePartialModal {...(useModalStore.getState().modalData || {})} />
         </Modal>
       )}
       {modals.markPantoneAsConsumed && (
-        <Modal title="Reso da produzione" modalKey="markPantoneAsConsumed" onClose={() => closeModal('markPantoneAsConsumed')}>
+        <Modal title="Reso da Produzione" modalKey="markPantoneAsConsumed" onClose={() => closeModal('markPantoneAsConsumed')}>
           <MarkPantoneAsConsumed pantone={selectedPantoni[0]} />
         </Modal>
       )}
       {modals.transferPantone && (
-        <Modal title="Trasferisci pantone" modalKey="transferPantone" onClose={() => closeModal('transferPantone')}>
+        <Modal title="Trasferisci Pantone" modalKey="transferPantone" onClose={() => closeModal('transferPantone')}>
           <TransferPantone pantone={selectedPantoni[0]} />
         </Modal>
       )}

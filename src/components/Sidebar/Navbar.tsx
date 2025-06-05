@@ -29,46 +29,77 @@ const navItems: NavItem[] = [
   },
   { label: 'Statistiche', href: '/statistiche', icon: ChartColumn },
   { label: 'Documenti', href: '/documenti', icon: FileStack },
-  { label: 'F.A.Q.', href: '/faq', icon: CircleHelp },
-  { label: 'Impostazioni', href: '/impostazioni', icon: Settings },
   { label: 'Dev', href: '/dev', icon: SquareCode },
 ];
 
+const bottomItems: NavItem[] = [
+  { label: 'F.A.Q.', href: '/faq', icon: CircleHelp },
+  { label: 'Impostazioni', href: '/impostazioni', icon: Settings },
+];
+
 const liClasses = 'my-3';
-const linkClasses =
-  'group flex items-center cursor-pointer p-3 rounded-lg text-[var(--text)] hover:text-[var(--accent)] transition-colors text-lg border-1 border-transparent hover:border-1 hover:border-dashed hover:border-[var(--border)]';
-const linkClassesActive =
-  'group flex items-center cursor-pointer p-3 rounded-lg bg-[var(--foreground)] text-[var(--text-inverted)] transition-colors text-lg hover:text-[var(--accent)]';
-const iconClasses = 'w-7 h-7 min-w-7 text-inherit group-hover:text-[var(--accent)] transition-colors';
-const iconClassesActive = 'w-7 h-7 min-w-7 text-inherit transition-colors';
 
 export default function Navbar(): JSX.Element {
   const path = usePathname();
   const { isOpen } = useSidebarStore();
+  const Icon0 = bottomItems[0].icon;
+  const Icon1 = bottomItems[1].icon;
 
   return (
-    <ul>
-      {navItems.map(({ href, label, icon: Icon }) => {
-        const isActive = path === href;
-        const link = (
-          <Link href={href} prefetch={true} className={`${isActive ? linkClassesActive : linkClasses} ${!isOpen && 'justify-center'}`}>
-            <Icon className={`${isActive ? iconClassesActive : iconClasses} ${isOpen && 'mr-3'}`} />
-            {isOpen && <span>{label}</span>}
-          </Link>
-        );
+    <nav className="flex flex-col h-full">
+      {/* NAV ITEMS */}
+      <ul>
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive = path === href;
+          const linkBase = isActive ? 'nav-link-active' : 'nav-link';
+          const iconBase = isActive ? 'nav-icon-active' : 'nav-icon';
+          const link = (
+            <Link href={href} prefetch={true} className={`group ${linkBase} ${!isOpen && 'justify-center'}`}>
+              <Icon className={`${iconBase} ${isOpen && 'mr-3'}`} />
+              {isOpen && <span>{label}</span>}
+            </Link>
+          );
+          return (
+            <li key={href} className={liClasses}>
+              {!isOpen ? (
+                <Tooltip tooltip={label} position="right">
+                  {link}
+                </Tooltip>
+              ) : (
+                link
+              )}
+            </li>
+          );
+        })}
+      </ul>
 
-        return (
-          <li key={href} className={liClasses}>
-            {!isOpen ? (
-              <Tooltip tooltip={label} position="right">
-                {link}
-              </Tooltip>
-            ) : (
-              link
-            )}
-          </li>
-        );
-      })}
-    </ul>
+      {/* BOTTOM ITEMS MANUALI */}
+      {isOpen && (
+        <div className="mt-auto flex flex-row items-center justify-center gap-2 pb-2">
+          <div className="justify-center">
+            <Link
+              href={bottomItems[0].href}
+              prefetch={true}
+              className={`group ${path === bottomItems[0].href ? 'nav-link-active' : 'nav-link'} flex-row`}
+            >
+              <Icon0 className="bottom-nav-icon" />
+              {isOpen && <span className="text-xs ml-1">{bottomItems[0].label}</span>}
+            </Link>
+          </div>
+          {/* Separatore verticale */}
+          <span className="h-6 w-px bg-[var(--border)] mx-1" />
+          <div className="justify-center">
+            <Link
+              href={bottomItems[1].href}
+              prefetch={true}
+              className={`group ${path === bottomItems[1].href ? 'nav-link-active' : 'nav-link'} flex-row`}
+            >
+              <Icon1 className="bottom-nav-icon" />
+              {isOpen && <span className="text-xs ml-1">{bottomItems[1].label}</span>}
+            </Link>
+          </div>
+        </div>
+      )}
+    </nav>
   );
 }

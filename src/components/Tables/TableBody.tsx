@@ -33,7 +33,7 @@ export default function TableBody<T extends BaseItem>({
             key={id}
             onClick={() => toggleSelection(id)}
             data-selected={isSelected(id)}
-            className={`grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] items-center text-center py-2 odd:bg-[var(--hover-btn-ghost)] data-[selected=true]:bg-[var(--selected-row)] hover:bg-[var(--selected-row)] cursor-pointer border-x border-b border-dashed border-[var(--border)] data-[selected=true]:border-b-1 data-[selected=true]:border-dashed data-[selected=true]:border-[var(--border)] ${isUrgente ? 'bg-red-200 dark:bg-red-900/60' : ''}`}
+            className={`row-interactive grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] items-center text-center py-2  ${isUrgente ? 'bg-red-200 dark:bg-red-900/60' : ''}`}
           >
             <input
               type="checkbox"
@@ -96,7 +96,7 @@ export default function TableBody<T extends BaseItem>({
                           const totaleIT = totale.replace('.', ',');
                           return (
                             <div key={base.nomeMateriale} className="text-sm">
-                              <span className="font-bold">{base.label}</span>: {totaleIT}
+                              <span className="font-semibold">{base.label}</span>: {totaleIT} kg
                             </div>
                           );
                         })}

@@ -2,33 +2,18 @@
 
 :root {
   --font-poppins: 'Poppins', sans-serif;
-  --background: #ffffff;
-  --foreground: #171717;
-  --border: oklch(80% 0 0);
-  --accent: oklch(70.5% 0.213 47.604);
-  --text: #000;
-  --text-inverted: #fff;
-  --selected-row: #ffe9c3;
-
-  /* Bottoni */
-  --bg-btn-primary: #0a0a0a;
-  --text-btn-primary: #ffffff;
-  --hover-btn-primary: #171717;
-
-  --bg-btn-secondary: oklch(92.2% 0 0);
-  --text-btn-secondary: #171717;
-  --hover-btn-secondary: oklch(88% 0.003 48.717);
-
-  --bg-btn-danger: #dc2626;
-  --text-btn-danger: #ffffff;
-  --hover-btn-danger: #b91c1c;
-
-  --border-btn-outline: #d4d4d4;
-  --text-btn-outline: #171717;
-  --hover-btn-outline: #f5f5f5;
-
-  --text-btn-ghost: #171717;
-  --hover-btn-ghost: #f5f5f5;
+  --background: #fafaf9;
+  --foreground: #0c0a09;
+  --secondary: #d6d3d1;
+  --border: #a8a29e;
+  --accent: #ea580c;
+  --danger: #b91c1c;
+  --danger-hover: #dc2626;
+  --text: var(--foreground);
+  --text-inverted: var(--background);
+  --hover: #292524;
+  --hover-foreground: #e7e5e4;
+  --selected-row: var(--foreground);
 }
 
 /* @theme inline {
@@ -39,38 +24,99 @@
 } */
 
 html.dark {
-    --background: oklch(14.5% 0 0);
-    --foreground: #ededed;
-    --border: oklch(40% 0 0);
-    --accent: oklch(70.5% 0.213 47.604);
-    --text: #fff;
-    --text-inverted: #000;
-    --selected-row: #333333;
-
-    /* Bottoni */
-    --bg-btn-primary: #ffffff;
-    --text-btn-primary: #000000;
-    --hover-btn-primary: #e5e5e5;
-
-    --bg-btn-secondary: oklch(37.1% 0 0);
-    --text-btn-secondary: #ffffff;
-    --hover-btn-secondary: oklch(34% 0 0);
-
-    --bg-btn-danger: #ef4444;
-    --text-btn-danger: #ffffff;
-    --hover-btn-danger: #dc2626;
-
-    --border-btn-outline: oklch(37.1% 0 0);
-    --text-btn-outline: #ffffff;
-    --hover-btn-outline: oklch(37.1% 0 0);
-
-    --text-btn-ghost: #ffffff;
-    --hover-btn-ghost: #262626;
+    --background: #0c0a09;
+    --foreground: #fafaf9;
+    --secondary: #292524;
+    --border: #57534e;
+    --accent: #ea580c;
+    --danger: #b91c1c;
+    --danger-hover: #dc2626;
+    --text: var(--foreground);
+    --text-inverted: var(--background);
+    --hover: #e7e5e4;
+    --hover-foreground: #1c1917;
+    --selected-row: var(--foreground);
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--text);
   font-family: var(--font-poppins);
+}
+
+@layer components {
+  /* BUTTON VARIANTS */
+  .btn-primary {
+    @apply bg-[var(--foreground)] text-[var(--text-inverted)]
+  }
+  .btn-primary:hover {
+    @apply bg-[var(--hover)]
+  }
+  .btn-secondary {
+    @apply bg-[var(--secondary)]
+  }
+  .btn-secondary:hover {
+    @apply bg-[var(--hover-foreground)]
+  }
+  .btn-danger {
+    @apply bg-[var(--danger)] text-white
+  }
+  .btn-danger:hover {
+    @apply bg-[var(--danger-hover)] text-white
+  }
+  .btn-outline {
+    @apply bg-transparent border-[var(--border)]
+  }
+  .btn-outline:hover {
+    @apply bg-[var(--secondary)] border-transparent
+  }
+  .btn-ghost {
+    @apply bg-transparent
+  }
+  .btn-ghost:hover {
+    @apply bg-[var(--secondary)]
+  }
+
+  /* TABLE SELECTED ROWS */
+  .row-interactive {
+    @apply cursor-pointer border-x border-b border-dashed border-[var(--border)] transition-colors;
+  }
+  .row-interactive:nth-child(odd) {
+    @apply bg-[var(--hover-foreground)];
+  }
+  .row-interactive:hover,
+  .row-interactive[data-selected="true"] {
+    @apply bg-[var(--selected-row)] text-[var(--text-inverted)];
+  }
+
+  /* TABLE PAGINATION */
+  .pagination-btn {
+    @apply px-1 py-1 border rounded border-dashed cursor-pointer transition-colors;
+    @apply hover:bg-[var(--selected-row)] hover:text-[var(--text-inverted)];
+    @apply disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit disabled:cursor-default;
+  }
+  .pagination-btn-active {
+    @apply bg-[var(--foreground)] text-[var(--text-inverted)] border-solid border-white;
+  }
+
+  /* NAVBAR */
+  .nav-link {
+  @apply flex items-center cursor-pointer p-3 rounded-lg text-[var(--text)] hover:text-[var(--accent)] transition-colors text-lg border border-transparent hover:border hover:border-dashed hover:border-[var(--border)];
+}
+.nav-link-active {
+  @apply flex items-center cursor-pointer p-3 rounded-lg bg-[var(--foreground)] text-[var(--text-inverted)] transition-colors text-lg hover:text-[var(--accent)];
+}
+  .nav-icon {
+    @apply w-7 h-7 min-w-7 text-inherit group-hover:text-[var(--accent)] transition-colors;
+  }
+  .nav-icon-active {
+    @apply w-7 h-7 min-w-7 text-inherit transition-colors;
+  }
+  .bottom-nav-icon {
+    @apply w-5 h-5 min-w-5 text-inherit group-hover:text-[var(--accent)] transition-colors;
+  }
+  .bottom-nav-icon-active {
+    @apply w-5 h-5 min-w-5 text-inherit transition-colors;
+  }
 }
 

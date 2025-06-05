@@ -82,7 +82,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 />
                 <div>
                   <select
-                    className="h-9 border-1 border-dashed border-[var(--border)] rounded-lg bg-[var(--background)] cursor-pointer"
+                    className="h-9 border-1 border-dashed border-[var(--border)] hover:border-[var(--hover)] rounded-lg bg-[var(--background)] cursor-pointer"
                     onChange={(e) => setRowsPerPage(Number(e.target.value))}
                     value={rowsPerPage}
                   >
@@ -229,7 +229,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                 ></Button>
                 <div>
                   <select
-                    className="h-9 border-1 border-dashed border-[var(--border)] rounded-lg bg-[var(--background)] cursor-pointer"
+                    className="h-9 border-1 border-dashed border-[var(--border)] hover:border-[var(--hover)] rounded-lg bg-[var(--background)] cursor-pointer"
                     onChange={(e) => setRowsPerPage(Number(e.target.value))}
                     value={rowsPerPage}
                   >
