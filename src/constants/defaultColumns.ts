@@ -640,7 +640,16 @@ export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'q
 export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino', 'count'];
 export const CONFIG_MOVIMENTI_MAGAZZINO_PANTONE: string[] = ['dispMagazzino', 'quantita', 'tipo', 'data', 'causale'];
 export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
-export const CONFIG_SCHEDA_PANTONE: string[] = ['variante', 'articolo', 'passoCarta', 'hCarta', 'dose', 'consumo', 'dispMagazzino'];
+export const CONFIG_SCHEDA_PANTONE: string[] = [
+  'variante',
+  'articolo',
+  'passoCarta',
+  'hCarta',
+  'consumo',
+  'descrizione',
+  'noteArticolo',
+  'noteColore',
+];
 export const CONFIG_MATERIALI: string[] = ['label', 'codiceColore', 'fornitore', 'tipo', 'quantita', 'utilizzo', 'stato'];
 export const CONFIG_MOVIMENTI_MATERIALE: string[] = ['tipo', 'quantita', 'causale', 'data', 'noteOperatore', 'DDT', 'dataDDT'];
 export const CONFIG_MAGAZZINO_PANTONI: string[] = ['nomePantone', 'tipo', 'cliente', 'variante', 'dispMagazzino', 'ultimoUso', 'count'];

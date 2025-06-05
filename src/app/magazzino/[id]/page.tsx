@@ -1,5 +1,6 @@
 import { Table } from '@/components/ClientWrapper';
-import { CONFIG_MOVIMENTI_MAGAZZINO_PANTONE, DEFAULT_COLS } from '@/constants/defaultColumns';
+import { H2 } from '@/components/UI/Titles&Texts';
+import { CONFIG_MOVIMENTI_MAGAZZINO_PANTONE, CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { aggregateMagazzinoPantoni } from '@/lib/magazzinoPantoni/logic';
 import { normalizePantoni } from '@/lib/normalizers';
@@ -54,18 +55,22 @@ export default async function MagazzinoPage({ params }: { params: Promise<{ id: 
               <span className="font-semibold">Note magazzino:</span>
               {gruppo.noteMagazzino}
             </li>
+            <li className="flex flex-row gap-2">
+              <span className="font-semibold">Dose:</span>
+              {pantoniDelGruppo[0].dose} kg
+            </li>
             {/* Altri dettagli se disponibili */}
           </ul>
         </div>
       </div>
 
       {/* TABELLA PANTONI DEL GRUPPO */}
-      <Table items={pantoniDelGruppo} config={DEFAULT_COLS} tableKey="ricettario" />
+      <Table items={pantoniDelGruppo} config={CONFIG_SCHEDA_PANTONE} tableKey="ricettario" />
 
       {/* TABELLA MOVIMENTI MAGAZZINO */}
       {Array.isArray(gruppoRaw?.movimenti) && gruppoRaw.movimenti.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-3xl font-semibold mb-2">Movimenti magazzino</h2>
+          <H2>Movimenti</H2>
           <Table
             items={gruppoRaw.movimenti.map((mov, idx) => ({ ...mov, _id: `${gruppoRaw._id ?? gruppoRaw.pantoneGroupId}_mov_${idx}` }))}
             config={CONFIG_MOVIMENTI_MAGAZZINO_PANTONE}
