@@ -1,4 +1,4 @@
-import { CONFIG_MAGAZZINO } from '@/constants/defaultColumns';
+import { CONFIG_MAGAZZINO_PANTONI } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
 import { normalizePantoni } from '@/lib/normalizers';
@@ -17,7 +17,7 @@ export default async function Magazzino() {
   return (
     <div className="p-4">
       <H1>Magazzino</H1>
-      <Table items={raggruppati} config={CONFIG_MAGAZZINO} tableKey="magazzino" />
+      <Table items={raggruppati} config={CONFIG_MAGAZZINO_PANTONI} tableKey="magazzino-pantoni" />
     </div>
   );
 }

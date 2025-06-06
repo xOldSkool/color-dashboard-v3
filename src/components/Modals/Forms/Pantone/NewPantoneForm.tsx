@@ -3,7 +3,7 @@ import InputMap from '@/components/InputMap';
 import Loader from '@/components/Loader';
 import { H3 } from '@/components/UI/Titles&Texts';
 import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
-import { useBasiMateriali } from '@/hooks/useMateriali';
+import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
@@ -25,6 +25,7 @@ export default function NewPantoneForm() {
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
+  const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
 
   const basiFiltrate =
     !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
@@ -51,6 +52,22 @@ export default function NewPantoneForm() {
       ...prev,
       [name]: cleanedValue,
     }));
+  };
+
+  // Handler per selezione pantone esterno
+  const handlePantoneMaterialeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    const selected = pantoneMateriali.find((m) => m._id?.toString() === selectedId);
+    if (selected) {
+      setFormData((prev) => ({
+        ...prev,
+        nomePantone: selected.label,
+        variante: selected.fornitore,
+        tipo: selected.tipo,
+        dose: 2.5,
+        codiceFornitore: selected.codiceFornitore,
+      }));
+    }
   };
 
   useEffect(() => {
@@ -120,6 +137,7 @@ export default function NewPantoneForm() {
         consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
         pantoneGroupId: String(formData.pantoneGroupId || ''),
+        codiceFornitore: String(formData.codiceFornitore || ''),
         basi: basiFinali,
         basiNormalizzate: String(''), // Se serve, aggiungi la logica
       };
@@ -168,8 +186,35 @@ export default function NewPantoneForm() {
 
   return (
     <form className="w-6xl">
-      <H3 className="mb-2">Dettagli Pantone</H3>
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      <div className="flex flex-row justify-between">
+        <H3 className="mb-2">Dettagli Pantone</H3>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {/* Select Pantone Esterno */}
+        <div className="mb-4 flex flex-row items-center border border-dashed border-[var(--border)] rounded-xl px-2">
+          <label className="font-semibold mr-2">Importa pantone esterno:</label>
+          <select
+            className="p-2 rounded bg-zinc-700 text-white focus:outline-none"
+            onChange={handlePantoneMaterialeSelect}
+            defaultValue=""
+            disabled={loadingPantoniMateriali}
+          >
+            {loadingPantoniMateriali ? (
+              <option value="" disabled>
+                Caricamento...
+              </option>
+            ) : (
+              <>
+                <option value="">Seleziona un pantone...</option>
+                {pantoneMateriali.map((m) => (
+                  <option key={m._id?.toString()} value={m._id?.toString()}>
+                    {m.label} - {m.fornitore}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+      </div>
       <div className="grid grid-cols-1 gap-2">
         <div className="grid grid-cols-3 gap-2">
           <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />

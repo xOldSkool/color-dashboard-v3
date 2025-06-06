@@ -1,20 +1,26 @@
 'use client';
 
 import {
-  MAGAZZINO_PANTONI_COLUMNS,
-  MATERIALI_COLUMNS,
+  MOVIMENTI_MAGAZZINO_COLUMNS,
   MOVIMENTI_MATERIALE_COLUMNS,
-  PANTONE_COLUMNS,
-  SHOWABLE_MAGAZZINO_PANTONE_COLS,
-  SHOWABLE_MATERIALI_COLS,
+  ALL_DB_COLUMNS,
+  SHOWABLE_ALL_DB_COLS,
+  SHOWABLE_MOVIMENTI_MAGAZZINO_COLS,
   SHOWABLE_MOVIMENTI_MATERIALE_COLS,
-  SHOWABLE_PANTONE_COLS,
 } from '@/constants/defaultColumns';
 import { useTableStore } from '@/store/useTableStore';
 import { TableColumn } from '@/types/constantsTypes';
 import { JSX } from 'react';
 
-export type TableKey = 'ricettario' | 'magazzino' | 'materiali' | 'movimenti-materiale' | 'magazzino-pantoni';
+export type TableKey =
+  | 'ricettario'
+  | 'materiali' //
+  | 'movimenti-materiale'
+  | 'magazzino-pantoni' //
+  | 'da-produrre'
+  | 'consegnati-produzione'
+  | 'movimenti-magazzino'
+  | 'scheda-pantone';
 export interface ColumnSelectorProps {
   tableKey: TableKey;
 }
@@ -35,16 +41,21 @@ export default function ColumnSelector({ tableKey }: ColumnSelectorProps): JSX.E
   };
 
   let columns: TableColumn[] = [];
-  if (tableKey === 'materiali') {
-    columns = SHOWABLE_MATERIALI_COLS.map((key) => MATERIALI_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn => Boolean(c));
-  } else if (tableKey === 'ricettario' || tableKey === 'magazzino') {
-    columns = SHOWABLE_PANTONE_COLS.map((key) => PANTONE_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn => Boolean(c));
+  if (
+    tableKey === 'materiali' ||
+    tableKey === 'magazzino-pantoni' ||
+    tableKey === 'ricettario' ||
+    tableKey === 'da-produrre' ||
+    tableKey === 'consegnati-produzione' ||
+    tableKey === 'scheda-pantone'
+  ) {
+    columns = SHOWABLE_ALL_DB_COLS.map((key) => ALL_DB_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn => Boolean(c));
   } else if (tableKey === 'movimenti-materiale') {
     columns = SHOWABLE_MOVIMENTI_MATERIALE_COLS.map((key) => MOVIMENTI_MATERIALE_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn =>
       Boolean(c)
     );
-  } else if (tableKey === 'magazzino-pantoni') {
-    columns = SHOWABLE_MAGAZZINO_PANTONE_COLS.map((key) => MAGAZZINO_PANTONI_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn =>
+  } else if (tableKey === 'movimenti-magazzino') {
+    columns = SHOWABLE_MOVIMENTI_MAGAZZINO_COLS.map((key) => MOVIMENTI_MAGAZZINO_COLUMNS.find((c) => c.key === key)).filter((c): c is TableColumn =>
       Boolean(c)
     );
   }

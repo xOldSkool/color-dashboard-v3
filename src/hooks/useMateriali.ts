@@ -59,3 +59,27 @@ export function useUpdateMateriale() {
   };
   return { updateMateriale };
 }
+
+export function usePantoneMateriali() {
+  const [pantoneMateriali, setPantoneMateriali] = useState<Materiale[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPantoneMateriali = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get<Materiale[]>('/api/materiali?utilizzo=Pantone');
+        setPantoneMateriali(response.data);
+        setError(null);
+      } catch {
+        setError('Errore nel recupero dei pantoni esterni');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPantoneMateriali();
+  }, []);
+
+  return { pantoneMateriali, loading, error };
+}

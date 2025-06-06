@@ -5,15 +5,21 @@ import { Collection, Db, ObjectId } from 'mongodb';
 import { calcolaProduzionePantone } from './calcoli';
 import { normalizzaBasi } from './normalizzaBasi';
 
-// Genera 'pantoneGroupId' in base a 'nomePantone' e 'basi'
+// Genera 'pantoneGroupId' in base a 'nomePantone', 'basi' e 'codiceFornitore' (se presente)
 export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promise<string> {
   const collection: Collection<Pantone> = db.collection('pantoni');
   const basiNormalizzate = normalizzaBasi(nuovoPantone.basi || []);
 
-  const candidato = await collection.findOne({
+  // Costruisci il filtro di ricerca in base alle proprietà disponibili
+  const filtro: Partial<Pick<Pantone, 'nomePantone' | 'basiNormalizzate' | 'codiceFornitore'>> = {
     nomePantone: nuovoPantone.nomePantone,
     basiNormalizzate,
-  });
+  };
+  if (nuovoPantone.codiceFornitore) {
+    filtro.codiceFornitore = nuovoPantone.codiceFornitore;
+  }
+
+  const candidato = await collection.findOne(filtro);
 
   if (candidato) return candidato.pantoneGroupId;
   return `${nuovoPantone.nomePantone}_${new ObjectId().toHexString().slice(-6)}`;

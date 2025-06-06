@@ -9,6 +9,7 @@ import { Materiale } from '@/types/materialeTypes';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
 import { materialeToFormData } from '@/lib/adapter';
+import toCamelCase from '@/utils/toCamelCase';
 
 interface EditMaterialeFormProps {
   materiale: Materiale;
@@ -31,10 +32,17 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const cleanedValue = value.replace(',', '.');
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
-    }));
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: type === 'number' && cleanedValue !== '' ? parseFloat(cleanedValue) : cleanedValue,
+      };
+      // Se cambia label, aggiorna anche name in camelCase
+      if (name === 'label') {
+        updated.name = toCamelCase(cleanedValue);
+      }
+      return updated;
+    });
   };
 
   const submit = useCallback(async () => {
@@ -52,7 +60,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         fornitore: String(formData.fornitore || ''),
         tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale'] as const, 'Base'),
+        utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base'),
         noteMateriale: String(formData.noteMateriale || ''),
       };
 

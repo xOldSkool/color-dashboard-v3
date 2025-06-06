@@ -117,7 +117,6 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
         pantoneGroupId: String(formData.pantoneGroupId || ''),
-        noteMagazzino: String(formData.noteMagazzino || ''),
         basi: basiFinali,
         basiNormalizzate: '', // Se serve, aggiungi la logica
       };

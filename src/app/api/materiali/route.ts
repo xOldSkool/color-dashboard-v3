@@ -1,11 +1,27 @@
 import { connectToDatabase } from '@/lib/connectToMongoDb';
+import { getPantoneMateriali } from '@/lib/materiali/logic';
 import { MaterialeSchema, MaterialeSchemaOpzionale } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const db = await connectToDatabase();
+  const url = new URL(request.url);
+  const utilizzo = url.searchParams.get('utilizzo');
+
+  if (utilizzo === 'Pantone') {
+    // Recupera solo i materiali Pantone tramite la business logic
+    const pantoni = await getPantoneMateriali(db);
+    // Validazione Zod array
+    const validation = MaterialeSchema.array().safeParse(pantoni);
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
+    }
+    return NextResponse.json(pantoni);
+  }
+
+  // Default: tutti i materiali
   const materiali = await db.collection('materiali').find({}).toArray();
   return NextResponse.json(materiali);
 }

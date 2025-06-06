@@ -28,6 +28,7 @@ export interface Pantone {
   consegnatoProduzione?: boolean;
   qtConsegnataProduzione?: number;
   pantoneGroupId: string;
+  codiceFornitore?: string; // Codice fornitore, usato solo per pantoni esterni
   basi?: BasiPantone[]; // Basi opzionali (può non esserci o essere array vuoto)
   basiNormalizzate?: string;
 }
@@ -71,4 +72,5 @@ export interface RawPantone {
   hex?: string;
   dataCreazione?: string | Date;
   ultimoUso: Date | string;
+  codiceFornitore?: string;
 }

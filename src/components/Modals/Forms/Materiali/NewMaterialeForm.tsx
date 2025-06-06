@@ -48,7 +48,7 @@ export default function NewMaterialeForm() {
         fornitore: String(formData.fornitore || ''),
         tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale'] as const, 'Base'),
+        utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base'),
         noteMateriale: String(formData.noteMateriale || ''),
         dataCreazione: new Date().toISOString(),
         movimenti: [], // oppure logica per aggiungere movimenti

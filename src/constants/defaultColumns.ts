@@ -30,6 +30,13 @@ export const PANTONE_COLUMNS: TableColumn[] = [
     hideable: true,
   },
   {
+    key: 'ultimoUso',
+    label: 'Ultimo uso',
+    sortable: true,
+    visibleByDefault_COLS: false,
+    hideable: true,
+  },
+  {
     key: 'articolo',
     label: 'Articolo',
     sortable: true,
@@ -53,13 +60,6 @@ export const PANTONE_COLUMNS: TableColumn[] = [
   {
     key: 'noteArticolo',
     label: 'Note Articolo',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'momentum',
-    label: 'Momentum',
     sortable: true,
     visibleByDefault_COLS: false,
     hideable: true,
@@ -142,21 +142,6 @@ export const PANTONE_COLUMNS: TableColumn[] = [
     hideable: true,
   },
   {
-    key: 'dispMagazzino',
-    label: 'Disponibilità Magazzino',
-    sortable: true,
-    visibleByDefault_COLS: true,
-    hideable: true,
-  },
-  {
-    key: 'ultimoUso',
-    label: 'Ultimo uso',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-
-  {
     key: 'daProdurre',
     label: 'Da produrre',
     sortable: true,
@@ -166,6 +151,20 @@ export const PANTONE_COLUMNS: TableColumn[] = [
   {
     key: 'qtDaProdurre',
     label: 'Quantità da produrre',
+    sortable: true,
+    visibleByDefault_COLS: false,
+    hideable: true,
+  },
+  {
+    key: 'battuteDaProdurre',
+    label: 'Battute da produrre',
+    sortable: true,
+    visibleByDefault_COLS: false,
+    hideable: true,
+  },
+  {
+    key: 'consegnatoProduzione',
+    label: 'Consegnato Produzione',
     sortable: true,
     visibleByDefault_COLS: false,
     hideable: true,
@@ -185,17 +184,17 @@ export const PANTONE_COLUMNS: TableColumn[] = [
     hideable: true,
   },
   {
-    key: 'consegnatoProduzione',
-    label: 'Consegnato Produzione',
+    key: 'pantoneGroupId',
+    label: 'Pantone Group ID',
     sortable: true,
     visibleByDefault_COLS: false,
     hideable: true,
   },
   {
-    key: 'count',
-    label: 'N° Pantoni',
+    key: 'codiceFornitore',
+    label: 'Codice Fornitore',
     sortable: true,
-    visibleByDefault_COLS: true,
+    visibleByDefault_COLS: false,
     hideable: true,
   },
   {
@@ -207,182 +206,13 @@ export const PANTONE_COLUMNS: TableColumn[] = [
     type: 'array',
   },
   {
-    key: 'black',
-    label: 'Black',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'cyan',
-    label: 'Cyan',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'giallo',
-    label: 'Giallo',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'magenta',
-    label: 'Magenta',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'viola',
-    label: 'Viola',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'purple',
-    label: 'Purple',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'opaqueWhite',
-    label: 'OpaqueWhite',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'transparentWhite',
-    label: 'TransparentWhite',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'red032',
-    label: 'Red032',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'reflexBlue',
-    label: 'ReflexBlue',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'warmRed',
-    label: 'WarmRed',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'green',
-    label: 'Green',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'rubineRed',
-    label: 'RubineRed',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'processBlu',
-    label: 'ProcessBlu',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'orange021',
-    label: 'Orange021',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'rhodamine',
-    label: 'Rhodamine',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'antitack',
-    label: 'Antitack',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'waxPaste',
-    label: 'WaxPaste',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'extender',
-    label: 'Extender',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'oro522',
-    label: 'Oro522',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'oro523',
-    label: 'Oro523',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'argento511',
-    label: 'Argento511',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'verniceMetallica',
-    label: 'VerniceMetallica',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'altro',
-    label: 'Altro',
-    sortable: true,
-    visibleByDefault_COLS: false,
-    hideable: true,
-  },
-  {
-    key: 'vernice5204m',
-    label: 'Vernice5204m',
-    sortable: true,
+    key: 'basiNormalizzate',
+    label: 'Basi Normalizzate',
+    sortable: false,
     visibleByDefault_COLS: false,
     hideable: true,
   },
 ];
-
 export const MAGAZZINO_PANTONI_COLUMNS: TableColumn[] = [
   {
     key: '_id',
@@ -479,10 +309,9 @@ export const MOVIMENTI_MAGAZZINO_COLUMNS: TableColumn[] = [
     hideable: true,
   },
 ];
-
 export const MATERIALI_COLUMNS: TableColumn[] = [
   {
-    key: 'nome',
+    key: 'nomeMateriale',
     label: 'Materiale',
     sortable: true,
     visibleByDefault_COLS: true,
@@ -577,51 +406,7 @@ export const MOVIMENTI_MATERIALE_COLUMNS: TableColumn[] = [
   { key: 'noteOperatore', label: 'Note Operatore', sortable: true, visibleByDefault_COLS: true, hideable: true },
 ];
 
-export const SHOWABLE_PANTONE_COLS: string[] = [
-  'nomePantone',
-  'variante',
-  'dataCreazione',
-  'articolo',
-  'is',
-  'cliente',
-  'noteArticolo',
-  'urgente',
-  'tipoCarta',
-  'fornitoreCarta',
-  'passoCarta',
-  'hCarta',
-  'stato',
-  'tipo',
-  'descrizione',
-  'noteColore',
-  'consumo',
-  'dose',
-  'ultimoUso',
-  'noteMagazzino',
-  'daProdurre',
-  'qtDaProdurre',
-  'consegnatoProduzione',
-  'qtConsegnataProduzione',
-  'basi',
-  'dispMagazzino',
-  'count',
-];
-export const SHOWABLE_MAGAZZINO_PANTONE_COLS: string[] = ['tipo', 'quantita', 'data', 'causale'];
-
-export const SHOWABLE_MATERIALI_COLS: string[] = [
-  'nome',
-  'label',
-  'codiceColore',
-  'codiceFornitore',
-  'quantita',
-  'fornitore',
-  'tipo',
-  'utilizzo',
-  'noteMateriale',
-  'dataCreazione',
-  'movimenti',
-];
-
+export const SHOWABLE_MOVIMENTI_MAGAZZINO_COLS: string[] = ['tipo', 'quantita', 'data', 'causale'];
 export const SHOWABLE_MOVIMENTI_MATERIALE_COLS: string[] = ['quantita', 'DDT', 'dataDDT', 'data', 'tipo', 'causale', 'noteOperatore'];
 
 export const DEFAULT_COLS: string[] = [
@@ -634,11 +419,24 @@ export const DEFAULT_COLS: string[] = [
   'consumo',
   'dose',
   'dispMagazzino',
+  'passoCarta',
+  'hCarta',
   'descrizione',
 ];
-export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'cliente', 'qtDaProdurre', 'consegnatoProduzione', 'basi'];
-export const CONFIG_MAGAZZINO: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'tipo', 'dispMagazzino', 'noteMagazzino', 'count'];
-export const CONFIG_MOVIMENTI_MAGAZZINO_PANTONE: string[] = ['dispMagazzino', 'quantita', 'tipo', 'data', 'causale'];
+
+export const CONFIG_DA_PRODURRE: string[] = ['hex', 'nomePantone', 'variante', 'cliente', 'articolo', 'qtDaProdurre', 'basi', 'noteArticolo'];
+export const CONFIG_MAGAZZINO_PANTONI: string[] = [
+  'hex',
+  'nomePantone',
+  'variante',
+  'cliente',
+  'fornitore',
+  'tipo',
+  'dispMagazzino',
+  'noteMagazzino',
+  'count',
+];
+export const CONFIG_MOVIMENTI_MAGAZZINO_PANTONE: string[] = ['quantita', 'tipo', 'data', 'causale'];
 export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'variante', 'consumo', 'dose', 'cliente', 'qtConsegnataProduzione'];
 export const CONFIG_SCHEDA_PANTONE: string[] = [
   'variante',
@@ -652,6 +450,20 @@ export const CONFIG_SCHEDA_PANTONE: string[] = [
 ];
 export const CONFIG_MATERIALI: string[] = ['label', 'codiceColore', 'fornitore', 'tipo', 'quantita', 'utilizzo', 'stato'];
 export const CONFIG_MOVIMENTI_MATERIALE: string[] = ['tipo', 'quantita', 'causale', 'data', 'noteOperatore', 'DDT', 'dataDDT'];
-export const CONFIG_MAGAZZINO_PANTONI: string[] = ['nomePantone', 'tipo', 'cliente', 'variante', 'dispMagazzino', 'ultimoUso', 'count'];
+// export const CONFIG_MAGAZZINO_PANTONI: string[] = ['nomePantone', 'tipo', 'cliente', 'variante', 'ultimoUso'];
 
 export const visibleColumns = DEFAULT_COLS.map((key) => PANTONE_COLUMNS.find((col) => col.key === key)); //scorre ogni chiave in DEFAULT_COLS e per ogni chiave (key) cerca nell'array PANTONE_COLUMNS l'oggetto con quella chiave (key). "!" serve a dire che si trova sempre un valore diverso da undefined
+
+// Unione di tutte le colonne definite nei vari moduli, senza duplicati (per key)
+export const ALL_DB_COLUMNS: TableColumn[] = Array.from(
+  [...PANTONE_COLUMNS, ...MAGAZZINO_PANTONI_COLUMNS, ...MATERIALI_COLUMNS]
+    .reduce((acc, col) => {
+      if (!acc.has(col.key)) acc.set(col.key, col);
+      return acc;
+    }, new Map<string, TableColumn>())
+    .values()
+);
+
+export const SHOWABLE_ALL_DB_COLS: string[] = ALL_DB_COLUMNS.map((col) => col.key).filter(
+  (key) => key !== '_id' && key !== 'daProdurre' && key !== 'consegnatoProduzione' && key !== 'urgente' && key !== 'basiNormalizzate'
+);
