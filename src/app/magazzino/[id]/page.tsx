@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Table } from '@/components/ClientWrapper';
 import { H1, H2 } from '@/components/UI/Titles&Texts';
 import { CONFIG_MOVIMENTI_MAGAZZINO_PANTONE, CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
