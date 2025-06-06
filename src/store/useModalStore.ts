@@ -36,7 +36,7 @@ type ModalData =
   | string
   | null
   | { pantone: Pantone; quantita: number; onSuccess?: () => void }
-  | { columns: string[]; rows: unknown[] };
+  | { columns: string[]; rows: unknown[]; tableKey: string };
 
 export interface ModalState {
   modals: Record<ModalKey, boolean>;

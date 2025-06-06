@@ -53,7 +53,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
 
   const handleExportClick = () => {
     const visibleCols = useTableStore.getState().getVisibleUserCols(tableKey);
-    openModal('exportToFile', { columns: visibleCols, rows: data });
+    openModal('exportToFile', { columns: visibleCols, rows: data, tableKey: tableKey });
   };
 
   return (
