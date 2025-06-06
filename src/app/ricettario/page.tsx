@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Button } from '@/components/ClientWrapper';
 import Table from '@/components/Tables/Table';
 import { DEFAULT_COLS } from '@/constants/defaultColumns';
