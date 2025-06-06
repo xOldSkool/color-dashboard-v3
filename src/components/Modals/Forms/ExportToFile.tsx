@@ -3,13 +3,8 @@ import { utils, writeFile } from 'xlsx';
 import Button from '@/components/Button';
 import { Download } from 'lucide-react';
 
-interface ExportColumn {
-  key: string;
-  label: string;
-}
-
 interface ExportToFileProps {
-  columns: ExportColumn[];
+  columns: string[];
   rows: Record<string, unknown>[];
   tableKey?: string;
 }
@@ -18,11 +13,14 @@ export default function ExportToFile({ columns, rows, tableKey }: ExportToFilePr
   const [format, setFormat] = useState<'xlsx' | 'csv'>('xlsx');
 
   const handleDownload = () => {
-    const header = columns.map((col) => col.label);
-    const keys = columns.map((col) => col.key);
-    const data = rows.map((row) => keys.map((key) => row[key]));
-
-    const ws = utils.aoa_to_sheet([header, ...data]);
+    const data = rows.map((row) => {
+      const filtered: Record<string, unknown> = {};
+      columns.forEach((col) => {
+        filtered[col] = row[col];
+      });
+      return filtered;
+    });
+    const ws = utils.json_to_sheet(data);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'Dati');
     const baseName = tableKey ? `${tableKey}-export` : 'export';
