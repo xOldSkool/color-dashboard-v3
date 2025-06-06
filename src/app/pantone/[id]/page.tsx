@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { CONFIG_SCHEDA_PANTONE } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllPantoni } from '@/lib/pantoni/db';
