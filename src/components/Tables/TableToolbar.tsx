@@ -34,7 +34,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
       let path = '';
       if (tableKey === 'materiali') {
         path = `/materiali/${selectedId}`;
-      } else if (tableKey === 'magazzino') {
+      } else if (tableKey === 'magazzino' || tableKey === 'magazzino-pantoni') {
         const selectedItem = data.find((item) => item._id === selectedId) as { pantoneGroupId?: string };
         path = `/magazzino/${selectedItem?.pantoneGroupId || selectedId}`;
       } else {
@@ -49,6 +49,11 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
   const handleSelectColumnsClick = () => {
     setSelectedTableKey(tableKey);
     openModal('selectColumns');
+  };
+
+  const handleExportClick = () => {
+    const visibleCols = useTableStore.getState().getVisibleUserCols(tableKey);
+    openModal('exportToFile', { columns: visibleCols, rows: data });
   };
 
   return (
@@ -227,6 +232,15 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
                   iconClass={'size-8 hover:text-[var(--accent)]'}
                   onClick={handleSelectColumnsClick}
                 ></Button>
+                {tableKey !== 'da-produrre' && tableKey !== 'consegnati-produzione' && (
+                  <Button
+                    iconName="file"
+                    tooltip="Esporta"
+                    variant="toolbar"
+                    iconClass="size-8 hover:text-[var(--accent)]"
+                    onClick={handleExportClick}
+                  />
+                )}
                 <div>
                   <select
                     className="h-9 border-1 border-dashed border-[var(--border)] hover:border-[var(--hover)] rounded-lg bg-[var(--background)] cursor-pointer"

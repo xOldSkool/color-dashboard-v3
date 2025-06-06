@@ -20,6 +20,7 @@ import ReturnPantoneForm from './Forms/Pantone/ReturnPantoneForm';
 import ReturnPantonePartialModal from './Forms/Pantone/ReturnPantonePartialModal';
 import MarkPantoneAsConsumed from './Forms/Pantone/MarkPantoneAsConsumed';
 import TransferPantone from './Forms/Pantone/TransferPantone';
+import ExportToFile from './Forms/ExportToFile';
 
 export default function ModalManager() {
   const router = useRouter();
@@ -124,6 +125,12 @@ export default function ModalManager() {
       {modals.transferPantone && (
         <Modal title="Trasferisci Pantone" modalKey="transferPantone" onClose={() => closeModal('transferPantone')}>
           <TransferPantone pantone={selectedPantoni[0]} />
+        </Modal>
+      )}
+      {modals.exportToFile && (
+        <Modal title="Esporta dati" modalKey="exportToFile" onClose={() => closeModal('exportToFile')} showFooter={false}>
+          {/* @ts-expect-error modalData tipizzata dinamicamente */}
+          <ExportToFile {...(useModalStore.getState().modalData || {})} onClose={() => closeModal('exportToFile')} />
         </Modal>
       )}
 

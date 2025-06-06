@@ -22,14 +22,21 @@ export type ModalKey =
   | 'unloadMateriale'
   | 'editMateriale'
   | 'returnPantonePartial'
-  | 'markPantoneAsConsumed';
+  | 'markPantoneAsConsumed'
+  | 'exportToFile';
 
 type Handler = {
   submit?: () => Promise<void | boolean>;
   reset?: () => void;
 };
 
-type ModalData = Materiale | Pantone | string | null | { pantone: Pantone; quantita: number; onSuccess?: () => void };
+type ModalData =
+  | Materiale
+  | Pantone
+  | string
+  | null
+  | { pantone: Pantone; quantita: number; onSuccess?: () => void }
+  | { columns: string[]; rows: unknown[] };
 
 export interface ModalState {
   modals: Record<ModalKey, boolean>;
@@ -63,6 +70,7 @@ export const useModalStore = create<ModalState>((set) => ({
     editMateriale: false,
     returnPantonePartial: false,
     markPantoneAsConsumed: false,
+    exportToFile: false,
   },
   submitHandlers: {} as Record<ModalKey, () => Promise<boolean>>,
   resetHandlers: {} as Record<ModalKey, () => void>,
