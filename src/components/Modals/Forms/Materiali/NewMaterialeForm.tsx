@@ -2,17 +2,21 @@
 import InputMap from '@/components/InputMap';
 import { materialeFieldsCreate } from '@/constants/inputFields';
 import { useCreateMateriale } from '@/hooks/useMateriali';
-import { MaterialeSchema } from '@/schemas/MaterialeSchema';
+import { MaterialeSchema, MovimentoSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { getEnumValue } from '@/utils/getEnumValues';
 import toCamelCase from '@/utils/toCamelCase';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useCallback } from 'react';
+import { z } from 'zod';
+import React from 'react';
 
 export interface FormData {
   [key: string]: string | number | undefined;
 }
+
+const utilizzoOptions = ['Base', 'Materiale', 'Pantone'] as const;
 
 export default function NewMaterialeForm() {
   const router = useRouter();
@@ -48,17 +52,24 @@ export default function NewMaterialeForm() {
         fornitore: String(formData.fornitore || ''),
         tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base'),
+        utilizzo: Array.isArray(formData.utilizzo) ? formData.utilizzo : [getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base')],
         noteMateriale: String(formData.noteMateriale || ''),
         dataCreazione: new Date().toISOString(),
         movimenti: [], // oppure logica per aggiungere movimenti
       };
 
       // Validazione con Zod
+      if (nuovoMateriale.movimenti && nuovoMateriale.movimenti.length > 0) {
+        const movimento = nuovoMateriale.movimenti[0];
+        const movimentoValidation = MovimentoSchema.safeParse(movimento);
+        if (!movimentoValidation.success) {
+          alert('Errore di validazione movimento:\n' + movimentoValidation.error.issues.map((e: z.ZodIssue) => e.message).join('\n'));
+          return false;
+        }
+      }
       const validation = MaterialeSchema.safeParse(nuovoMateriale);
       if (!validation.success) {
-        // Mostra errore (puoi usare un toast, alert, setState, ecc.)
-        alert('Errore di validazione:\n' + validation.error.issues.map((e) => e.message).join('\n'));
+        alert('Errore di validazione:\n' + validation.error.issues.map((e: z.ZodIssue) => e.message).join('\n'));
         return false;
       }
 
@@ -100,6 +111,39 @@ export default function NewMaterialeForm() {
     <form>
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       <InputMap fields={materialeFieldsCreate} formData={formData} handleChange={handleChange} />
+      <div className="mb-4">
+        <label className="block font-medium mb-1">Utilizzo</label>
+        <div className="flex gap-4">
+          {utilizzoOptions.map((option) => (
+            <label key={option} className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                name="utilizzo"
+                value={option}
+                checked={Array.isArray(formData.utilizzo) ? formData.utilizzo.includes(option) : false}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setFormData((prev) => {
+                    const current = Array.isArray(prev.utilizzo)
+                      ? prev.utilizzo
+                      : typeof prev.utilizzo === 'string' && prev.utilizzo.length > 0
+                        ? prev.utilizzo.split(',')
+                        : [];
+                    let next: string[];
+                    if (checked) {
+                      next = [...current, option];
+                    } else {
+                      next = current.filter((v) => v !== option);
+                    }
+                    return { ...prev, utilizzo: next.join(',') };
+                  });
+                }}
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+      </div>
     </form>
   );
 }

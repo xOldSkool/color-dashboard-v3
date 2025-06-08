@@ -5,6 +5,7 @@ import { useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { useModalStore } from '@/store/useModalStore';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
+import { normalizzaBasiConUtilizzo } from '@/lib/pantoni/normalizzaBasiConUtilizzo';
 
 interface TransferPantoneProps {
   pantone: Pantone;
@@ -29,6 +30,8 @@ export default function TransferPantone({ pantone }: TransferPantoneProps) {
       battuteDaProdurre: 0,
       consegnatoProduzione: true,
       qtConsegnataProduzione: pantone.qtDaProdurre ?? 0,
+      // Normalizza basi se presenti
+      ...(pantone.basi ? { basi: normalizzaBasiConUtilizzo(pantone.basi) } : {}),
     });
     closeModal('transferPantone');
     router.refresh();
@@ -42,6 +45,8 @@ export default function TransferPantone({ pantone }: TransferPantoneProps) {
       daProdurre: false,
       qtDaProdurre: 0,
       battuteDaProdurre: 0,
+      // Normalizza basi se presenti
+      ...(pantone.basi ? { basi: normalizzaBasiConUtilizzo(pantone.basi) } : {}),
     });
     await updateMagazzinoPantoni({
       pantoneGroupId: pantone.pantoneGroupId,

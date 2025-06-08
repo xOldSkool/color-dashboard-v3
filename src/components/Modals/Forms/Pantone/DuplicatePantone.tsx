@@ -2,7 +2,7 @@
 import InputMap from '@/components/InputMap';
 import Loader from '@/components/Loader';
 import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
-import { useBasiMateriali } from '@/hooks/useMateriali';
+import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
@@ -13,6 +13,7 @@ import { Pantone } from '@/types/pantoneTypes';
 import { pantoneToFormData } from '@/lib/adapter';
 import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
+import { H3 } from '@/components/UI/Titles&Texts';
 
 interface DuplicatePantoneProps {
   pantone: Pantone;
@@ -23,19 +24,43 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
   const { createPantone } = useCreatePantone();
   const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
 
-  // Precaricamento formData con pantone originale
+  const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
+
+  // Precaricamento formData con pantone originale e gestione pantone esterno
   useEffect(() => {
     if (pantone) {
-      setFormData(pantoneToFormData(pantone));
+      // Escludi la proprietà dose dal formData iniziale
+      const formDataOriginale = pantoneToFormData(pantone);
+      const fd = { ...formDataOriginale };
+      delete fd.dose;
+      // Cerca la base con utilizzo Pantone
+      const basePantone = Array.isArray(pantone.basi)
+        ? pantone.basi.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'))
+        : undefined;
+      if (basePantone) {
+        // Trova il materiale corrispondente tra i pantoneMateriali
+        const materialeEsterno = pantoneMateriali.find((m) => m.nomeMateriale === basePantone.nomeMateriale && m.fornitore === basePantone.fornitore);
+        if (materialeEsterno && materialeEsterno._id) {
+          setPantoneEsternoSelezionato(materialeEsterno._id.toString());
+          fd.pantoneEsternoInput = basePantone.quantita;
+        }
+      }
+      console.log('[DEBUG] formData inizializzato:', fd);
+      setFormData(fd);
     }
-  }, [pantone]);
+  }, [pantone, pantoneMateriali]);
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
 
   const basiFiltrate =
-    !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
+    !loading && tipoSelezionato
+      ? basi.filter(
+          (base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base')
+        )
+      : [];
 
   const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
     if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
@@ -61,17 +86,56 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
     }));
   };
 
+  const handlePantoneMaterialeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    const selected = pantoneMateriali.find((m) => m._id?.toString() === selectedId);
+    if (selected) {
+      setPantoneEsternoSelezionato(selectedId);
+      setFormData((prev) => {
+        // Rimuovo eventuale duplicato di pantoneEsternoInput
+        const rest = { ...prev };
+        delete rest.pantoneEsternoInput;
+        return {
+          ...rest,
+          nomePantone: selected.label,
+          variante: selected.fornitore,
+          tipo: selected.tipo,
+          codiceFornitore: selected.codiceFornitore,
+          pantoneEsternoInput: 2.5,
+        };
+      });
+    } else {
+      // Prima rimuovo pantoneEsternoInput, poi aggiorno la selezione
+      setFormData((prev) => {
+        if ('pantoneEsternoInput' in prev) {
+          const rest = { ...prev };
+          delete rest.pantoneEsternoInput;
+          return rest;
+        }
+        return prev;
+      });
+      setPantoneEsternoSelezionato(null);
+    }
+  };
+
   useEffect(() => {
     // Somma tutte le quantità inserite nelle basi
-    const doseTotale = Object.entries(formData)
+    const doseBasi = Object.entries(formData)
       .filter(([key]) => key.startsWith('valore_'))
       .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
+    // Se presente, aggiungi la quantità del pantone esterno SOLO se selezionato e presente l'input
+    const dosePantoneEsterno =
+      pantoneEsternoSelezionato && formData.pantoneEsternoInput !== undefined && formData.pantoneEsternoInput !== ''
+        ? Number(formData.pantoneEsternoInput) || 0
+        : 0;
+    const doseTotale = doseBasi + dosePantoneEsterno;
+    console.log('[DEBUG] Calcolo dose:', { doseBasi, dosePantoneEsterno, doseTotale, formData });
     if (formData.dose !== doseTotale) {
       setFormData((prev) => ({ ...prev, dose: doseTotale }));
     }
-  }, [formData]);
+  }, [formData, pantoneEsternoSelezionato]);
 
-  // Costruisci le basi finali come in NewForm
+  // Costruzione delle basi finali
   const basiFinali = Object.entries(basiRaggruppatePerName)
     .map(([nomeBase, basiArr]) => {
       const fornitoreSelezionato = formData[`fornitore_${nomeBase}`];
@@ -85,9 +149,27 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         fornitore: String(baseSelezionata.fornitore || ''),
         tipo: String(baseSelezionata.tipo || ''),
         codiceColore: String(baseSelezionata.codiceColore || ''),
+        utilizzo: ['Base'],
       };
     })
     .filter((b) => b.quantita > 0);
+
+  // Se è selezionato un pantone esterno, aggiungi la base corrispondente
+  if (pantoneEsternoSelezionato && formData.pantoneEsternoInput) {
+    const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+    if (pantoneEsterno) {
+      basiFinali.push({
+        nomeMateriale: pantoneEsterno.nomeMateriale,
+        label: pantoneEsterno.label,
+        quantita: Number(formData.pantoneEsternoInput) || 0,
+        codiceFornitore: String(pantoneEsterno.codiceFornitore || ''),
+        fornitore: String(pantoneEsterno.fornitore || ''),
+        tipo: String(pantoneEsterno.tipo || ''),
+        codiceColore: String(pantoneEsterno.codiceColore || ''),
+        utilizzo: ['Pantone'],
+      });
+    }
+  }
 
   const submit = useCallback(async () => {
     try {
@@ -120,6 +202,8 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         basi: basiFinali,
         basiNormalizzate: '', // Se serve, aggiungi la logica
       };
+
+      console.log('[DEBUG] Submit nuovoPantone:', nuovoPantone);
 
       const validation = PantoneSchema.safeParse(nuovoPantone);
       if (!validation.success) {
@@ -163,7 +247,35 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
 
   return (
     <form className="w-6xl">
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      <div className="flex flex-row justify-between">
+        <H3 className="mb-2">Dettagli Pantone</H3>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {/* Select Pantone Esterno */}
+        <div className="mb-4 flex flex-row items-center border border-dashed border-[var(--border)] rounded-xl px-2">
+          <label className="font-semibold mr-2">Importa pantone esterno:</label>
+          <select
+            className="p-2 rounded bg-zinc-700 text-white focus:outline-none"
+            onChange={handlePantoneMaterialeSelect}
+            value={pantoneEsternoSelezionato || ''}
+            disabled={loadingPantoniMateriali}
+          >
+            {loadingPantoniMateriali ? (
+              <option value="" disabled>
+                Caricamento...
+              </option>
+            ) : (
+              <>
+                <option value="">Seleziona un pantone...</option>
+                {pantoneMateriali.map((m) => (
+                  <option key={m._id?.toString()} value={m._id?.toString()}>
+                    {m.label} - {m.fornitore}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+      </div>
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-3 gap-2">
           <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
@@ -172,7 +284,32 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold mt-5">Composizione</h2>
+          {/* Pantone esterno input */}
+          {pantoneEsternoSelezionato && (
+            <div className="mb-4 flex flex-col">
+              {(() => {
+                const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+                if (!pantoneEsterno) return null;
+                return (
+                  <label className="mb-1">
+                    {pantoneEsterno.label}
+                    <span className="ml-2 text-sm text-neutral-300 italic">{pantoneEsterno.fornitore}</span>
+                  </label>
+                );
+              })()}
+              <input
+                type="number"
+                name="pantoneEsternoInput"
+                className="w-32 p-2 rounded bg-zinc-600 text-white focus:outline-none"
+                value={formData.pantoneEsternoInput ?? ''}
+                onChange={handleChange}
+                min={0}
+                step={0.01}
+              />
+            </div>
+          )}
 
+          {/* Basi section (always shown) */}
           {tipoSelezionato ? (
             loading ? (
               <Loader />

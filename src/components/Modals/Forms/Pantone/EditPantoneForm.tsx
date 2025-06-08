@@ -2,8 +2,9 @@
 
 import InputMap from '@/components/InputMap';
 import Loader from '@/components/Loader';
+import { H3 } from '@/components/UI/Titles&Texts';
 import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
-import { useBasiMateriali } from '@/hooks/useMateriali';
+import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useUpdatePantone } from '@/hooks/usePantone';
 import { pantoneToFormData } from '@/lib/adapter';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
@@ -23,12 +24,18 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   const { updatePantone } = useUpdatePantone();
   const [formData, setFormData] = useState<Record<string, string | number | undefined>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
+  const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
 
   const basiFiltrate =
-    !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
+    !loading && tipoSelezionato
+      ? basi.filter(
+          (base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base')
+        )
+      : [];
 
   const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
     if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
@@ -36,12 +43,25 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     return acc;
   }, {});
 
-  // Precaricamento formData con pantone originale
+  // Precaricamento formData con pantone originale e gestione pantone esterno
   useEffect(() => {
     if (pantone) {
-      setFormData(pantoneToFormData(pantone));
+      const fd = pantoneToFormData(pantone);
+      // Cerca la base con utilizzo Pantone
+      const basePantone = Array.isArray(pantone.basi)
+        ? pantone.basi.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'))
+        : undefined;
+      if (basePantone) {
+        // Trova il materiale corrispondente tra i pantoneMateriali
+        const materialeEsterno = pantoneMateriali.find((m) => m.nomeMateriale === basePantone.nomeMateriale && m.fornitore === basePantone.fornitore);
+        if (materialeEsterno && materialeEsterno._id) {
+          setPantoneEsternoSelezionato(materialeEsterno._id.toString());
+          fd.pantoneEsternoInput = basePantone.quantita;
+        }
+      }
+      setFormData(fd);
     }
-  }, [pantone]);
+  }, [pantone, pantoneMateriali]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -52,16 +72,59 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     }));
   };
 
+  const handlePantoneMaterialeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    const selected = pantoneMateriali.find((m) => m._id?.toString() === selectedId);
+    if (selected) {
+      setPantoneEsternoSelezionato(selectedId);
+      setFormData((prev) => ({
+        ...prev,
+        nomePantone: selected.label,
+        variante: selected.fornitore,
+        tipo: selected.tipo,
+        dose: 2.5,
+        codiceFornitore: selected.codiceFornitore,
+        pantoneEsternoInput: 2.5,
+      }));
+    } else {
+      // Rimuovi pantoneEsternoInput PRIMA di aggiornare lo stato
+      setFormData((prev) => {
+        if ('pantoneEsternoInput' in prev) {
+          const rest = { ...prev };
+          delete rest.pantoneEsternoInput;
+          return rest;
+        }
+        return prev;
+      });
+      setPantoneEsternoSelezionato(null);
+    }
+  };
+
+  const handlePantoneEsternoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(',', '.');
+    setFormData((prev) => ({
+      ...prev,
+      pantoneEsternoInput: value,
+    }));
+  };
+
   useEffect(() => {
     // Somma tutte le quantità inserite nelle basi
-    const doseTotale = Object.entries(formData)
+    const doseBasi = Object.entries(formData)
       .filter(([key]) => key.startsWith('valore_'))
       .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
+    // Se presente, aggiungi la quantità del pantone esterno
+    const dosePantoneEsterno =
+      pantoneEsternoSelezionato && formData.pantoneEsternoInput !== undefined && formData.pantoneEsternoInput !== ''
+        ? Number(formData.pantoneEsternoInput) || 0
+        : 0;
+    const doseTotale = doseBasi + dosePantoneEsterno;
     if (formData.dose !== doseTotale) {
       setFormData((prev) => ({ ...prev, dose: doseTotale }));
     }
-  }, [formData]);
+  }, [formData, pantoneEsternoSelezionato]);
 
+  // Costruzione delle basi finali
   const basiFinali = Object.entries(basiRaggruppatePerName)
     .map(([nomeBase, basiArr]) => {
       const fornitoreSelezionato = formData[`fornitore_${nomeBase}`];
@@ -75,22 +138,37 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         fornitore: String(baseSelezionata.fornitore || ''),
         tipo: String(baseSelezionata.tipo || ''),
         codiceColore: String(baseSelezionata.codiceColore || ''),
+        utilizzo: ['Base'],
       };
     })
     .filter((b) => b.quantita > 0);
+
+  // Se è selezionato un pantone esterno, aggiungi la base corrispondente
+  if (pantoneEsternoSelezionato && formData.pantoneEsternoInput) {
+    const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+    if (pantoneEsterno) {
+      basiFinali.push({
+        nomeMateriale: pantoneEsterno.nomeMateriale,
+        label: pantoneEsterno.label,
+        quantita: Number(formData.pantoneEsternoInput) || 0,
+        codiceFornitore: String(pantoneEsterno.codiceFornitore || ''),
+        fornitore: String(pantoneEsterno.fornitore || ''),
+        tipo: String(pantoneEsterno.tipo || ''),
+        codiceColore: String(pantoneEsterno.codiceColore || ''),
+        utilizzo: ['Pantone'],
+      });
+    }
+  }
 
   const formDataRef = useRef(formData);
   useEffect(() => {
     formDataRef.current = formData;
   }, [formData]);
 
-  console.log('basiFiltrate:', basiFiltrate);
-  console.log('basiFinali:', basiFinali);
-
   const submit = useCallback(async () => {
     const formData = formDataRef.current;
+
     try {
-      console.log('SUBMIT: formData prima del submit:', formData);
       if (!pantone._id) {
         setErrorMessage('ID Pantone mancante.');
         return false;
@@ -124,7 +202,6 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         basi: basiFinali,
         basiNormalizzate: pantone.basiNormalizzate ?? '',
       };
-      console.log('Invio aggiornato:', aggiornato);
 
       const validation = PantoneSchema.safeParse(aggiornato);
       if (!validation.success) {
@@ -164,7 +241,35 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
 
   return (
     <form className="w-6xl">
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      <div className="flex flex-row justify-between">
+        <H3 className="mb-2">Dettagli Pantone</H3>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {/* Select Pantone Esterno */}
+        <div className="mb-4 flex flex-row items-center border border-dashed border-[var(--border)] rounded-xl px-2">
+          <label className="font-semibold mr-2">Importa pantone esterno:</label>
+          <select
+            className="p-2 rounded bg-zinc-700 text-white focus:outline-none"
+            onChange={handlePantoneMaterialeSelect}
+            value={pantoneEsternoSelezionato || ''}
+            disabled={loadingPantoniMateriali}
+          >
+            {loadingPantoniMateriali ? (
+              <option value="" disabled>
+                Caricamento...
+              </option>
+            ) : (
+              <>
+                <option value="">Seleziona un pantone...</option>
+                {pantoneMateriali.map((m) => (
+                  <option key={m._id?.toString()} value={m._id?.toString()}>
+                    {m.label} - {m.fornitore}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+      </div>
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-3 gap-2">
           <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
@@ -173,7 +278,32 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold mt-5">Composizione</h2>
+          {/* Pantone esterno input */}
+          {pantoneEsternoSelezionato && (
+            <div className="mb-4 flex flex-col">
+              {(() => {
+                const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+                if (!pantoneEsterno) return null;
+                return (
+                  <label className="mb-1">
+                    {pantoneEsterno.label}
+                    <span className="ml-2 text-sm text-neutral-300 italic">{pantoneEsterno.fornitore}</span>
+                  </label>
+                );
+              })()}
+              <input
+                type="number"
+                name="pantoneEsternoInput"
+                className="w-32 p-2 rounded bg-zinc-600 text-white focus:outline-none"
+                value={formData.pantoneEsternoInput ?? 2.5}
+                onChange={handlePantoneEsternoInputChange}
+                min={0}
+                step={0.01}
+              />
+            </div>
+          )}
 
+          {/* Basi section (always shown) */}
           {tipoSelezionato ? (
             loading ? (
               <Loader />

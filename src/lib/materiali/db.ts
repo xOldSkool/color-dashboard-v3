@@ -1,4 +1,4 @@
-import { Db, ObjectId, InsertOneResult, InsertManyResult, UpdateResult, DeleteResult, UpdateFilter, UpdateOptions } from 'mongodb';
+import { Db, ObjectId, InsertOneResult, InsertManyResult, UpdateResult, DeleteResult, UpdateFilter, UpdateOptions, Filter } from 'mongodb';
 import { Materiale } from '@/types/materialeTypes';
 
 // Recupera tutti i materiali
@@ -25,6 +25,11 @@ export async function updateMateriale(
   return await db.collection<Materiale>('materiali').updateOne(query, update, options);
 }
 
+// Aggiorna tutte le proprietà di un materiale (eccetto _id)
+export async function updateMaterialeCompleto(db: Db, id: string, materiale: Omit<Materiale, '_id'>): Promise<UpdateResult> {
+  return await db.collection<Materiale>('materiali').updateOne({ _id: new ObjectId(id) }, { $set: materiale });
+}
+
 // Elimina uno o più materiali
 export async function deleteMateriale(db: Db, filter: Partial<Materiale> | ObjectId[]): Promise<DeleteResult> {
   const collection = db.collection<Materiale>('materiali');
@@ -41,6 +46,6 @@ export async function getMaterialeById(db: Db, id: string): Promise<Materiale | 
 }
 
 // Recupera materiali tramite query
-export async function getMaterialiByQuery(db: Db, query: Partial<Materiale>): Promise<Materiale[]> {
+export async function getMaterialiByQuery(db: Db, query: Filter<Materiale>): Promise<Materiale[]> {
   return await db.collection<Materiale>('materiali').find(query).toArray();
 }

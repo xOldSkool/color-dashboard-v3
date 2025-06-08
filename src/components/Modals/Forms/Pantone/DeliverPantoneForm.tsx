@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { useModalStore } from '@/store/useModalStore';
-import { useUpdatePantone } from '@/hooks/usePantone';
-import { useUpdateMagazzinoPantoni } from '@/hooks/useUpdateMagazzinoPantoni';
+import { useUpdatePantone, useDeliverPantone } from '@/hooks/usePantone';
 import { Pantone } from '@/types/pantoneTypes';
 import { useRouter } from 'next/navigation';
 
@@ -26,7 +25,7 @@ export default function DeliverPantoneForm({ pantone, onSuccess }: DeliverFormPr
   const submitRef = useRef<(() => Promise<boolean>) | null>(null);
   const resetRef = useRef<(() => void) | null>(null);
   const { updatePantone } = useUpdatePantone();
-  const { updateMagazzinoPantoni } = useUpdateMagazzinoPantoni();
+  const { deliverPantone } = useDeliverPantone();
 
   // Validazione form
   useEffect(() => {
@@ -51,22 +50,24 @@ export default function DeliverPantoneForm({ pantone, onSuccess }: DeliverFormPr
       return false;
     }
     try {
+      // Aggiorna stato pantone (consegnatoProduzione)
       await updatePantone(String(pantone._id), {
         consegnatoProduzione: true,
-        qtConsegnataProduzione: (pantone.qtConsegnataProduzione ?? 0) + quantita,
+        qtConsegnataProduzione: quantita,
       });
-      await updateMagazzinoPantoni({
+      // Chiamata API centralizzata tramite hook custom
+      const result = await deliverPantone({
+        pantoneId: String(pantone._id),
         pantoneGroupId: pantone.pantoneGroupId,
         tipo: pantone.tipo,
-        dispMagazzino: dispMagazzino - quantita,
-        ultimoUso: new Date().toISOString(),
-        movimento: {
-          tipo: 'scarico',
-          quantita,
-          data: new Date().toISOString(),
-          causale: 'Uso produzione',
-        },
+        quantita,
+        causale: 'Uso produzione',
       });
+      if (!result.success) {
+        setErrorMessage('Errore magazzino/materiali: ' + result.error);
+        setLoading(false);
+        return false;
+      }
       if (onSuccess) onSuccess();
       router.refresh();
       return true;
@@ -76,7 +77,7 @@ export default function DeliverPantoneForm({ pantone, onSuccess }: DeliverFormPr
     } finally {
       setLoading(false);
     }
-  }, [formData, dispMagazzino, pantone, onSuccess, updatePantone, updateMagazzinoPantoni, router]);
+  }, [formData, dispMagazzino, pantone, onSuccess, updatePantone, router, deliverPantone]);
 
   // Reset logica
   const reset = useCallback(() => {

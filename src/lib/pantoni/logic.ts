@@ -5,21 +5,27 @@ import { Collection, Db, ObjectId } from 'mongodb';
 import { calcolaProduzionePantone } from './calcoli';
 import { normalizzaBasi } from './normalizzaBasi';
 
+// Utility per forzare utilizzo come array di stringhe
+function normalizzaUtilizzoBase(b: { utilizzo?: unknown }): string[] {
+  if (Array.isArray(b.utilizzo)) return b.utilizzo.map((v) => String(v));
+  if (typeof b.utilizzo === 'string' && b.utilizzo.length > 0)
+    return b.utilizzo
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
+  return [];
+}
+
 // Genera 'pantoneGroupId' in base a 'nomePantone', 'basi' e 'codiceFornitore' (se presente)
 export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promise<string> {
   const collection: Collection<Pantone> = db.collection('pantoni');
   const basiNormalizzate = normalizzaBasi(nuovoPantone.basi || []);
 
   // Costruisci il filtro di ricerca in base alle proprietà disponibili
-  const filtro: Partial<Pick<Pantone, 'nomePantone' | 'basiNormalizzate' | 'codiceFornitore'>> = {
+  const candidato = await collection.findOne({
     nomePantone: nuovoPantone.nomePantone,
     basiNormalizzate,
-  };
-  if (nuovoPantone.codiceFornitore) {
-    filtro.codiceFornitore = nuovoPantone.codiceFornitore;
-  }
-
-  const candidato = await collection.findOne(filtro);
+  });
 
   if (candidato) return candidato.pantoneGroupId;
   return `${nuovoPantone.nomePantone}_${new ObjectId().toHexString().slice(-6)}`;
@@ -57,6 +63,9 @@ export async function produciPantone({ db, pantoneId, battute, urgente }: { db: 
   if (!pantone) throw new Error('Pantone non trovato');
   if (!pantone.basi || !Array.isArray(pantone.basi)) throw new Error('Pantone senza basi');
 
+  // Normalizza utilizzo basi
+  const basiNormalizzate = pantone.basi.map((b) => ({ ...b, utilizzo: normalizzaUtilizzoBase(b) }));
+
   // Recupera dispMagazzino
   const magazzinoPantone = await db
     .collection<MagazzinoPantoni>('magazzinoPantoni')
@@ -69,7 +78,7 @@ export async function produciPantone({ db, pantoneId, battute, urgente }: { db: 
     dose: pantone.dose,
     battute,
     dispMagazzino,
-    basi: pantone.basi,
+    basi: basiNormalizzate,
   });
 
   // Verifica disponibilità basi in materiali
@@ -142,6 +151,9 @@ export async function annullaProduzionePantone({ db, pantoneId }: { db: Db; pant
   if (!pantone.basi || !Array.isArray(pantone.basi)) throw new Error('Pantone senza basi');
   if (!pantone.battuteDaProdurre || !pantone.daProdurre) throw new Error('Pantone non in stato "da produrre"');
 
+  // Normalizza utilizzo basi
+  const basiNormalizzate = pantone.basi.map((b) => ({ ...b, utilizzo: normalizzaUtilizzoBase(b) }));
+
   // Recupera dispMagazzino
   const magazzinoPantone = await db
     .collection<MagazzinoPantoni>('magazzinoPantoni')
@@ -154,7 +166,7 @@ export async function annullaProduzionePantone({ db, pantoneId }: { db: Db; pant
     dose: pantone.dose,
     battute: pantone.battuteDaProdurre,
     dispMagazzino,
-    basi: pantone.basi,
+    basi: basiNormalizzate,
   });
 
   // Ripristina materiali e aggiungi movimento di carico
@@ -201,30 +213,3 @@ export async function annullaProduzionePantone({ db, pantoneId }: { db: Db; pant
 
   return { success: true };
 }
-
-// 🔑 assegnaPantoneGroupId
-// Scopo: Determina il pantoneGroupId da assegnare a un nuovo pantone, confrontandolo con quelli già esistenti con lo stesso nomePantone.
-
-// Come?
-// 1️⃣ Cerca i pantoni esistenti con lo stesso nomePantone.
-// 2️⃣ Confronta la composizione delle basi (normalizzaBasi).
-// 3️⃣ Se trova un match, usa pantoneGroupId esistente o lo genera con _id.
-// 4️⃣ Se non trova nulla, genera un nuovo pantoneGroupId unico (nomePantone_ID).
-
-// 👌 insertMagazzinoIfNotExists
-// Scopo: Inserisce un documento in magazzinoPantoni solo se non esiste già un record con lo stesso pantoneGroupId.
-
-// Come?
-// 1️⃣ Cerca magazzinoPantoni per pantoneGroupId.
-// 2️⃣ Se esiste, non fa nulla.
-// 3️⃣ Se non esiste, inserisce il documento inizializzando dispMagazzino e movimenti.
-
-// 🧾 estraiBasi
-// Scopo: Converte un oggetto payload generico (es. valori del form) e una lista di basi (BaseMateriale[]) in un array di { nome, label, quantita }.
-
-// Come?
-// 1️⃣ Prende ciascun elemento di basi, estraendo name e label.
-// 2️⃣ Legge il quantita corrispondente da payload e lo converte in number.
-// 3️⃣ Filtra per valori > 0.
-
-// Perché? Serve per estrarre solo le basi effettivamente valorizzate dal form o da un input grezzo.

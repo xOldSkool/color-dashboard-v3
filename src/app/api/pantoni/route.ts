@@ -8,19 +8,7 @@ import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// API per annullare la produzione di un pantone
-// Spostata in /api/pantoni/undo-produce/route.ts
 export async function POST(req: NextRequest) {
-  // Support legacy POST for creation
-  // Se la url contiene 'undo-produce', restituisci errore (deve usare la nuova route)
-  let url = '';
-  if ('url' in req && typeof req.url === 'string') {
-    url = req.url;
-  }
-  if (url.includes('undo-produce')) {
-    return NextResponse.json({ error: 'Usa la route /api/pantoni/undo-produce' }, { status: 404 });
-  }
-
   try {
     const db = await connectToDatabase();
     const collection = db.collection<Pantone>('pantoni');
@@ -94,8 +82,11 @@ export async function PATCH(req: NextRequest) {
       pantoneGroupId,
     };
 
+    // DEBUG: logga il payload ricevuto e la validazione PATCH
+    console.log('[API PATCH DEBUG] rawData:', rawData);
     // Validazione
     const validation = PantoneSchema.safeParse(aggiornato);
+    console.log('[API PATCH DEBUG] validation:', validation);
     if (!validation.success) {
       return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
     }
@@ -150,24 +141,26 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-// API per la produzione di un pantone
 export async function PUT(req: NextRequest) {
-  // Rotta: /api/pantoni/produce
   try {
     const db = await connectToDatabase();
     const body = await req.json();
-    // Validazione input
+    // DEBUG: logga il body ricevuto e il risultato della validazione
+    console.log('[API DEBUG] body:', body);
     const schema = z.object({
       pantoneId: z.string(),
       battute: z.number().min(1),
       urgente: z.boolean(),
     });
     const validation = schema.safeParse(body);
+    console.log('[API DEBUG] validation:', validation);
     if (!validation.success) {
       return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
     }
     const { pantoneId, battute, urgente } = validation.data;
+    // DEBUG: logga il risultato di produciPantone
     const result = await produciPantone({ db, pantoneId, battute, urgente });
+    console.log('[API DEBUG] produciPantone result:', result);
     if (!result.success) {
       return NextResponse.json(result, { status: 400 });
     }

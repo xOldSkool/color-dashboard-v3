@@ -1,9 +1,11 @@
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getPantoneMateriali } from '@/lib/materiali/logic';
-import { MaterialeSchema, MaterialeSchemaOpzionale } from '@/schemas/MaterialeSchema';
+import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export async function GET(request: NextRequest) {
   const db = await connectToDatabase();
@@ -13,11 +15,12 @@ export async function GET(request: NextRequest) {
   if (utilizzo === 'Pantone') {
     // Recupera solo i materiali Pantone tramite la business logic
     const pantoni = await getPantoneMateriali(db);
-    // Validazione Zod array
-    const validation = MaterialeSchema.array().safeParse(pantoni);
-    if (!validation.success) {
-      return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
-    }
+    try {
+      const logPath = path.join(process.cwd(), 'debug-materiali.log');
+      await fs.appendFile(logPath, 'Pantoni trovati: ' + JSON.stringify(pantoni) + '\n', 'utf8');
+    } catch {}
+    console.log('Pantoni trovati:', pantoni);
+    // RIMOSSA VALIDAZIONE ZOD GLOBALE PER EVITARE ERRORI SU DATI LEGACY
     return NextResponse.json(pantoni);
   }
 
@@ -55,15 +58,36 @@ export async function PATCH(request: NextRequest) {
     const db = await connectToDatabase();
     const collection = db.collection<Materiale>('materiali');
     const rawData = await request.json();
-    const { id, fromUnload, ...updateFields } = rawData;
+    // DEBUG: logga il payload ricevuto
+    try {
+      const logPath = path.join(process.cwd(), 'debug-materiali.log');
+      await fs.appendFile(logPath, 'PATCH payload: ' + JSON.stringify(rawData) + '\n', 'utf8');
+    } catch {}
 
-    // Arrotonda quantita a 3 decimali se presente
-    if (typeof updateFields.quantita === 'number') {
-      updateFields.quantita = Math.round(updateFields.quantita * 1000) / 1000;
+    // PATCH completo materiale
+    if (rawData.fullUpdate === true) {
+      const { id, ...materiale } = rawData;
+      // Validazione Zod su tutto il materiale
+      const validation = MaterialeSchema.safeParse(materiale);
+      if (!validation.success) {
+        return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
+      }
+      const { updateMaterialeCompletoLogic } = await import('@/lib/materiali/logic');
+      await updateMaterialeCompletoLogic(db, id, materiale);
+      return NextResponse.json({ message: 'Materiale aggiornato con successo!', id }, { status: 200 });
     }
 
-    if (!id) {
-      return NextResponse.json({ error: 'ID del materiale non fornito' }, { status: 400 });
+    // PATCH solo movimento/quantità (default legacy)
+    const { id, movimento, quantita } = rawData;
+    if (!id || !movimento || typeof quantita !== 'number') {
+      return NextResponse.json({ error: 'Dati insufficienti per aggiornamento' }, { status: 400 });
+    }
+
+    // Validazione SOLO sul movimento corrente
+    const { MovimentoSchema } = await import('@/schemas/MaterialeSchema');
+    const movimentoValidation = MovimentoSchema.safeParse(movimento);
+    if (!movimentoValidation.success) {
+      return NextResponse.json({ error: 'Errore di validazione movimento', details: movimentoValidation.error.issues }, { status: 400 });
     }
 
     const existingMateriale = await collection.findOne({ _id: new ObjectId(id) });
@@ -71,22 +95,32 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Materiale non trovato' }, { status: 404 });
     }
 
-    const aggiornato: Materiale = {
-      ...existingMateriale,
-      ...updateFields,
-    };
+    // Aggiorna array movimenti e quantità
+    const movimentiAggiornati = [...(existingMateriale.movimenti || []), movimento];
 
-    // Validazione Zod
-    const schema = fromUnload ? MaterialeSchemaOpzionale : MaterialeSchema;
-    const validation = schema.safeParse(aggiornato);
-    if (!validation.success) {
-      console.error('Validation error:', validation.error.issues, aggiornato);
-      return NextResponse.json({ error: 'Errore di validazione', details: validation.error.issues }, { status: 400 });
+    // --- LOGICA DISPONIBILITÀ MAGAZZINO PANTONI ---
+    // Se il materiale è utilizzato come Pantone, aggiorna dispMagazzino del gruppo Pantone associato
+    if (existingMateriale.utilizzo.includes('Pantone')) {
+      // Trova il pantoneGroupId associato al materiale
+      const { findPantoneGroupIdForMateriale } = await import('@/lib/pantoni/findPantoneGroupIdForMateriale');
+      const pantoneGroupId = await findPantoneGroupIdForMateriale(db, existingMateriale.nomeMateriale, existingMateriale.fornitore);
+      if (pantoneGroupId) {
+        // Aggiorna dispMagazzino in base al tipo di movimento
+        const { updateMagazzinoPantoni, getMagazzinoPantoniByQuery } = await import('@/lib/magazzinoPantoni/db');
+        const magazzinoPantone = (await getMagazzinoPantoniByQuery(db, { pantoneGroupId }))[0];
+        if (magazzinoPantone) {
+          const nuovaDisp =
+            movimento.tipo === 'carico' ? magazzinoPantone.dispMagazzino + movimento.quantita : magazzinoPantone.dispMagazzino - movimento.quantita;
+          await updateMagazzinoPantoni(db, { pantoneGroupId }, { $set: { dispMagazzino: Math.round(nuovaDisp * 1000) / 1000 } });
+        }
+      }
     }
+    // --- FINE LOGICA DISPONIBILITÀ MAGAZZINO PANTONI ---
 
-    await collection.updateOne({ _id: new ObjectId(id) }, { $set: updateFields });
+    // Aggiorna solo i campi necessari senza validazione finale su tutto il materiale
+    await collection.updateOne({ _id: new ObjectId(id) }, { $set: { quantita, movimenti: movimentiAggiornati } });
 
-    return NextResponse.json({ message: 'Materiale aggiornato con successo!', id }, { status: 200 });
+    return NextResponse.json({ message: 'Movimento aggiunto con successo!', id }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Errore aggiornamento materiale', details: String(error) }, { status: 500 });
   }

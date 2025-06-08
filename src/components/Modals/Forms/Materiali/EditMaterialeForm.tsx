@@ -1,7 +1,8 @@
 'use client';
+import React from 'react';
 import InputMap from '@/components/InputMap';
 import { materialeFieldsCreate } from '@/constants/inputFields';
-import { useUpdateMateriale } from '@/hooks/useMateriali';
+import { useUpdateMaterialeCompleto } from '@/hooks/useMateriali';
 import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { getEnumValue } from '@/utils/getEnumValues';
@@ -11,16 +12,17 @@ import { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
 import { materialeToFormData } from '@/lib/adapter';
 import toCamelCase from '@/utils/toCamelCase';
 
+const utilizzoOptions = ['Base', 'Materiale', 'Pantone'] as const;
+
 interface EditMaterialeFormProps {
   materiale: Materiale;
 }
 
 export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps) {
   const router = useRouter();
-  const { updateMateriale } = useUpdateMateriale();
+  const { updateMaterialeCompleto } = useUpdateMaterialeCompleto();
   const [formData, setFormData] = useState<{ [key: string]: string | number | undefined }>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  console.log('materiale ricevuto:', materiale);
 
   // Precaricamento formData con materiale originale
   useEffect(() => {
@@ -56,12 +58,17 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         label: String(formData.label || ''),
         codiceColore: String(formData.codiceColore || ''),
         codiceFornitore: String(formData.codiceFornitore || ''),
-        quantita: Number(formData.quantita) || 0,
         fornitore: String(formData.fornitore || ''),
         tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base'),
+        utilizzo: Array.isArray(formData.utilizzo)
+          ? (formData.utilizzo.map((v) => String(v)) as Array<'Base' | 'Materiale' | 'Pantone'>)
+          : typeof formData.utilizzo === 'string' && formData.utilizzo.length > 0
+            ? [formData.utilizzo as 'Base' | 'Materiale' | 'Pantone']
+            : [],
         noteMateriale: String(formData.noteMateriale || ''),
+        quantita: materiale.quantita, // obbligatorio per Materiale
+        dataCreazione: materiale.dataCreazione, // obbligatorio per Materiale
       };
 
       // Validazione con Zod
@@ -71,7 +78,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         return false;
       }
 
-      await updateMateriale(materiale._id.toString(), materialeAggiornato);
+      await updateMaterialeCompleto(materiale._id.toString(), materialeAggiornato);
       setErrorMessage(null);
       router.refresh();
       return true;
@@ -80,7 +87,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [formData, updateMateriale, materiale, router]);
+  }, [formData, materiale, router, updateMaterialeCompleto]);
 
   const reset = useCallback(() => {
     if (materiale) {
@@ -89,11 +96,10 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         label: materiale.label || '',
         codiceColore: materiale.codiceColore || '',
         codiceFornitore: materiale.codiceFornitore || '',
-        quantita: materiale.quantita || 0,
         fornitore: materiale.fornitore || '',
         tipo: materiale.tipo || '',
         stato: materiale.stato || '',
-        utilizzo: materiale.utilizzo || '',
+        utilizzo: Array.isArray(materiale.utilizzo) ? materiale.utilizzo.join(',') : '',
         noteMateriale: materiale.noteMateriale || '',
       });
     }
@@ -118,6 +124,41 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
     <form>
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       <InputMap fields={materialeFieldsCreate} formData={formData} handleChange={handleChange} />
+      <div className="mb-4">
+        <label className="block font-medium mb-1">Utilizzo</label>
+        <div className="flex gap-4">
+          {utilizzoOptions.map((option) => (
+            <label key={option} className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                name="utilizzo"
+                value={option}
+                checked={Array.isArray(formData.utilizzo)
+                  ? formData.utilizzo.includes(option)
+                  : typeof formData.utilizzo === 'string' && formData.utilizzo.split(',').includes(option)}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setFormData((prev) => {
+                    const current = Array.isArray(prev.utilizzo)
+                      ? prev.utilizzo
+                      : typeof prev.utilizzo === 'string' && prev.utilizzo.length > 0
+                        ? prev.utilizzo.split(',')
+                        : [];
+                    let next: string[];
+                    if (checked) {
+                      next = [...current, option];
+                    } else {
+                      next = current.filter((v) => v !== option);
+                    }
+                    return { ...prev, utilizzo: next.join(',') };
+                  });
+                }}
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+      </div>
     </form>
   );
 }

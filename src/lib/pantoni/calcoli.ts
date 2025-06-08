@@ -1,5 +1,3 @@
-// Centralized calculation logic for Pantone production
-// This function can be imported by both backend and frontend for consistent business logic
 import { BasiPantone } from '@/types/pantoneTypes';
 
 export interface CalcolaProduzionePantoneInput {

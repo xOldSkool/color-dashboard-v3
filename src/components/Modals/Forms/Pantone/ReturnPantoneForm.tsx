@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useModalStore } from '@/store/useModalStore';
 import { useUpdatePantone } from '@/hooks/usePantone';
-import { useUpdateMagazzinoPantoni } from '@/hooks/useUpdateMagazzinoPantoni';
-import { useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
+import { useLoadPantone } from '@/hooks/useLoadPantone';
+import { usePantoneMateriali } from '@/hooks/useMateriali';
 import { Pantone } from '@/types/pantoneTypes';
 import { useRouter } from 'next/navigation';
 
@@ -19,11 +19,8 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { updatePantone } = useUpdatePantone();
-  const { updateMagazzinoPantoni } = useUpdateMagazzinoPantoni();
-  const { magazzinoPantone } = useMagazzinoPantoni({
-    pantoneGroupId: pantone.pantoneGroupId,
-    tipo: pantone.tipo,
-  });
+  const { loadPantone } = useLoadPantone();
+  const { pantoneMateriali } = usePantoneMateriali();
   const submitRef = useRef<(() => Promise<boolean>) | null>(null);
   const resetRef = useRef<(() => void) | null>(null);
   const qtConsegnataProduzione = pantone.qtConsegnataProduzione || 0;
@@ -47,34 +44,8 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
       setLoading(false);
       return false;
     }
-    if (quantita === qtConsegnataProduzione) {
-      try {
-        await updatePantone(String(pantone._id), {
-          consegnatoProduzione: false,
-          qtConsegnataProduzione: 0,
-        });
-        await updateMagazzinoPantoni({
-          pantoneGroupId: pantone.pantoneGroupId,
-          tipo: pantone.tipo,
-          dispMagazzino: (magazzinoPantone?.dispMagazzino ?? 0) + quantita,
-          ultimoUso: new Date().toISOString(),
-          movimento: {
-            tipo: 'carico',
-            quantita,
-            data: new Date().toISOString(),
-            causale: 'Rientro produzione',
-          },
-        });
-        if (onSuccess) onSuccess();
-        router.refresh();
-        return true;
-      } catch {
-        setErrorMessage('Errore durante il rientro');
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    } else {
+    // --- LOGICA: se rientro parziale, apri modale ReturnPantonePartialModal ---
+    if (quantita < qtConsegnataProduzione) {
       useModalStore.getState().openModal('returnPantonePartial', {
         pantone,
         quantita,
@@ -83,7 +54,45 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
       setLoading(false);
       return false;
     }
-  }, [formData, qtConsegnataProduzione, pantone, onSuccess, updatePantone, updateMagazzinoPantoni, router, magazzinoPantone]);
+    // --- Rientro totale: aggiorna Pantone e Materiale tramite API centralizzata ---
+    try {
+      await updatePantone(String(pantone._id), {
+        consegnatoProduzione: false,
+        qtConsegnataProduzione: 0,
+      });
+      const basePantone = pantone.basi?.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'));
+      if (basePantone) {
+        const materiale = pantoneMateriali.find((m) => m.nomeMateriale === basePantone.nomeMateriale && m.fornitore === basePantone.fornitore);
+        if (!materiale) {
+          setErrorMessage('Materiale associato non trovato');
+          setLoading(false);
+          return false;
+        }
+        const result = await loadPantone({
+          materialeId: String(materiale._id),
+          nomeMateriale: materiale.nomeMateriale,
+          fornitore: materiale.fornitore,
+          quantita,
+          causale: 'Rientro produzione',
+        });
+        if (!result.success) {
+          setErrorMessage('Errore magazzino/materiali: ' + result.error);
+          setLoading(false);
+          return false;
+        }
+      } else {
+        // Se non c'è materiale associato, aggiorna solo Pantone tramite API (già fatto sopra)
+      }
+      if (onSuccess) onSuccess();
+      router.refresh();
+      return true;
+    } catch {
+      setErrorMessage('Errore durante il rientro');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [formData, qtConsegnataProduzione, pantone, onSuccess, updatePantone, router, loadPantone, pantoneMateriali]);
 
   const reset = useCallback(() => {
     setFormData({ qtRientro: '' });

@@ -1,22 +1,20 @@
 'use client';
 import { materialeFieldsMovimentoLoad } from '@/constants/inputFields';
 import { useUpdateMateriale } from '@/hooks/useMateriali';
-import { MaterialeSchema } from '@/schemas/MaterialeSchema';
+import { MovimentoSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { Materiale } from '@/types/materialeTypes';
 import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 
-type FormDataState = {
-  [key: string]: string;
-};
-
+// Tipi
+type FormDataState = Record<string, string>;
 interface LoadMaterialeFormProps {
   materiale: Materiale;
 }
 
-export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMaterialeFormProps) {
+export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMaterialeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormDataState>({});
   const { modalData, closeModal } = useModalStore();
@@ -25,6 +23,7 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formDataRef = useRef<FormDataState>({});
 
+  // Gestione input
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => {
@@ -34,6 +33,7 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
     });
   };
 
+  // Submit movimento
   const submit = useCallback(async () => {
     setErrorMessage(null);
     if (!materiale || !materiale._id) return false;
@@ -49,31 +49,27 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
       dataDDT: currentFormData.dataDDT,
       fromUnload: false,
     };
-    const nuovaQuantita = Math.round((materiale.quantita + movimento.quantita) * 1000) / 1000;
-    const materialeAggiornato = {
-      ...materiale,
-      quantita: nuovaQuantita,
-      movimenti: [...(materiale.movimenti || []), movimento],
-    };
-
-    const validation = MaterialeSchema.safeParse(materialeAggiornato);
-    if (!validation.success) {
-      setErrorMessage('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+    // Validazione solo sul movimento corrente
+    const movimentoValidation = MovimentoSchema.safeParse(movimento);
+    if (!movimentoValidation.success) {
+      setErrorMessage('Errore di validazione:\n' + movimentoValidation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
     }
-
-    await updateMateriale(String(materiale._id), {
-      quantita: nuovaQuantita,
-      movimenti: [...(materiale.movimenti || []), movimento],
-    });
+    const nuovaQuantita = Math.round((materiale.quantita + movimento.quantita) * 1000) / 1000;
+    try {
+      await updateMateriale(String(materiale._id), movimento, nuovaQuantita);
+    } catch {
+      setErrorMessage('Errore durante la richiesta al server per il carico/scarico materiale.');
+      return false;
+    }
     setErrorMessage(null);
     router.refresh();
     closeModal('loadMateriale');
     return true;
   }, [materiale, updateMateriale, router, closeModal]);
 
+  // Reset form
   const reset = useCallback(() => setFormData({}), []);
-
   const submitRef = useRef(submit);
   const resetRef = useRef(reset);
 
@@ -83,7 +79,6 @@ export default function LoadMaterialeForms({ materiale: materialeProp }: LoadMat
   }, [submit, reset]);
 
   useEffect(() => {
-    // Usa la funzione direttamente dallo store per evitare referenze che cambiano
     useModalStore.getState().registerHandler('loadMateriale', {
       submit: () => submitRef.current(),
       reset: () => resetRef.current(),

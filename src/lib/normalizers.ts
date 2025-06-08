@@ -31,15 +31,28 @@ export function normalizePantone(raw: RawPantone): Pantone {
     battuteDaProdurre: Number(raw.battuteDaProdurre ?? 0),
     urgente: Boolean(raw.urgente ?? false),
     basi: Array.isArray(raw.basi)
-      ? raw.basi.map((b) => ({
-          nomeMateriale: String(b.nomeMateriale),
-          label: String(b.label),
-          codiceFornitore: String(b.codiceFornitore),
-          codiceColore: String(b.codiceColore),
-          tipo: String(b.tipo),
-          quantita: Number(b.quantita),
-          fornitore: String(b.fornitore),
-        }))
+      ? raw.basi.map((b) => {
+          let utilizzoArr: string[] = [];
+          const rawUtilizzo = (b as { utilizzo?: unknown }).utilizzo;
+          if (Array.isArray(rawUtilizzo)) {
+            utilizzoArr = rawUtilizzo.map((v: unknown) => String(v));
+          } else if (typeof rawUtilizzo === 'string' && rawUtilizzo.length > 0) {
+            utilizzoArr = (rawUtilizzo as string)
+              .split(',')
+              .map((v: string) => v.trim())
+              .filter(Boolean);
+          }
+          return {
+            nomeMateriale: String(b.nomeMateriale),
+            label: String(b.label),
+            codiceFornitore: String(b.codiceFornitore),
+            codiceColore: String(b.codiceColore),
+            tipo: String(b.tipo),
+            quantita: Number(b.quantita),
+            fornitore: String(b.fornitore),
+            utilizzo: utilizzoArr,
+          };
+        })
       : [],
     hex: String(raw.hex ?? ''),
 

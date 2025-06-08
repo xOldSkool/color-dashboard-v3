@@ -8,6 +8,7 @@ export const BasiPantoneSchema = z.object({
   tipo: z.string(),
   quantita: z.number().nonnegative(),
   fornitore: z.string(),
+  utilizzo: z.array(z.string()),
 });
 
 export const PantoneSchema = z.object({
@@ -53,7 +54,6 @@ export const PantoneSchema = z.object({
   consegnatoProduzione: z.boolean().optional(),
   qtConsegnataProduzione: z.number().optional(),
   pantoneGroupId: z.string(),
-  codiceFornitore: z.string().optional(), // Solo per pantoni esterni
   basi: z.array(BasiPantoneSchema).optional(),
   basiNormalizzate: z.string().optional(),
 });

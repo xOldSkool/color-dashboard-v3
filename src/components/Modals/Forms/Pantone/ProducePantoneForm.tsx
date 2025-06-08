@@ -28,6 +28,7 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
   const [urgente, setUrgente] = useState(false);
   const [result, setResult] = useState<null | { kgTotali: number; nDosi: number; basiRisultato: BasiRisultato[]; success: boolean }>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<{ basiNonDisponibili?: { nomeMateriale: string; richiesti: number }[] } | null>(null);
   const { producePantone } = useProducePantone();
   const formRef = useRef<HTMLFormElement | null>(null);
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
 
   const submit = useCallback(async () => {
     setError(null);
+    setErrorDetails(null);
     setResult(null);
     try {
       const res = await producePantone({ pantoneId: pantone._id as string, battute, urgente });
@@ -47,6 +49,7 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
         return true;
       } else {
         setError(res.error || 'Errore generico');
+        setErrorDetails(res.basiNonDisponibili ? { basiNonDisponibili: res.basiNonDisponibili } : null);
         return false;
       }
     } catch (err) {
@@ -55,9 +58,19 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
         typeof err === 'object' &&
         err !== null &&
         'response' in err &&
-        typeof (err as { response?: { data?: { error?: string } } }).response?.data?.error === 'string'
+        typeof (err as { response?: { data?: { error?: string; basiNonDisponibili?: { nomeMateriale: string; richiesti: number }[] } } }).response
+          ?.data?.error === 'string'
       ) {
-        errorMsg = (err as { response: { data: { error: string } } }).response.data.error;
+        errorMsg = (err as { response: { data: { error: string; basiNonDisponibili?: { nomeMateriale: string; richiesti: number }[] } } }).response
+          .data.error;
+        setErrorDetails(
+          (err as { response: { data: { basiNonDisponibili?: { nomeMateriale: string; richiesti: number }[] } } }).response.data.basiNonDisponibili
+            ? {
+                basiNonDisponibili: (err as { response: { data: { basiNonDisponibili: { nomeMateriale: string; richiesti: number }[] } } }).response
+                  .data.basiNonDisponibili,
+              }
+            : null
+        );
       }
       setError(errorMsg);
       return false;
@@ -69,6 +82,7 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
     setUrgente(false);
     setResult(null);
     setError(null);
+    setErrorDetails(null);
   }, []);
 
   useEffect(() => {
@@ -169,7 +183,20 @@ export default function ProducePantoneForm({ pantone, onSuccess }: ProduceFormPr
           ))}
         </ul>
       </div>
-      {error && <div className="text-red-500 font-semibold">{error}</div>}
+      {error && (
+        <div className="text-red-500 font-semibold">
+          {error}
+          {errorDetails?.basiNonDisponibili && (
+            <ul className="mt-2 text-sm font-normal">
+              {errorDetails.basiNonDisponibili.map((b) => (
+                <li key={b.nomeMateriale}>
+                  {b.nomeMateriale}: manca {b.richiesti} kg
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {result && (
         <div className="text-green-500 font-semibold">
           Pantone pronto da produrre! Kg totali: {result.kgTotali} | N° dosi: {result.nDosi}

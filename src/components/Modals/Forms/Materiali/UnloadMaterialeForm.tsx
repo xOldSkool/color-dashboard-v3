@@ -1,10 +1,8 @@
 'use client';
 import { materialeFieldsMovimentoUnload } from '@/constants/inputFields';
 import { useUpdateMateriale } from '@/hooks/useMateriali';
-import { MaterialeSchemaOpzionale } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { Materiale } from '@/types/materialeTypes';
-import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 type FormDataState = {
@@ -15,13 +13,13 @@ interface UnloadMaterialeFormProps {
   materiale: Materiale;
 }
 
-export default function UnloadMaterialeFormData({ materiale: materialeProp }: UnloadMaterialeFormProps) {
+export default function UnloadMaterialeForm({ materiale: materialeProp }: UnloadMaterialeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormDataState>({});
   const { modalData, closeModal } = useModalStore();
   const materiale = materialeProp ?? (modalData as Materiale | undefined);
   const { updateMateriale } = useUpdateMateriale();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // 3. Stato errore
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formDataRef = useRef<FormDataState>({});
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -33,6 +31,7 @@ export default function UnloadMaterialeFormData({ materiale: materialeProp }: Un
     });
   };
 
+  // Submit movimento scarico
   const submit = useCallback(async () => {
     setErrorMessage(null);
     if (!materiale || !materiale._id) return false;
@@ -41,30 +40,27 @@ export default function UnloadMaterialeFormData({ materiale: materialeProp }: Un
       ...currentFormData,
       quantita: Math.round(Number(currentFormData.quantita) * 1000) / 1000,
       data: new Date().toISOString(),
-      tipo: getEnumValue(currentFormData.tipo, ['carico', 'scarico'] as const, 'scarico'),
+      tipo: 'scarico',
       noteOperatore: currentFormData.noteOperatore,
       causale: currentFormData.noteOperatore,
       DDT: '',
       dataDDT: '',
       fromUnload: true,
     };
-    const nuovaQuantita = Math.round((materiale.quantita - movimento.quantita) * 1000) / 1000;
-    const materialeAggiornato = {
-      ...materiale,
-      quantita: nuovaQuantita,
-      movimenti: [...(materiale.movimenti || []), movimento],
-    };
-
-    const validation = MaterialeSchemaOpzionale.safeParse(materialeAggiornato);
-    if (!validation.success) {
-      setErrorMessage('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+    // Validazione solo sul movimento corrente
+    const { MovimentoSchema } = await import('@/schemas/MaterialeSchema');
+    const movimentoValidation = MovimentoSchema.safeParse(movimento);
+    if (!movimentoValidation.success) {
+      setErrorMessage('Errore di validazione:\n' + movimentoValidation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
     }
-
-    await updateMateriale(String(materiale._id), {
-      quantita: nuovaQuantita,
-      movimenti: [...(materiale.movimenti || []), movimento],
-    });
+    const nuovaQuantita = Math.round((materiale.quantita - movimento.quantita) * 1000) / 1000;
+    try {
+      await updateMateriale(String(materiale._id), movimento, nuovaQuantita);
+    } catch {
+      setErrorMessage('Errore durante la richiesta al server per lo scarico materiale.');
+      return false;
+    }
     setErrorMessage(null);
     router.refresh();
     closeModal('unloadMateriale');

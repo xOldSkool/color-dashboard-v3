@@ -2,6 +2,8 @@ import { useModalStore } from '@/store/useModalStore';
 import { useUpdatePantone } from '@/hooks/usePantone';
 import { useUpdateMagazzinoPantoni } from '@/hooks/useUpdateMagazzinoPantoni';
 import { useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
+import { useLoadPantone } from '@/hooks/useLoadPantone';
+import { usePantoneMateriali } from '@/hooks/useMateriali';
 import { Pantone, BasiPantone } from '@/types/pantoneTypes';
 import Button from '@/components/Button';
 import { normalizzaBasi } from '@/lib/pantoni/normalizzaBasi';
@@ -47,11 +49,27 @@ export default function ReturnPantonePartialModal({ pantone, quantita, onSuccess
     pantoneGroupId: pantone.pantoneGroupId,
     tipo: pantone.tipo,
   });
+  const { loadPantone } = useLoadPantone();
+  const { pantoneMateriali } = usePantoneMateriali();
 
   // Handler per "Usata"
   const handleUsata = async () => {
-    // Filtra solo basi valide
-    const basiPulite = Array.isArray(pantone.basi) ? pantone.basi.filter(isValidBase) : [];
+    // Filtra solo basi valide e normalizza utilizzo come array di stringhe
+    const basiPulite = Array.isArray(pantone.basi)
+      ? pantone.basi.filter(isValidBase).map((b) => {
+          const rawUtilizzo = (b as { utilizzo?: unknown }).utilizzo;
+          let utilizzoArr: string[] = [];
+          if (Array.isArray(rawUtilizzo)) {
+            utilizzoArr = rawUtilizzo.map((v: unknown) => String(v));
+          } else if (typeof rawUtilizzo === 'string' && rawUtilizzo.length > 0) {
+            utilizzoArr = (rawUtilizzo as string)
+              .split(',')
+              .map((v: string) => v.trim())
+              .filter(Boolean);
+          }
+          return { ...b, utilizzo: utilizzoArr };
+        })
+      : [];
     const updatePayload = deepClean({
       _id: pantone._id,
       nomePantone: pantone.nomePantone,
@@ -70,8 +88,6 @@ export default function ReturnPantonePartialModal({ pantone, quantita, onSuccess
       consumo: pantone.consumo,
       dose: pantone.dose,
       pantoneGroupId: pantone.pantoneGroupId,
-      consegnatoProduzione: false,
-      qtConsegnataProduzione: 0,
       is: pantone.is,
       noteArticolo: pantone.noteArticolo,
       urgente: pantone.urgente,
@@ -83,20 +99,38 @@ export default function ReturnPantonePartialModal({ pantone, quantita, onSuccess
       basiNormalizzate: normalizzaBasi(basiPulite),
       hex: pantone.hex,
     });
-    console.log('Handler per "Usata", updatePantone payload', updatePayload);
-    await updatePantone(String(pantone._id), updatePayload);
-    await updateMagazzinoPantoni({
-      pantoneGroupId: pantone.pantoneGroupId,
-      tipo: pantone.tipo,
-      dispMagazzino: (magazzinoPantone?.dispMagazzino ?? 0) + quantita,
-      ultimoUso: new Date().toISOString(),
-      movimento: {
-        tipo: 'carico',
-        quantita,
-        data: new Date().toISOString(),
-        causale: 'Rimanenza produzione',
-      },
+    await updatePantone(String(pantone._id), {
+      ...updatePayload,
+      consegnatoProduzione: false,
+      qtConsegnataProduzione: 0,
     });
+    // --- LOGICA CENTRALIZZATA: aggiorna anche materiali se serve ---
+    const basePantone = basiPulite.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'));
+    if (basePantone) {
+      const materiale = pantoneMateriali.find((m) => m.nomeMateriale === basePantone.nomeMateriale && m.fornitore === basePantone.fornitore);
+      if (!materiale) return;
+      const result = await loadPantone({
+        materialeId: String(materiale._id),
+        nomeMateriale: materiale.nomeMateriale,
+        fornitore: materiale.fornitore,
+        quantita,
+        causale: 'Rientro produzione (usata)',
+      });
+      if (!result.success) return;
+    } else {
+      await updateMagazzinoPantoni({
+        pantoneGroupId: pantone.pantoneGroupId,
+        tipo: pantone.tipo,
+        dispMagazzino: (magazzinoPantone?.dispMagazzino ?? 0) + quantita,
+        ultimoUso: new Date().toISOString(),
+        movimento: {
+          tipo: 'carico',
+          quantita,
+          data: new Date().toISOString(),
+          causale: 'Rientro produzione (usata)',
+        },
+      });
+    }
     useModalStore.getState().closeModal('returnPantonePartial');
     useModalStore.getState().closeModal('returnPantone'); // chiude anche la modale precedente
     router.refresh();
@@ -105,7 +139,22 @@ export default function ReturnPantonePartialModal({ pantone, quantita, onSuccess
 
   // Handler per "Rimane in produzione"
   const handleRimane = async () => {
-    const basiPulite = Array.isArray(pantone.basi) ? pantone.basi.filter(isValidBase) : [];
+    // Filtra solo basi valide e normalizza utilizzo come array di stringhe
+    const basiPulite = Array.isArray(pantone.basi)
+      ? pantone.basi.filter(isValidBase).map((b) => {
+          const rawUtilizzo = (b as { utilizzo?: unknown }).utilizzo;
+          let utilizzoArr: string[] = [];
+          if (Array.isArray(rawUtilizzo)) {
+            utilizzoArr = rawUtilizzo.map((v: unknown) => String(v));
+          } else if (typeof rawUtilizzo === 'string' && rawUtilizzo.length > 0) {
+            utilizzoArr = (rawUtilizzo as string)
+              .split(',')
+              .map((v: string) => v.trim())
+              .filter(Boolean);
+          }
+          return { ...b, utilizzo: utilizzoArr };
+        })
+      : [];
     // Calcola la nuova qtConsegnataProduzione residua
     const nuovaQtConsegnataProduzione = (typeof pantone.qtConsegnataProduzione === 'number' ? pantone.qtConsegnataProduzione : 0) - quantita;
     const updatePayload = deepClean({
@@ -126,8 +175,6 @@ export default function ReturnPantonePartialModal({ pantone, quantita, onSuccess
       consumo: pantone.consumo,
       dose: pantone.dose,
       pantoneGroupId: pantone.pantoneGroupId,
-      qtConsegnataProduzione: nuovaQtConsegnataProduzione,
-      consegnatoProduzione: true,
       is: pantone.is,
       noteArticolo: pantone.noteArticolo,
       urgente: pantone.urgente,
@@ -139,20 +186,38 @@ export default function ReturnPantonePartialModal({ pantone, quantita, onSuccess
       basiNormalizzate: normalizzaBasi(basiPulite),
       hex: pantone.hex,
     });
-    console.log('Handler per "Rimane in produzione", updatePantone payload', updatePayload);
-    await updatePantone(String(pantone._id), updatePayload);
-    await updateMagazzinoPantoni({
-      pantoneGroupId: pantone.pantoneGroupId,
-      tipo: pantone.tipo,
-      dispMagazzino: (magazzinoPantone?.dispMagazzino ?? 0) + quantita,
-      ultimoUso: new Date().toISOString(),
-      movimento: {
-        tipo: 'carico',
-        quantita,
-        data: new Date().toISOString(),
-        causale: 'Rientro produzione',
-      },
+    await updatePantone(String(pantone._id), {
+      ...updatePayload,
+      consegnatoProduzione: true,
+      qtConsegnataProduzione: nuovaQtConsegnataProduzione,
     });
+    // --- LOGICA CENTRALIZZATA: aggiorna anche materiali se serve ---
+    const basePantone = basiPulite.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'));
+    if (basePantone) {
+      const materiale = pantoneMateriali.find((m) => m.nomeMateriale === basePantone.nomeMateriale && m.fornitore === basePantone.fornitore);
+      if (!materiale) return;
+      const result = await loadPantone({
+        materialeId: String(materiale._id),
+        nomeMateriale: materiale.nomeMateriale,
+        fornitore: materiale.fornitore,
+        quantita,
+        causale: 'Rientro produzione (rimane)',
+      });
+      if (!result.success) return;
+    } else {
+      await updateMagazzinoPantoni({
+        pantoneGroupId: pantone.pantoneGroupId,
+        tipo: pantone.tipo,
+        dispMagazzino: (magazzinoPantone?.dispMagazzino ?? 0) + quantita,
+        ultimoUso: new Date().toISOString(),
+        movimento: {
+          tipo: 'carico',
+          quantita,
+          data: new Date().toISOString(),
+          causale: 'Rientro produzione (rimane)',
+        },
+      });
+    }
     useModalStore.getState().closeModal('returnPantonePartial');
     useModalStore.getState().closeModal('returnPantone'); // chiude anche la modale precedente
     router.refresh();

@@ -1,5 +1,6 @@
-import { Pantone } from '@/types/pantoneTypes';
+import { DeliverPantoneParams, Pantone } from '@/types/pantoneTypes';
 import axios from 'axios';
+import { useState, useCallback } from 'react';
 
 export function useCreatePantone() {
   const createPantone = async (pantone: Pantone): Promise<Pantone> => {
@@ -41,4 +42,34 @@ export function useUndoProducePantone() {
     return response.data;
   };
   return { undoProducePantone };
+}
+
+export function useDeliverPantone() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const deliverPantone = useCallback(async (params: DeliverPantoneParams) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/magazzinoPantoni/consegna', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      const result = await response.json();
+      if (!result.success) {
+        setError(result.error || 'Errore sconosciuto');
+        return { success: false, error: result.error };
+      }
+      return { success: true };
+    } catch {
+      setError('Errore di rete o server');
+      return { success: false, error: 'Errore di rete o server' };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { deliverPantone, loading, error };
 }

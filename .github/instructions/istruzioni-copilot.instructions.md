@@ -1,5 +1,6 @@
 Spiega Sempre Perché Proponi Certe Soluzioni.
 Fai riferimento alle documentazioni più recenti di ogni elemento dello stack.
+Parla in italiano.
 Stack utilizzato:
 
 - Next.js (app router)

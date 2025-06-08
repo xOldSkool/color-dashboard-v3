@@ -13,14 +13,24 @@ export default function TableBody<T extends BaseItem>({
   currentPage,
   rowsPerPage,
 }: Omit<TableBodyProps<T>, 'sortKey' | 'sortOrder' | 'handleSort' | 'allSelected' | 'selectAll' | 'clearAll' | 'allIds'>): JSX.Element {
-  // Porta in cima gli elementi urgenti SOLO se tableKey === 'da-produrre'
+  // Ordina: urgenti in cima solo per 'da-produrre', poi per dataCreazione decrescente
   const sortedData =
     tableKey === 'da-produrre'
-      ? [
-          ...data.filter((item) => 'urgente' in item && item.urgente === true),
-          ...data.filter((item) => !('urgente' in item && item.urgente === true)),
-        ]
-      : data;
+      ? [...data].sort((a, b) => {
+          // Prima urgenti
+          const aUrg = 'urgente' in a && a.urgente === true ? 1 : 0;
+          const bUrg = 'urgente' in b && b.urgente === true ? 1 : 0;
+          if (aUrg !== bUrg) return bUrg - aUrg;
+          // Poi per dataCreazione
+          const aDate = 'dataCreazione' in a && a.dataCreazione ? new Date(a.dataCreazione as string | Date).getTime() : 0;
+          const bDate = 'dataCreazione' in b && b.dataCreazione ? new Date(b.dataCreazione as string | Date).getTime() : 0;
+          return bDate - aDate;
+        })
+      : [...data].sort((a, b) => {
+          const aDate = 'dataCreazione' in a && a.dataCreazione ? new Date(a.dataCreazione as string | Date).getTime() : 0;
+          const bDate = 'dataCreazione' in b && b.dataCreazione ? new Date(b.dataCreazione as string | Date).getTime() : 0;
+          return bDate - aDate;
+        });
 
   return (
     <>
@@ -51,6 +61,8 @@ export default function TableBody<T extends BaseItem>({
               const isUV = col.key === 'tipo';
               const isMovimentiMateriali = col.key === 'movimenti';
               const isMovimentiMaterialeSingolo = tableKey === 'movimenti-materiale';
+              // Gestione colonna utilizzo come array
+              const isUtilizzo = col.key === 'utilizzo';
 
               return (
                 <div
@@ -105,6 +117,8 @@ export default function TableBody<T extends BaseItem>({
                     <span className={item[col.key as keyof T] === 'UV' ? 'text-purple-500' : ''}>
                       {dateToItalia(col.key as string, item[col.key as keyof T]) || '-'}
                     </span>
+                  ) : isUtilizzo && 'utilizzo' in item && Array.isArray(item.utilizzo) ? (
+                    <span>{item.utilizzo.length > 0 ? item.utilizzo.join(', ') : '-'}</span>
                   ) : typeof item[col.key as keyof T] === 'object' && item[col.key as keyof T] !== null ? (
                     <span className="italic text-gray-400">-</span>
                   ) : (

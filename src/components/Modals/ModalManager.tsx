@@ -123,7 +123,7 @@ export default function ModalManager() {
         </Modal>
       )}
       {modals.transferPantone && (
-        <Modal title="Trasferisci Pantone" modalKey="transferPantone" onClose={() => closeModal('transferPantone')}>
+        <Modal title="Trasferisci Pantone" modalKey="transferPantone" onClose={() => closeModal('transferPantone')} showFooter={false}>
           <TransferPantone pantone={selectedPantoni[0]} />
         </Modal>
       )}

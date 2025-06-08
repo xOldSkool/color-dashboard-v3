@@ -1,9 +1,14 @@
 import { Db } from 'mongodb';
 import { Materiale } from '@/types/materialeTypes';
-import { getMaterialiByQuery } from './db';
+import { getMaterialiByQuery, updateMaterialeCompleto as updateMaterialeCompletoDb } from './db';
 
-// Funzione di business logic per ottenere solo i materiali con utilizzo: 'Pantone'
+// Funzione per ottenere solo i materiali con utilizzo: 'Pantone'
 export async function getPantoneMateriali(db: Db): Promise<Materiale[]> {
-  // Eventuale logica aggiuntiva qui (es: ordinamento, filtri extra)
-  return getMaterialiByQuery(db, { utilizzo: 'Pantone' });
+  return getMaterialiByQuery(db, { utilizzo: { $in: ['Pantone'] } });
+}
+
+// Logica per aggiornamento completo materiale
+export async function updateMaterialeCompletoLogic(db: Db, id: string, materiale: Omit<Materiale, '_id'>) {
+  // Qui puoi aggiungere eventuale logica di business/normalizzazione
+  return updateMaterialeCompletoDb(db, id, materiale);
 }

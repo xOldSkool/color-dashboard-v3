@@ -10,7 +10,7 @@ import { useModalStore } from '@/store/useModalStore';
 import { BaseMateriale } from '@/types/materialeTypes';
 import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState, useMemo } from 'react';
 import { useCallback } from 'react';
 
 export interface FormData {
@@ -22,13 +22,18 @@ export default function NewPantoneForm() {
   const { createPantone } = useCreatePantone();
   const [formData, setFormData] = useState<FormData>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
 
   const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
   const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
 
   const basiFiltrate =
-    !loading && tipoSelezionato ? basi.filter((base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && base.utilizzo === 'Base') : [];
+    !loading && tipoSelezionato
+      ? basi.filter(
+          (base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base')
+        )
+      : [];
 
   const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
     if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
@@ -59,6 +64,7 @@ export default function NewPantoneForm() {
     const selectedId = e.target.value;
     const selected = pantoneMateriali.find((m) => m._id?.toString() === selectedId);
     if (selected) {
+      setPantoneEsternoSelezionato(selectedId);
       setFormData((prev) => ({
         ...prev,
         nomePantone: selected.label,
@@ -66,20 +72,59 @@ export default function NewPantoneForm() {
         tipo: selected.tipo,
         dose: 2.5,
         codiceFornitore: selected.codiceFornitore,
+        pantoneEsternoInput: 2.5,
       }));
+    } else {
+      // Rimuovi pantoneEsternoInput PRIMA di aggiornare lo stato
+      setFormData((prev) => {
+        if ('pantoneEsternoInput' in prev) {
+          const rest = { ...prev };
+          delete rest.pantoneEsternoInput;
+          return rest;
+        }
+        return prev;
+      });
+      setPantoneEsternoSelezionato(null);
     }
+  };
+
+  const handlePantoneEsternoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(',', '.');
+    setFormData((prev) => ({
+      ...prev,
+      pantoneEsternoInput: value,
+    }));
   };
 
   useEffect(() => {
     // Somma tutte le quantità inserite nelle basi
-    const doseTotale = Object.entries(formData)
+    const doseBasi = Object.entries(formData)
       .filter(([key]) => key.startsWith('valore_'))
       .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
-    // Aggiorna il campo dose solo se è diverso
+    // Se presente, aggiungi la quantità del pantone esterno
+    const dosePantoneEsterno =
+      pantoneEsternoSelezionato && formData.pantoneEsternoInput !== undefined && formData.pantoneEsternoInput !== ''
+        ? Number(formData.pantoneEsternoInput) || 0
+        : 0;
+    const doseTotale = doseBasi + dosePantoneEsterno;
     if (formData.dose !== doseTotale) {
       setFormData((prev) => ({ ...prev, dose: doseTotale }));
     }
-  }, [formData]);
+  }, [formData, pantoneEsternoSelezionato]);
+
+  const utilizzo = useMemo(() => {
+    if (formData.utilizzo) {
+      if (Array.isArray(formData.utilizzo)) {
+        return formData.utilizzo as string[];
+      } else if (typeof formData.utilizzo === 'string') {
+        return formData.utilizzo
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean);
+      }
+    }
+    return [];
+  }, [formData.utilizzo]);
 
   const pantone: Record<string, string | number | undefined> = {};
   for (const [key, value] of Object.entries(formData)) {
@@ -90,23 +135,37 @@ export default function NewPantoneForm() {
 
   const basiFinali = Object.entries(basiRaggruppatePerName)
     .map(([nomeBase, basiArr]) => {
-      // Recupero il fornitore selezionato per questa base
       const fornitoreSelezionato = formData[`fornitore_${nomeBase}`];
-      // Recupero la quantità inserita per questa base
       const valoreInserito = formData[`valore_${nomeBase}`];
-      // Trovo il documento della base corrispondente al fornitore selezionato
       const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
       return {
         nomeMateriale: baseSelezionata.nomeMateriale,
         label: baseSelezionata.label,
-        quantita: Number(valoreInserito) || 0, // sempre number
+        quantita: Number(valoreInserito) || 0,
         codiceFornitore: String(baseSelezionata.codiceFornitore || ''),
         fornitore: String(baseSelezionata.fornitore || ''),
         tipo: String(baseSelezionata.tipo || ''),
         codiceColore: String(baseSelezionata.codiceColore || ''),
+        utilizzo: ['Base'],
       };
     })
     .filter((b) => b.quantita > 0);
+
+  if (pantoneEsternoSelezionato && formData.pantoneEsternoInput) {
+    const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+    if (pantoneEsterno) {
+      basiFinali.push({
+        nomeMateriale: pantoneEsterno.nomeMateriale,
+        label: pantoneEsterno.label,
+        quantita: Number(formData.pantoneEsternoInput) || 0,
+        codiceFornitore: String(pantoneEsterno.codiceFornitore || ''),
+        fornitore: String(pantoneEsterno.fornitore || ''),
+        tipo: String(pantoneEsterno.tipo || ''),
+        codiceColore: String(pantoneEsterno.codiceColore || ''),
+        utilizzo: ['Pantone'],
+      });
+    }
+  }
 
   const submit = useCallback(async () => {
     try {
@@ -137,9 +196,9 @@ export default function NewPantoneForm() {
         consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
         qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
         pantoneGroupId: String(formData.pantoneGroupId || ''),
-        codiceFornitore: String(formData.codiceFornitore || ''),
         basi: basiFinali,
-        basiNormalizzate: String(''), // Se serve, aggiungi la logica
+        basiNormalizzate: String(''),
+        utilizzo,
       };
 
       // Validazione con Zod
@@ -159,7 +218,7 @@ export default function NewPantoneForm() {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [router, formData, basiFinali, createPantone]);
+  }, [router, formData, basiFinali, createPantone, utilizzo]);
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};
@@ -215,6 +274,7 @@ export default function NewPantoneForm() {
           </select>
         </div>
       </div>
+
       <div className="grid grid-cols-1 gap-2">
         <div className="grid grid-cols-3 gap-2">
           <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
@@ -223,7 +283,6 @@ export default function NewPantoneForm() {
         </div>
         <div className="flex flex-col gap-5">
           <H3 className="mt-5">Composizione</H3>
-
           {tipoSelezionato ? (
             loading ? (
               <Loader />
@@ -232,54 +291,81 @@ export default function NewPantoneForm() {
             ) : basi.length === 0 ? (
               <p className="text-neutral-400 italic">Nessuna base disponibile per questo &quot;Tipo&quot;.</p>
             ) : (
-              <div className="grid grid-cols-4 gap-2">
-                {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
-                  const fornitoriDisponibili = basi.map((b) => ({
-                    id: b._id!.toString(),
-                    label: b.label,
-                    fornitore: b.fornitore,
-                    codiceColore: b.codiceColore,
-                  }));
-                  const label = basi[0].label || nome;
-
-                  return (
-                    <div key={nome}>
-                      <label>
-                        {label}
-                        <span className="text-sm">
-                          {fornitoriDisponibili.length > 1 ? (
-                            <select
-                              name={`fornitore_${nome}`}
-                              className="ml-2 rounded bg-zinc-800 text-white italic focus:outline-none"
-                              onChange={handleChange}
-                              value={formData[`fornitore_${nome}`] || ''}
-                            >
-                              <option value="">Seleziona fornitore</option>
-                              {fornitoriDisponibili.map((f) => (
-                                <option key={f.id} value={f.fornitore}>
-                                  {f.fornitore} - {f.codiceColore}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="ml-2 text-sm text-neutral-300 italic">
-                              {fornitoriDisponibili[0].fornitore} - {fornitoriDisponibili[0].codiceColore}
-                            </span>
-                          )}
-                        </span>
-                      </label>
+              <>
+                <div>
+                  {pantoneEsternoSelezionato && (
+                    <div className="mb-4 flex flex-col">
+                      {(() => {
+                        const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+                        if (!pantoneEsterno) return null;
+                        return (
+                          <label className="mb-1">
+                            {pantoneEsterno.label}
+                            <span className="ml-2 text-sm text-neutral-300 italic">{pantoneEsterno.fornitore}</span>
+                          </label>
+                        );
+                      })()}
                       <input
-                        name={`valore_${nome}`}
                         type="number"
-                        placeholder="0"
-                        className="w-full p-2 rounded bg-zinc-600 text-white focus:outline-none mt-1"
-                        value={formData[`valore_${nome}`] || ''}
-                        onChange={handleChange}
+                        name="pantoneEsternoInput"
+                        className="w-32 p-2 rounded bg-zinc-600 text-white focus:outline-none"
+                        value={formData.pantoneEsternoInput ?? 2.5}
+                        onChange={handlePantoneEsternoInputChange}
+                        min={0}
+                        step={0.01}
                       />
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
+                    const fornitoriDisponibili = basi.map((b) => ({
+                      id: b._id!.toString(),
+                      label: b.label,
+                      fornitore: b.fornitore,
+                      codiceColore: b.codiceColore,
+                    }));
+                    const label = basi[0].label || nome;
+
+                    return (
+                      <div key={nome}>
+                        <label>
+                          {label}
+                          <span className="text-sm">
+                            {fornitoriDisponibili.length > 1 ? (
+                              <select
+                                name={`fornitore_${nome}`}
+                                className="ml-2 rounded bg-zinc-800 text-white italic focus:outline-none"
+                                onChange={handleChange}
+                                value={formData[`fornitore_${nome}`] || ''}
+                              >
+                                <option value="">Seleziona fornitore</option>
+                                {fornitoriDisponibili.map((f) => (
+                                  <option key={f.id} value={f.fornitore}>
+                                    {f.fornitore} - {f.codiceColore}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span className="ml-2 text-sm text-neutral-300 italic">
+                                {fornitoriDisponibili[0].fornitore} - {fornitoriDisponibili[0].codiceColore}
+                              </span>
+                            )}
+                          </span>
+                        </label>
+                        <input
+                          name={`valore_${nome}`}
+                          type="number"
+                          placeholder="0"
+                          className="w-full p-2 rounded bg-zinc-600 text-white focus:outline-none mt-1"
+                          value={formData[`valore_${nome}`] || ''}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )
           ) : (
             <p className="text-neutral-400 italic">Seleziona un &quot;Tipo&quot; per vedere le basi disponibili.</p>

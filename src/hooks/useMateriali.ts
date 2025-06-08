@@ -54,10 +54,18 @@ export function useCreateMateriale() {
 }
 
 export function useUpdateMateriale() {
-  const updateMateriale = async (id: string, updateData: Partial<Omit<Materiale, '_id'>>) => {
-    await axios.patch<Materiale>(`/api/materiali/`, { id, ...updateData });
+  // Aggiorna materiale passando SOLO il movimento e la nuova quantità
+  const updateMateriale = async (id: string, movimento: unknown, nuovaQuantita: number) => {
+    await axios.patch<Materiale>(`/api/materiali/`, { id, movimento, quantita: nuovaQuantita });
   };
   return { updateMateriale };
+}
+
+export function useUpdateMaterialeCompleto() {
+  const updateMaterialeCompleto = async (id: string, materiale: Omit<Materiale, '_id'>) => {
+    await axios.patch(`/api/materiali/`, { id, ...materiale, fullUpdate: true });
+  };
+  return { updateMaterialeCompleto };
 }
 
 export function usePantoneMateriali() {
