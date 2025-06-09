@@ -20,7 +20,7 @@ export default function TableBody<T extends BaseItem>({
     <>
       {paginatedData.length === 0 ? (
         <div className="row-interactive grid grid-cols-[50px_repeat(auto-fit,_minmax(50px,_1fr))] items-center text-center py-2">
-          <div className="col-span-full w-full text-gray-400 text-center py-2">Nessun pantone o materiale presente</div>
+          <div className="col-span-full w-full text-[var(--text)]text-center py-2">Nessun pantone o materiale presente</div>
         </div>
       ) : (
         paginatedData.map((item) => {
