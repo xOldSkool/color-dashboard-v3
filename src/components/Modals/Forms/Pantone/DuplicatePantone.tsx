@@ -47,7 +47,6 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
           fd.pantoneEsternoInput = basePantone.quantita;
         }
       }
-      console.log('[DEBUG] formData inizializzato:', fd);
       setFormData(fd);
     }
   }, [pantone, pantoneMateriali]);
@@ -129,7 +128,6 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         ? Number(formData.pantoneEsternoInput) || 0
         : 0;
     const doseTotale = doseBasi + dosePantoneEsterno;
-    console.log('[DEBUG] Calcolo dose:', { doseBasi, dosePantoneEsterno, doseTotale, formData });
     if (formData.dose !== doseTotale) {
       setFormData((prev) => ({ ...prev, dose: doseTotale }));
     }
@@ -202,8 +200,6 @@ export default function DuplicatePantone({ pantone }: DuplicatePantoneProps) {
         basi: basiFinali,
         basiNormalizzate: '', // Se serve, aggiungi la logica
       };
-
-      console.log('[DEBUG] Submit nuovoPantone:', nuovoPantone);
 
       const validation = PantoneSchema.safeParse(nuovoPantone);
       if (!validation.success) {

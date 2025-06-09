@@ -13,10 +13,8 @@ import { z } from 'zod';
 import React from 'react';
 
 export interface FormData {
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | string[] | undefined;
 }
-
-const utilizzoOptions = ['Base', 'Materiale', 'Pantone'] as const;
 
 export default function NewMaterialeForm() {
   const router = useRouter();
@@ -27,6 +25,21 @@ export default function NewMaterialeForm() {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const cleanedValue = value.replace(',', '.');
+    // Gestione checkbox multipli (array)
+    if (type === 'checkbox' && name === 'utilizzo' && e.target instanceof HTMLInputElement) {
+      const checked = e.target.checked;
+      setFormData((prev) => {
+        const prevArr = Array.isArray(prev.utilizzo) ? prev.utilizzo : [];
+        let newArr: string[];
+        if (checked) {
+          newArr = [...prevArr, value];
+        } else {
+          newArr = prevArr.filter((v: string) => v !== value);
+        }
+        return { ...prev, [name]: newArr };
+      });
+      return;
+    }
     setFormData((prev) => {
       const updated = {
         ...prev,
@@ -52,7 +65,9 @@ export default function NewMaterialeForm() {
         fornitore: String(formData.fornitore || ''),
         tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: Array.isArray(formData.utilizzo) ? formData.utilizzo : [getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base')],
+        utilizzo: Array.isArray(formData.utilizzo)
+          ? (formData.utilizzo.filter((v): v is 'Base' | 'Materiale' | 'Pantone' => ['Base', 'Materiale', 'Pantone'].includes(v)) as Array<'Base' | 'Materiale' | 'Pantone'>)
+          : [getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base')],
         noteMateriale: String(formData.noteMateriale || ''),
         dataCreazione: new Date().toISOString(),
         movimenti: [], // oppure logica per aggiungere movimenti
@@ -111,39 +126,6 @@ export default function NewMaterialeForm() {
     <form>
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       <InputMap fields={materialeFieldsCreate} formData={formData} handleChange={handleChange} />
-      <div className="mb-4">
-        <label className="block font-medium mb-1">Utilizzo</label>
-        <div className="flex gap-4">
-          {utilizzoOptions.map((option) => (
-            <label key={option} className="flex items-center gap-1">
-              <input
-                type="checkbox"
-                name="utilizzo"
-                value={option}
-                checked={Array.isArray(formData.utilizzo) ? formData.utilizzo.includes(option) : false}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setFormData((prev) => {
-                    const current = Array.isArray(prev.utilizzo)
-                      ? prev.utilizzo
-                      : typeof prev.utilizzo === 'string' && prev.utilizzo.length > 0
-                        ? prev.utilizzo.split(',')
-                        : [];
-                    let next: string[];
-                    if (checked) {
-                      next = [...current, option];
-                    } else {
-                      next = current.filter((v) => v !== option);
-                    }
-                    return { ...prev, utilizzo: next.join(',') };
-                  });
-                }}
-              />
-              {option}
-            </label>
-          ))}
-        </div>
-      </div>
     </form>
   );
 }

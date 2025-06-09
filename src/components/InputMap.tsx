@@ -11,7 +11,7 @@ import { ChangeEvent, createElement, JSX } from 'react';
 
 interface InputMapProps {
   fields: Field[];
-  formData: Record<string, string | number | undefined>;
+  formData: Record<string, string | number | undefined | string[]>;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
@@ -24,8 +24,49 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
 
         if (!tag) return null;
 
+        // Gestione speciale per checkbox multipli (array)
+        if (
+          field.form === 'input' &&
+          field.type === 'checkbox' &&
+          'options' in field && Array.isArray(field.options)
+        ) {
+          const options = field.options;
+          // formData[field.name] può essere string | number | undefined | string[]
+          let selectedValues: string[] = [];
+          const raw = formData[field.name];
+          if (Array.isArray(raw)) {
+            selectedValues = raw as string[];
+          } else if (typeof raw === 'string' && raw) {
+            selectedValues = [raw];
+          }
+          return (
+            <div key={index} className="flex flex-col items-start">
+              {field.label && <label>{field.label}</label>}
+              <div className="flex gap-4">
+                {options.map((opt) => (
+                  <label key={opt} className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      name={field.name}
+                      value={opt}
+                      checked={selectedValues.includes(opt)}
+                      onChange={handleChange}
+                    />
+                    {opt}
+                  </label>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
         const rawValue = formData[field.name];
-        let displayValue: string | number = rawValue ?? '';
+        let displayValue: string | number = '';
+        if (Array.isArray(rawValue)) {
+          displayValue = '';
+        } else if (rawValue !== undefined) {
+          displayValue = rawValue;
+        }
         if (field.name === 'dose' && typeof rawValue === 'number') {
           // Richiamo toFixed(3) SOLO se è davvero un number
           displayValue = rawValue.toFixed(3);

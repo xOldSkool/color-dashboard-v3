@@ -199,8 +199,9 @@ export const materialeFieldsCreate: Field[] = [
     required: true,
   },
   {
-    form: 'select',
-    options: ['Seleziona...', 'Base', 'Pantone', 'Materiale'],
+    form: 'input',
+    type: 'checkbox',
+    options: ['Base', 'Pantone', 'Materiale'],
     name: 'utilizzo',
     label: 'Utilizzo',
     required: true,

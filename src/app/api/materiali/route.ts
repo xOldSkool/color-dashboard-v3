@@ -4,8 +4,6 @@ import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 
 export async function GET(request: NextRequest) {
   const db = await connectToDatabase();
@@ -15,12 +13,7 @@ export async function GET(request: NextRequest) {
   if (utilizzo === 'Pantone') {
     // Recupera solo i materiali Pantone tramite la business logic
     const pantoni = await getPantoneMateriali(db);
-    try {
-      const logPath = path.join(process.cwd(), 'debug-materiali.log');
-      await fs.appendFile(logPath, 'Pantoni trovati: ' + JSON.stringify(pantoni) + '\n', 'utf8');
-    } catch {}
-    console.log('Pantoni trovati:', pantoni);
-    // RIMOSSA VALIDAZIONE ZOD GLOBALE PER EVITARE ERRORI SU DATI LEGACY
+
     return NextResponse.json(pantoni);
   }
 
@@ -58,11 +51,6 @@ export async function PATCH(request: NextRequest) {
     const db = await connectToDatabase();
     const collection = db.collection<Materiale>('materiali');
     const rawData = await request.json();
-    // DEBUG: logga il payload ricevuto
-    try {
-      const logPath = path.join(process.cwd(), 'debug-materiali.log');
-      await fs.appendFile(logPath, 'PATCH payload: ' + JSON.stringify(rawData) + '\n', 'utf8');
-    } catch {}
 
     // PATCH completo materiale
     if (rawData.fullUpdate === true) {

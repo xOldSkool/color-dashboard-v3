@@ -12,6 +12,11 @@ export interface InputField extends FieldBase {
   type?: string;
 }
 
+export interface CheckboxGroupField extends InputField {
+  type: 'checkbox';
+  options: string[];
+}
+
 export interface TextareaField extends FieldBase {
   form: 'textarea';
 }
@@ -21,7 +26,7 @@ export interface SelectField extends FieldBase {
   options: string[];
 }
 
-export type Field = InputField | TextareaField | SelectField;
+export type Field = InputField | CheckboxGroupField | TextareaField | SelectField;
 
 export interface TableColumn {
   key: string;
