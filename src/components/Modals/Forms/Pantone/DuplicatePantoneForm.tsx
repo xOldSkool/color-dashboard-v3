@@ -1,8 +1,9 @@
+'use client';
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import PantoneFormLayout from './PantoneFormLayout';
 import { usePantoneForm } from '@/hooks/usePantoneForm';
 import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
-import { useUpdatePantone } from '@/hooks/usePantone';
+import { useCreatePantone } from '@/hooks/usePantone';
 import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { getEnumValue } from '@/utils/getEnumValues';
@@ -10,19 +11,20 @@ import { pantoneToFormData } from '@/lib/adapter';
 import { useRouter } from 'next/navigation';
 import { Pantone } from '@/types/pantoneTypes';
 
-interface EditFormProps {
+interface DuplicatePantoneProps {
   pantone: Pantone;
 }
 
-export default function EditPantoneForm({ pantone }: EditFormProps) {
+export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps) {
   const router = useRouter();
-  const { updatePantone } = useUpdatePantone();
-  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
+  const { createPantone } = useCreatePantone();
   const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
+  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
 
   // Precarica formData dal pantone originale
   const initialData = useMemo(() => {
     const fd = pantoneToFormData(pantone);
+    // Se esiste una base Pantone, preimposta pantoneEsternoSelezionato
     if (Array.isArray(pantone.basi)) {
       const basePantone = pantone.basi.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'));
       if (basePantone) {
@@ -63,7 +65,7 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   }, [basiFiltrate]);
 
   // Effetto: sincronizza formData con i campi dinamici delle basi
-  useEffect(() => {
+  React.useEffect(() => {
     const nuoviCampi: Record<string, string | number> = {};
     Object.keys(basiRaggruppatePerName).forEach((nome) => {
       const fornitoreKey = `fornitore_${nome}`;
@@ -93,7 +95,7 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     });
   }, [basiRaggruppatePerName]);
 
-  // Custom submit logic per modifica
+  // Custom submit logic per duplicazione
   const onSubmit = async (formData: Record<string, string | number | undefined>) => {
     const basiFinali = Object.entries(basiRaggruppatePerName)
       .map(([nomeBase, basiArr]) => {
@@ -127,42 +129,42 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         });
       }
     }
-    if (!pantone._id) return false;
-    const aggiornato = {
-      ...pantone,
-      nomePantone: String(formData.nomePantone ?? pantone.nomePantone),
-      variante: String(formData.variante ?? pantone.variante),
-      articolo: String(formData.articolo ?? pantone.articolo),
-      is: String(formData.is ?? pantone.is),
-      cliente: String(formData.cliente ?? pantone.cliente),
-      noteArticolo: String(formData.noteArticolo ?? pantone.noteArticolo),
-      urgente: formData.urgente !== undefined ? String(formData.urgente) === 'true' : (pantone.urgente ?? false),
-      tipoCarta: String(formData.tipoCarta ?? pantone.tipoCarta),
-      fornitoreCarta: String(formData.fornitoreCarta ?? pantone.fornitoreCarta),
-      passoCarta: Number(formData.passoCarta ?? pantone.passoCarta) || 0,
-      hCarta: Number(formData.hCarta ?? pantone.hCarta) || 0,
-      stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso') ?? pantone.stato,
-      tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB') ?? pantone.tipo,
-      descrizione: String(formData.descrizione ?? pantone.descrizione),
-      noteColore: String(formData.noteColore ?? pantone.noteColore),
-      consumo: Number(formData.consumo ?? pantone.consumo) || 0,
-      dose: Number(formData.dose ?? pantone.dose) || 0,
-      daProdurre: formData.daProdurre !== undefined ? String(formData.daProdurre) === 'true' : (pantone.daProdurre ?? false),
-      qtDaProdurre: Number(formData.qtDaProdurre ?? pantone.qtDaProdurre) || 0,
-      battuteDaProdurre: Number(formData.battuteDaProdurre ?? pantone.battuteDaProdurre) || 0,
-      consegnatoProduzione:
-        formData.consegnatoProduzione !== undefined ? String(formData.consegnatoProduzione) === 'true' : (pantone.consegnatoProduzione ?? false),
-      qtConsegnataProduzione: Number(formData.qtConsegnataProduzione ?? pantone.qtConsegnataProduzione) || 0,
-      pantoneGroupId: String(formData.pantoneGroupId ?? pantone.pantoneGroupId),
+    const nuovoPantone = {
+      nomePantone: String(formData.nomePantone || ''),
+      variante: String(formData.variante || ''),
+      dataCreazione: new Date().toISOString(),
+      ultimoUso: String(''),
+      articolo: String(formData.articolo || ''),
+      is: String(formData.is || ''),
+      cliente: String(formData.cliente || ''),
+      noteArticolo: String(formData.noteArticolo || ''),
+      urgente: Boolean(formData.urgente) && formData.urgente !== 'false',
+      tipoCarta: String(formData.tipoCarta || ''),
+      fornitoreCarta: String(formData.fornitoreCarta || ''),
+      passoCarta: Number(formData.passoCarta) || 0,
+      hCarta: Number(formData.hCarta) || 0,
+      stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
+      tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
+      descrizione: String(formData.descrizione || ''),
+      noteColore: String(formData.noteColore || ''),
+      consumo: Number(formData.consumo) || 0,
+      dose: Number(formData.dose) || 0,
+      daProdurre: Boolean(formData.daProdurre) && formData.daProdurre !== 'false',
+      qtDaProdurre: Number(formData.qtDaProdurre) || 0,
+      battuteDaProdurre: Number(formData.battuteDaProdurre) || 0,
+      consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
+      qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
+      pantoneGroupId: String(formData.pantoneGroupId || ''),
       basi: basiFinali,
-      basiNormalizzate: pantone.basiNormalizzate ?? '',
+      basiNormalizzate: String(''),
+      utilizzo: [],
     };
-    const validation = PantoneSchema.safeParse(aggiornato);
+    const validation = PantoneSchema.safeParse(nuovoPantone);
     if (!validation.success) {
       alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
     }
-    await updatePantone(pantone._id.toString(), aggiornato);
+    await createPantone(nuovoPantone);
     router.refresh();
     return true;
   };
@@ -171,15 +173,16 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     initialData: localFormData,
     onSubmit,
     validateFields,
-    modalKey: 'editPantone',
+    modalKey: 'duplicatePantone',
   });
 
   // Sincronizza localFormData con formData di usePantoneForm
-  useEffect(() => {
+  React.useEffect(() => {
     setLocalFormData(pantoneForm.formData);
   }, [pantoneForm.formData]);
 
   // Autocompletamento campi quando si seleziona un pantone esterno
+  // Questo effetto DEVE essere dopo la dichiarazione di pantoneForm!
   useEffect(() => {
     if (!pantoneEsternoSelezionato) return;
     const selected = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);

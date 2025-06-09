@@ -1,129 +1,35 @@
 'use client';
-import InputMap from '@/components/InputMap';
-import Loader from '@/components/Loader';
-import { H3 } from '@/components/UI/Titles&Texts';
-import { pantoneFieldsCenter, pantoneFieldsLeft, pantoneNotes } from '@/constants/inputFields';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
+import PantoneFormLayout from './PantoneFormLayout';
+import { usePantoneForm } from '@/hooks/usePantoneForm';
 import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
-import { PantoneSchema } from '@/schemas/PantoneSchema';
-import { useModalStore } from '@/store/useModalStore';
-import { BaseMateriale } from '@/types/materialeTypes';
-import { getEnumValue } from '@/utils/getEnumValues';
+import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useCallback } from 'react';
+import { Pantone } from '@/types/pantoneTypes';
+import { BasiPantone } from '@/types/pantoneTypes';
+import { BaseMateriale } from '@/types/materialeTypes';
+import { PantoneSchema } from '@/schemas/PantoneSchema';
+import { getEnumValue } from '@/utils/getEnumValues';
+import { useModalStore } from '@/store/useModalStore';
 
-export interface FormData {
-  [key: string]: string | number | undefined;
-}
-
-export default function NewPantoneForm() {
-  const router = useRouter();
-  const { createPantone } = useCreatePantone();
-  const [formData, setFormData] = useState<FormData>({});
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
-
-  const tipoSelezionato = typeof formData['tipo'] === 'string' ? formData['tipo'] : undefined;
-  const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
-  const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
-
-  const basiFiltrate =
-    !loading && tipoSelezionato
-      ? basi.filter(
-          (base) => base.tipo === tipoSelezionato && base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base')
-        )
-      : [];
-
-  const basiRaggruppatePerName = basiFiltrate.reduce<Record<string, BaseMateriale[]>>((acc, base) => {
-    if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
-    acc[base.nomeMateriale].push(base);
-    return acc;
-  }, {});
-
-  useEffect(() => {
-    const requiredFields = [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes].filter((field) => field.required);
-    const isValid = requiredFields.every((field) => {
-      const value = formData[field.name];
-      return value !== undefined && value !== '' && value !== null;
-    });
-    useModalStore.getState().setFormValid('newPantone', isValid);
-  }, [formData, basi]);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    const cleanedValue = value.replace(',', '.');
-    setFormData((prev) => ({
-      ...prev,
-      [name]: cleanedValue,
-    }));
-  };
-
-  // Handler per selezione pantone esterno
-  const handlePantoneMaterialeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
-    const selected = pantoneMateriali.find((m) => m._id?.toString() === selectedId);
-    if (selected) {
-      setPantoneEsternoSelezionato(selectedId);
-      setFormData((prev) => ({
-        ...prev,
-        nomePantone: selected.label,
-        variante: selected.fornitore,
-        tipo: selected.tipo,
-        dose: 2.5,
-        codiceFornitore: selected.codiceFornitore,
-        pantoneEsternoInput: 2.5,
-      }));
-    } else {
-      // Rimuovi pantoneEsternoInput PRIMA di aggiornare lo stato
-      setFormData((prev) => {
-        if ('pantoneEsternoInput' in prev) {
-          const rest = { ...prev };
-          delete rest.pantoneEsternoInput;
-          return rest;
-        }
-        return prev;
-      });
-      setPantoneEsternoSelezionato(null);
-    }
-  };
-
-  const handlePantoneEsternoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(',', '.');
-    setFormData((prev) => ({
-      ...prev,
-      pantoneEsternoInput: value,
-    }));
-  };
-
-  useEffect(() => {
-    // Somma tutte le quantità inserite nelle basi
-    const doseBasi = Object.entries(formData)
-      .filter(([key]) => key.startsWith('valore_'))
-      .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
-    // Se presente, aggiungi la quantità del pantone esterno
-    const dosePantoneEsterno =
-      pantoneEsternoSelezionato && formData.pantoneEsternoInput !== undefined && formData.pantoneEsternoInput !== ''
-        ? Number(formData.pantoneEsternoInput) || 0
-        : 0;
-    const doseTotale = doseBasi + dosePantoneEsterno;
-    if (formData.dose !== doseTotale) {
-      setFormData((prev) => ({ ...prev, dose: doseTotale }));
-    }
-  }, [formData, pantoneEsternoSelezionato]);
-
-  const pantone: Record<string, string | number | undefined> = {};
-  for (const [key, value] of Object.entries(formData)) {
-    if (!key.startsWith('fornitore_') && !key.startsWith('valore_')) {
-      pantone[key] = value;
-    }
-  }
-
-  const basiFinali = Object.entries(basiRaggruppatePerName)
+// Funzione helper per costruire un oggetto Pantone dal formData
+function buildPantoneFromFormData({
+  formData,
+  basiRaggruppatePerName,
+  pantoneEsternoSelezionato,
+  pantoneMateriali,
+}: {
+  formData: Record<string, string | number | undefined>;
+  basiRaggruppatePerName: Record<string, BaseMateriale[]>;
+  pantoneEsternoSelezionato: string | null;
+  pantoneMateriali: BaseMateriale[];
+}): Pantone {
+  const basiFinali: BasiPantone[] = Object.entries(basiRaggruppatePerName)
     .map(([nomeBase, basiArr]) => {
       const fornitoreSelezionato = formData[`fornitore_${nomeBase}`];
       const valoreInserito = formData[`valore_${nomeBase}`];
-      const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
+      const baseSelezionata = basiArr.find((b: BaseMateriale) => b.fornitore === fornitoreSelezionato) || basiArr[0];
       return {
         nomeMateriale: baseSelezionata.nomeMateriale,
         label: baseSelezionata.label,
@@ -136,9 +42,9 @@ export default function NewPantoneForm() {
       };
     })
     .filter((b) => b.quantita > 0);
-
+  // Pantone esterno
   if (pantoneEsternoSelezionato && formData.pantoneEsternoInput) {
-    const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+    const pantoneEsterno = pantoneMateriali.find((m: BaseMateriale) => m._id?.toString() === pantoneEsternoSelezionato);
     if (pantoneEsterno) {
       basiFinali.push({
         nomeMateriale: pantoneEsterno.nomeMateriale,
@@ -152,213 +58,168 @@ export default function NewPantoneForm() {
       });
     }
   }
+  return {
+    nomePantone: String(formData.nomePantone || ''),
+    variante: String(formData.variante || ''),
+    dataCreazione: new Date().toISOString(),
+    ultimoUso: '',
+    articolo: String(formData.articolo || ''),
+    is: String(formData.is || ''),
+    cliente: String(formData.cliente || ''),
+    noteArticolo: String(formData.noteArticolo || ''),
+    urgente: Boolean(formData.urgente) && formData.urgente !== 'false',
+    tipoCarta: String(formData.tipoCarta || ''),
+    fornitoreCarta: String(formData.fornitoreCarta || ''),
+    passoCarta: Number(formData.passoCarta) || 0,
+    hCarta: Number(formData.hCarta) || 0,
+    stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
+    tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
+    descrizione: String(formData.descrizione || ''),
+    noteColore: String(formData.noteColore || ''),
+    consumo: Number(formData.consumo) || 0,
+    dose: Number(formData.dose) || 0,
+    daProdurre: Boolean(formData.daProdurre) && formData.daProdurre !== 'false',
+    qtDaProdurre: Number(formData.qtDaProdurre) || 0,
+    battuteDaProdurre: Number(formData.battuteDaProdurre) || 0,
+    consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
+    qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
+    pantoneGroupId: String(formData.pantoneGroupId || ''),
+    basi: basiFinali,
+    basiNormalizzate: '',
+  };
+}
 
-  const submit = useCallback(async () => {
-    try {
-      const utilizzo = (formData.utilizzo ?? []) as string[];
-      // Costruisci l'oggetto Pantone rispettando il tipo richiesto
-      const nuovoPantone = {
-        nomePantone: String(formData.nomePantone || ''),
-        variante: String(formData.variante || ''),
-        dataCreazione: new Date().toISOString(),
-        ultimoUso: String(''),
-        articolo: String(formData.articolo || ''),
-        is: String(formData.is || ''),
-        cliente: String(formData.cliente || ''),
-        noteArticolo: String(formData.noteArticolo || ''),
-        urgente: Boolean(formData.urgente) && formData.urgente !== 'false',
-        tipoCarta: String(formData.tipoCarta || ''),
-        fornitoreCarta: String(formData.fornitoreCarta || ''),
-        passoCarta: Number(formData.passoCarta) || 0,
-        hCarta: Number(formData.hCarta) || 0,
-        stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
-        descrizione: String(formData.descrizione || ''),
-        noteColore: String(formData.noteColore || ''),
-        consumo: Number(formData.consumo) || 0,
-        dose: Number(formData.dose) || 0,
-        daProdurre: Boolean(formData.daProdurre) && formData.daProdurre !== 'false',
-        qtDaProdurre: Number(formData.qtDaProdurre) || 0,
-        battuteDaProdurre: Number(formData.battuteDaProdurre) || 0,
-        consegnatoProduzione: Boolean(formData.consegnatoProduzione) && formData.consegnatoProduzione !== 'false',
-        qtConsegnataProduzione: Number(formData.qtConsegnataProduzione) || 0,
-        pantoneGroupId: String(formData.pantoneGroupId || ''),
-        basi: basiFinali,
-        basiNormalizzate: String(''),
-        utilizzo,
-      };
+export default function NewPantoneForm() {
+  const router = useRouter();
+  const { createPantone } = useCreatePantone();
 
-      // Validazione con Zod
-      const validation = PantoneSchema.safeParse(nuovoPantone);
-      if (!validation.success) {
-        // Mostra errore (puoi usare un toast, alert, setState, ecc.)
-        alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
-        return false;
+  // Stato locale per formData (per sincronizzazione campi dinamici)
+  const [localFormData, setLocalFormData] = useState<Record<string, string | number | undefined>>({});
+
+  // Ricava il tipo selezionato dal localFormData (prima di chiamare usePantoneForm)
+  const tipoSelezionato = typeof localFormData['tipo'] === 'string' && localFormData['tipo'] !== '' ? localFormData['tipo'] : undefined;
+  // Carica le basi solo se il tipo è selezionato
+  const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
+  const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
+
+  // Pantone esterno selezionato
+  const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
+
+  // Campi richiesti per la validazione
+  const pantoneFields = [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes];
+  const validateFields = pantoneFields.filter((f) => f.required).map((f) => f.name);
+
+  // Raggruppamento basi per nome
+  const basiFiltrate = useMemo(() => {
+    return basi.filter((base) => base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base'));
+  }, [basi]);
+  const basiRaggruppatePerName = useMemo(() => {
+    return basiFiltrate.reduce((acc: Record<string, BaseMateriale[]>, base) => {
+      if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
+      acc[base.nomeMateriale].push(base);
+      return acc;
+    }, {});
+  }, [basiFiltrate]);
+
+  // Effetto: sincronizza formData con i campi dinamici delle basi
+  const addedBaseKeysRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    // Quando cambiano le basi, aggiungi i nuovi campi richiesti a localFormData SOLO se non già aggiunti
+    const nuoviCampi: Record<string, string | number> = {};
+    let changed = false;
+    Object.keys(basiRaggruppatePerName).forEach((nome) => {
+      const keyF = `fornitore_${nome}`;
+      const keyV = `valore_${nome}`;
+      if (!localFormData[keyF] && !addedBaseKeysRef.current.has(keyF)) {
+        nuoviCampi[keyF] = '';
+        addedBaseKeysRef.current.add(keyF);
+        changed = true;
       }
+      if (!localFormData[keyV] && !addedBaseKeysRef.current.has(keyV)) {
+        nuoviCampi[keyV] = '';
+        addedBaseKeysRef.current.add(keyV);
+        changed = true;
+      }
+    });
+    if (changed) {
+      setLocalFormData((prev) => ({ ...prev, ...nuoviCampi }));
+    }
+  }, [basiRaggruppatePerName, localFormData]);
 
-      await createPantone(nuovoPantone);
-      setErrorMessage(null);
-      router.refresh();
-      return true;
-    } catch (error) {
-      console.error('Errore durante il submit:', error);
-      setErrorMessage('Errore durante il submit.');
+  const closeModal = useModalStore((state) => state.closeModal);
+
+  // Custom submit logic for new Pantone
+  const onSubmit = async (formData: Record<string, string | number | undefined>) => {
+    const nuovoPantone = buildPantoneFromFormData({
+      formData,
+      basiRaggruppatePerName,
+      pantoneEsternoSelezionato,
+      pantoneMateriali,
+    });
+    // Validazione con Zod
+    const validation = PantoneSchema.safeParse(nuovoPantone);
+    if (!validation.success) {
+      alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
     }
-  }, [router, formData, basiFinali, createPantone]);
+    await createPantone(nuovoPantone);
+    router.refresh();
+    return true;
+  };
 
-  const reset = useCallback(() => {
-    const iniziale: { [key: string]: string | number } = {};
-    [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes, ...basi.map((b) => ({ name: b.nomeMateriale }))].forEach((field) => {
-      iniziale[field.name] = ''; // resettiamo tutto a stringa vuota
-    });
-    setFormData(iniziale);
-  }, [basi]);
+  // Submit centralizzato tramite usePantoneForm
+  const { formData, handleChange, errorMessage, reset } = usePantoneForm({
+    initialData: localFormData,
+    onSubmit,
+    onSuccess: () => {
+      closeModal('newPantone');
+      reset();
+    },
+    onError: () => {},
+    validateFields,
+    modalKey: 'newPantone',
+  });
 
-  const submitRef = useRef(submit);
-  const resetRef = useRef(reset);
-
+  // Sincronizza localFormData con formData di usePantoneForm
   useEffect(() => {
-    submitRef.current = submit;
-    resetRef.current = reset;
-  }, [submit, reset]);
+    setLocalFormData(formData);
+  }, [formData]);
 
+  // Autocompletamento campi quando si seleziona un pantone esterno
+  // Questo effetto DEVE essere dopo la dichiarazione di handleChange!
   useEffect(() => {
-    useModalStore.getState().registerHandler('newPantone', {
-      submit: () => submitRef.current(),
-      reset: () => resetRef.current(),
-    });
-  }, []);
+    if (!pantoneEsternoSelezionato) return;
+    const selected = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+    if (selected) {
+      const autocompleted = {
+        nomePantone: selected.label,
+        variante: selected.fornitore,
+        tipo: selected.tipo,
+        dose: 2.5,
+        codiceFornitore: selected.codiceFornitore,
+        pantoneEsternoInput: 2.5,
+      };
+      setLocalFormData((prev) => ({ ...prev, ...autocompleted }));
+      Object.entries(autocompleted).forEach(([key, value]) => {
+        const event = { target: { name: key, value } } as React.ChangeEvent<HTMLInputElement>;
+        handleChange(event);
+      });
+    }
+  }, [pantoneEsternoSelezionato, pantoneMateriali, handleChange]);
 
   return (
-    <form className="w-6xl">
-      <div className="flex flex-row justify-between">
-        <H3 className="mb-2">Dettagli Pantone</H3>
-        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-        {/* Select Pantone Esterno */}
-        <div className="mb-4 flex flex-row items-center border border-dashed border-[var(--border)] rounded-xl px-2">
-          <label className="font-semibold mr-2">Importa pantone esterno:</label>
-          <select
-            className="p-2 rounded bg-zinc-700 text-white focus:outline-none"
-            onChange={handlePantoneMaterialeSelect}
-            defaultValue=""
-            disabled={loadingPantoniMateriali}
-          >
-            {loadingPantoniMateriali ? (
-              <option value="" disabled>
-                Caricamento...
-              </option>
-            ) : (
-              <>
-                <option value="">Seleziona un pantone...</option>
-                {pantoneMateriali.map((m) => (
-                  <option key={m._id?.toString()} value={m._id?.toString()}>
-                    {m.label} - {m.fornitore}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-2">
-        <div className="grid grid-cols-3 gap-2">
-          <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
-          <InputMap fields={pantoneFieldsCenter} formData={formData} handleChange={handleChange} />
-          <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} />
-        </div>
-        <div className="flex flex-col gap-5">
-          <H3 className="mt-5">Composizione</H3>
-          {tipoSelezionato ? (
-            loading ? (
-              <Loader />
-            ) : error ? (
-              <p className="text-red-500">{error}</p>
-            ) : basi.length === 0 ? (
-              <p className="text-neutral-400 italic">Nessuna base disponibile per questo &quot;Tipo&quot;.</p>
-            ) : (
-              <>
-                <div>
-                  {pantoneEsternoSelezionato && (
-                    <div className="mb-4 flex flex-col">
-                      {(() => {
-                        const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
-                        if (!pantoneEsterno) return null;
-                        return (
-                          <label className="mb-1">
-                            {pantoneEsterno.label}
-                            <span className="ml-2 text-sm text-neutral-300 italic">{pantoneEsterno.fornitore}</span>
-                          </label>
-                        );
-                      })()}
-                      <input
-                        type="number"
-                        name="pantoneEsternoInput"
-                        className="w-32 p-2 rounded bg-zinc-600 text-white focus:outline-none"
-                        value={formData.pantoneEsternoInput ?? 2.5}
-                        onChange={handlePantoneEsternoInputChange}
-                        min={0}
-                        step={0.01}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="grid grid-cols-4 gap-2">
-                  {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
-                    const fornitoriDisponibili = basi.map((b) => ({
-                      id: b._id!.toString(),
-                      label: b.label,
-                      fornitore: b.fornitore,
-                      codiceColore: b.codiceColore,
-                    }));
-                    const label = basi[0].label || nome;
-
-                    return (
-                      <div key={nome}>
-                        <label>
-                          {label}
-                          <span className="text-sm">
-                            {fornitoriDisponibili.length > 1 ? (
-                              <select
-                                name={`fornitore_${nome}`}
-                                className="ml-2 rounded bg-zinc-800 text-white italic focus:outline-none"
-                                onChange={handleChange}
-                                value={formData[`fornitore_${nome}`] || ''}
-                              >
-                                <option value="">Seleziona fornitore</option>
-                                {fornitoriDisponibili.map((f) => (
-                                  <option key={f.id} value={f.fornitore}>
-                                    {f.fornitore} - {f.codiceColore}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <span className="ml-2 text-sm text-neutral-300 italic">
-                                {fornitoriDisponibili[0].fornitore} - {fornitoriDisponibili[0].codiceColore}
-                              </span>
-                            )}
-                          </span>
-                        </label>
-                        <input
-                          name={`valore_${nome}`}
-                          type="number"
-                          placeholder="0"
-                          className="w-full p-2 rounded bg-zinc-600 text-white focus:outline-none mt-1"
-                          value={formData[`valore_${nome}`] || ''}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )
-          ) : (
-            <p className="text-neutral-400 italic">Seleziona un &quot;Tipo&quot; per vedere le basi disponibili.</p>
-          )}
-        </div>
-      </div>
-    </form>
+    <PantoneFormLayout
+      formData={formData}
+      handleChange={handleChange}
+      errorMessage={errorMessage}
+      pantoneMateriali={pantoneMateriali}
+      pantoneEsternoSelezionato={pantoneEsternoSelezionato}
+      setPantoneEsternoSelezionato={setPantoneEsternoSelezionato}
+      loadingPantoniMateriali={loadingPantoniMateriali}
+      basiRaggruppatePerName={basiRaggruppatePerName}
+      basi={basi}
+      loading={loading}
+      error={error}
+    />
   );
 }

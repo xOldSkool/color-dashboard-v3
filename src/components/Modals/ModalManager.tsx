@@ -4,7 +4,7 @@ import NewPantoneForm from './Forms/Pantone/NewPantoneForm';
 import Modal from './Modal';
 import { useTableStore } from '@/store/useTableStore';
 import EditPantoneForm from './Forms/Pantone/EditPantoneForm';
-import DuplicatePantone from './Forms/Pantone/DuplicatePantone';
+import DuplicatePantone from './Forms/Pantone/DuplicatePantoneForm';
 import ColumnSelector, { TableKey } from '../Tables/ColumnsSelector';
 import ProducePantoneForm from './Forms/Pantone/ProducePantoneForm';
 import RemoveFromToProduceForm from './Forms/Pantone/RemoveFromToProduceForm';
