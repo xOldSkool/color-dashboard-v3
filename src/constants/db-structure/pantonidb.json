@@ -1,33 +1,96 @@
 {
-  "_id": "00001",
-  "nomePantone": "P186C",
+  "_id": {
+    "$oid": "6845ecf277ef519fcd83a5ec"
+  },
+  "nomePantone": "P2219U",
   "variante": "DSSMITH",
-  "dataCreazione": "2025-04-30T10:00:00.000Z",
-  "articolo": "5468",
-  "is": "458.1",
+  "dataCreazione": {
+    "$date": "2025-06-08T20:05:06.814Z"
+  },
+  "ultimoUso": "",
+  "articolo": "25279",
+  "is": "",
   "cliente": "Grisport",
   "noteArticolo": "",
   "urgente": false,
-  "tipoCarta": "WP4",
-  "fornitoreCarta": "EsempioCarta Srl",
-  "passoCarta": 1360,
-  "hCarta": 950,
-  "hex": "#FFFFFF",
+  "tipoCarta": "Lb5",
+  "fornitoreCarta": "Giorgione",
+  "passoCarta": 1600,
+  "hCarta": 1070,
+  "hex": "#6ba5b4",
   "stato": "In uso",
   "tipo": "EB",
-  "descrizione": "Pantone di esempio con tutte le basi",
-  "noteColore": "",
-  "consumo": 0.15,
-  "dose": 1.2,
-  "noteMagazzino": "",
+  "descrizione": "",
+  "noteColore": "Con bianco",
+  "consumo": 2,
+  "dose": 2.56,
   "daProdurre": false,
   "qtDaProdurre": 0,
+  "battuteDaProdurre": 0,
   "consegnatoProduzione": false,
   "qtConsegnataProduzione": 0,
-  "pantoneGroupId": "P186C_b85b8a",
+  "pantoneGroupId": "P2219U_83a5ea",
   "basi": [
-    { "name": "opaqueWhite", "label": "Bianco UV", "valore": 1.5, "codiceFornitore": "XYZ123", "tipo": "UV", "codiceColore": "1234" },
-    { "name": "black", "label": "Nero EB", "valore": 0.35, "codiceFornitore": "ABC456", "tipo": "EB", "codiceColore": "5678" }
+    {
+      "nomeMateriale": "magenta",
+      "label": "Magenta",
+      "codiceFornitore": "06/0327",
+      "codiceColore": "U15061",
+      "tipo": "EB",
+      "quantita": 0.14,
+      "fornitore": "J+S",
+      "utilizzo": [
+        "Base"
+      ]
+    },
+    {
+      "nomeMateriale": "transparentWhite",
+      "label": "Transparent White",
+      "codiceFornitore": "06/0331",
+      "codiceColore": "U17910",
+      "tipo": "EB",
+      "quantita": 1.9,
+      "fornitore": "J+S",
+      "utilizzo": [
+        "Base"
+      ]
+    },
+    {
+      "nomeMateriale": "cyan",
+      "label": "Cyan",
+      "codiceFornitore": "06/0328",
+      "codiceColore": "U15062",
+      "tipo": "EB",
+      "quantita": 0.17,
+      "fornitore": "J+S",
+      "utilizzo": [
+        "Base"
+      ]
+    },
+    {
+      "nomeMateriale": "green",
+      "label": "Green",
+      "codiceFornitore": "06/0320",
+      "codiceColore": "U18908",
+      "tipo": "EB",
+      "quantita": 0.27,
+      "fornitore": "J+S",
+      "utilizzo": [
+        "Base"
+      ]
+    },
+    {
+      "nomeMateriale": "opaqueWhite",
+      "label": "Opaque White",
+      "codiceFornitore": "06/0325",
+      "codiceColore": "U19105",
+      "tipo": "EB",
+      "quantita": 0.08,
+      "fornitore": "J+S",
+      "utilizzo": [
+        "Base"
+      ]
+    }
   ],
-  "basiNormalizzate": "stringaconlebasinormalizzate"
+  "basiNormalizzate": "cyan:Cyan:0.17:J+S:EB:U15062:Base|green:Green:0.27:J+S:EB:U18908:Base|magenta:Magenta:0.14:J+S:EB:U15061:Base|opaqueWhite:Opaque White:0.08:J+S:EB:U19105:Base|transparentWhite:Transparent White:1.9:J+S:EB:U17910:Base"
 }

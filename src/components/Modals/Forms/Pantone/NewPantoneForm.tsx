@@ -10,7 +10,7 @@ import { useModalStore } from '@/store/useModalStore';
 import { BaseMateriale } from '@/types/materialeTypes';
 import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useEffect, useRef, useState, useMemo } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useCallback } from 'react';
 
 export interface FormData {
@@ -112,20 +112,6 @@ export default function NewPantoneForm() {
     }
   }, [formData, pantoneEsternoSelezionato]);
 
-  const utilizzo = useMemo(() => {
-    if (formData.utilizzo) {
-      if (Array.isArray(formData.utilizzo)) {
-        return formData.utilizzo as string[];
-      } else if (typeof formData.utilizzo === 'string') {
-        return formData.utilizzo
-          .split(',')
-          .map((v) => v.trim())
-          .filter(Boolean);
-      }
-    }
-    return [];
-  }, [formData.utilizzo]);
-
   const pantone: Record<string, string | number | undefined> = {};
   for (const [key, value] of Object.entries(formData)) {
     if (!key.startsWith('fornitore_') && !key.startsWith('valore_')) {
@@ -169,6 +155,7 @@ export default function NewPantoneForm() {
 
   const submit = useCallback(async () => {
     try {
+      const utilizzo = (formData.utilizzo ?? []) as string[];
       // Costruisci l'oggetto Pantone rispettando il tipo richiesto
       const nuovoPantone = {
         nomePantone: String(formData.nomePantone || ''),
@@ -218,7 +205,7 @@ export default function NewPantoneForm() {
       setErrorMessage('Errore durante il submit.');
       return false;
     }
-  }, [router, formData, basiFinali, createPantone, utilizzo]);
+  }, [router, formData, basiFinali, createPantone]);
 
   const reset = useCallback(() => {
     const iniziale: { [key: string]: string | number } = {};

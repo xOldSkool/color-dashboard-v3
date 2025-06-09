@@ -25,11 +25,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
         if (!tag) return null;
 
         // Gestione speciale per checkbox multipli (array)
-        if (
-          field.form === 'input' &&
-          field.type === 'checkbox' &&
-          'options' in field && Array.isArray(field.options)
-        ) {
+        if (field.form === 'input' && field.type === 'checkbox' && 'options' in field && Array.isArray(field.options)) {
           const options = field.options;
           // formData[field.name] può essere string | number | undefined | string[]
           let selectedValues: string[] = [];
@@ -45,13 +41,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
               <div className="flex gap-4">
                 {options.map((opt) => (
                   <label key={opt} className="flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      name={field.name}
-                      value={opt}
-                      checked={selectedValues.includes(opt)}
-                      onChange={handleChange}
-                    />
+                    <input type="checkbox" name={field.name} value={opt} checked={selectedValues.includes(opt)} onChange={handleChange} />
                     {opt}
                   </label>
                 ))}

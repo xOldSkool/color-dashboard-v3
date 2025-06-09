@@ -1,14 +1,17 @@
 {
-  "pantoneGroupId": "string",
-  "dispMagazzino": "number",
-  "tipo": "EB/UV",
-  "ultimo uso": "2025-04-30T10:00:00.000Z",
+  "_id": {
+    "$oid": "683c6b38f3289904fcc5d7a8"
+  },
+  "pantoneGroupId": "P2219U_c5d7a7",
+  "dispMagazzino": 35,
+  "tipo": "EB",
   "movimenti": [
     {
-    "tipo": "carico | scarico",
-    "quantita": "number",
-    "data": "string",
-    "causale": "string"
+      "tipo": "carico",
+      "quantita": 35,
+      "data": "2025-06-08T20:01:02.772Z",
+      "causale": "Composizione pantone"
     }
-  ]
+  ],
+  "ultimoUso": "2025-06-08T20:01:02.772Z"
 }

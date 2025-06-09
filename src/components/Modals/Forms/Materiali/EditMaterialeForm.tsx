@@ -36,12 +36,12 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
     if (type === 'checkbox' && name === 'utilizzo' && e.target instanceof HTMLInputElement) {
       const checked = e.target.checked;
       setFormData((prev) => {
-        const prevArr = Array.isArray(prev.utilizzo) ? prev.utilizzo : [];
+        const prevArr = (prev.utilizzo ?? []) as string[];
         let newArr: string[];
         if (checked) {
           newArr = [...prevArr, value];
         } else {
-          newArr = prevArr.filter((v: string) => v !== value);
+          newArr = prevArr.filter((v) => v !== value);
         }
         return { ...prev, [name]: newArr };
       });
@@ -74,9 +74,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         fornitore: String(formData.fornitore || ''),
         tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
         stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: Array.isArray(formData.utilizzo)
-          ? (formData.utilizzo.filter((v): v is 'Base' | 'Materiale' | 'Pantone' => ['Base', 'Materiale', 'Pantone'].includes(v)) as Array<'Base' | 'Materiale' | 'Pantone'>)
-          : [getEnumValue(formData.utilizzo, ['Base', 'Materiale', 'Pantone'] as const, 'Base')],
+        utilizzo: (formData.utilizzo as string[]).filter((v): v is 'Base' | 'Materiale' | 'Pantone' => ['Base', 'Materiale', 'Pantone'].includes(v)),
         noteMateriale: String(formData.noteMateriale || ''),
         quantita: materiale.quantita, // obbligatorio per Materiale
         dataCreazione: materiale.dataCreazione, // obbligatorio per Materiale
@@ -110,7 +108,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         fornitore: materiale.fornitore || '',
         tipo: materiale.tipo || '',
         stato: materiale.stato || '',
-        utilizzo: Array.isArray(materiale.utilizzo) ? materiale.utilizzo : [],
+        utilizzo: materiale.utilizzo,
         noteMateriale: materiale.noteMateriale || '',
       });
     }
