@@ -38,12 +38,10 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
 
   // Ref per tracciare i campi dinamici già aggiunti
   const addedBaseKeysRef = useRef<Set<string>>(new Set());
-
   // Ricava il tipo selezionato dal formData (prima di chiamare usePantoneForm)
   const tipoSelezionato = typeof initialData['tipo'] === 'string' && initialData['tipo'] !== '' ? initialData['tipo'] : undefined;
   // Carica le basi solo se il tipo è selezionato
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
-
   // Campi richiesti per la validazione
   const pantoneFields = [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes];
   const validateFields = pantoneFields.filter((f) => f.required).map((f) => f.name);
