@@ -24,7 +24,6 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
   // Precarica formData dal pantone originale
   const initialData = useMemo(() => {
     const fd = pantoneToFormData(pantone);
-    // Se esiste una base Pantone, preimposta pantoneEsternoSelezionato
     if (Array.isArray(pantone.basi)) {
       const basePantone = pantone.basi.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'));
       if (basePantone) {
@@ -38,13 +37,11 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
     return fd;
   }, [pantone, pantoneMateriali]);
 
-  // Stato locale per formData (per sincronizzazione campi dinamici)
-  const [localFormData, setLocalFormData] = useState<Record<string, string | number | undefined>>(initialData);
   // Ref per tracciare i campi dinamici già aggiunti
   const addedBaseKeysRef = useRef<Set<string>>(new Set());
 
-  // Ricava il tipo selezionato dal localFormData (prima di chiamare usePantoneForm)
-  const tipoSelezionato = typeof localFormData['tipo'] === 'string' && localFormData['tipo'] !== '' ? localFormData['tipo'] : undefined;
+  // Ricava il tipo selezionato dal formData (prima di chiamare usePantoneForm)
+  const tipoSelezionato = typeof initialData['tipo'] === 'string' && initialData['tipo'] !== '' ? initialData['tipo'] : undefined;
   // Carica le basi solo se il tipo è selezionato
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
 
@@ -63,37 +60,6 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
       return acc;
     }, {});
   }, [basiFiltrate]);
-
-  // Effetto: sincronizza formData con i campi dinamici delle basi
-  React.useEffect(() => {
-    const nuoviCampi: Record<string, string | number> = {};
-    Object.keys(basiRaggruppatePerName).forEach((nome) => {
-      const fornitoreKey = `fornitore_${nome}`;
-      const valoreKey = `valore_${nome}`;
-      if (!addedBaseKeysRef.current.has(fornitoreKey)) {
-        nuoviCampi[fornitoreKey] = '';
-        addedBaseKeysRef.current.add(fornitoreKey);
-      }
-      if (!addedBaseKeysRef.current.has(valoreKey)) {
-        nuoviCampi[valoreKey] = '';
-        addedBaseKeysRef.current.add(valoreKey);
-      }
-    });
-    if (Object.keys(nuoviCampi).length > 0) {
-      setLocalFormData((prev) => ({ ...prev, ...nuoviCampi }));
-    }
-    // Pulizia: se cambiano le basi, rimuovi le chiavi non più presenti
-    const allKeys = new Set<string>();
-    Object.keys(basiRaggruppatePerName).forEach((nome) => {
-      allKeys.add(`fornitore_${nome}`);
-      allKeys.add(`valore_${nome}`);
-    });
-    addedBaseKeysRef.current.forEach((key) => {
-      if (!allKeys.has(key)) {
-        addedBaseKeysRef.current.delete(key);
-      }
-    });
-  }, [basiRaggruppatePerName]);
 
   // Custom submit logic per duplicazione
   const onSubmit = async (formData: Record<string, string | number | undefined>) => {
@@ -114,16 +80,85 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
   };
 
   const pantoneForm = usePantoneForm({
-    initialData: localFormData,
+    initialData,
     onSubmit,
     validateFields,
     modalKey: 'duplicatePantone',
   });
 
-  // Sincronizza localFormData con formData di usePantoneForm
-  React.useEffect(() => {
-    setLocalFormData(pantoneForm.formData);
-  }, [pantoneForm.formData]);
+  // Helper per chiamare handleChange con nome e valore senza ChangeEvent
+  const setFormField = React.useCallback(
+    (name: string, value: string | number) => {
+      pantoneForm.handleChange({
+        target: { name, value },
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
+    },
+    [pantoneForm]
+  );
+
+  // Effetto: sincronizza formData con i campi dinamici delle basi
+  useEffect(() => {
+    const nuoviCampi: Record<string, string | number> = {};
+    Object.keys(basiRaggruppatePerName).forEach((nome) => {
+      const fornitoreKey = `fornitore_${nome}`;
+      const valoreKey = `valore_${nome}`;
+      if (!addedBaseKeysRef.current.has(fornitoreKey)) {
+        nuoviCampi[fornitoreKey] = '';
+        addedBaseKeysRef.current.add(fornitoreKey);
+      }
+      if (!addedBaseKeysRef.current.has(valoreKey)) {
+        nuoviCampi[valoreKey] = '';
+        addedBaseKeysRef.current.add(valoreKey);
+      }
+    });
+    if (Object.keys(nuoviCampi).length > 0) {
+      Object.entries(nuoviCampi).forEach(([key, value]) => {
+        setFormField(key, value);
+      });
+    }
+    // Pulizia: se cambiano le basi, rimuovi le chiavi non più presenti
+    const allKeys = new Set<string>();
+    Object.keys(basiRaggruppatePerName).forEach((nome) => {
+      allKeys.add(`fornitore_${nome}`);
+      allKeys.add(`valore_${nome}`);
+    });
+    addedBaseKeysRef.current.forEach((key) => {
+      if (!allKeys.has(key)) {
+        addedBaseKeysRef.current.delete(key);
+      }
+    });
+  }, [basiRaggruppatePerName, setFormField]);
+
+  // Autocompletamento campi quando si seleziona un pantone esterno
+  const autoCompletedRef = useRef(false);
+  useEffect(() => {
+    if (!pantoneEsternoSelezionato || autoCompletedRef.current) return;
+    const selected = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
+    if (selected) {
+      const autocompleted = {
+        nomePantone: selected.label,
+        variante: selected.fornitore,
+        tipo: selected.tipo,
+        dose: 2.5,
+        codiceFornitore: selected.codiceFornitore,
+        pantoneEsternoInput: 2.5,
+      };
+      Object.entries(autocompleted).forEach(([key, value]) => {
+        setFormField(key, value ?? '');
+      });
+      autoCompletedRef.current = true;
+    }
+  }, [pantoneEsternoSelezionato, pantoneMateriali, setFormField]);
+
+  // Dipendenza hash per dose effect
+  const doseDeps = React.useMemo(
+    () =>
+      Object.keys(pantoneForm.formData)
+        .filter((k) => k.startsWith('valore_') || k === 'pantoneEsternoInput')
+        .map((k) => `${k}:${pantoneForm.formData[k]}`)
+        .join('|'),
+    [pantoneForm.formData]
+  );
 
   // Aggiorna automaticamente il campo dose come somma di tutte le quantità
   useEffect(() => {
@@ -136,32 +171,9 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
         : 0;
     const doseTotale = doseBasi + dosePantoneEsterno;
     if (Number(pantoneForm.formData.dose) !== doseTotale) {
-      const event = { target: { name: 'dose', value: doseTotale } } as unknown as React.ChangeEvent<HTMLInputElement>;
-      pantoneForm.handleChange(event);
+      setFormField('dose', doseTotale);
     }
-  }, [pantoneForm, pantoneForm.formData, pantoneForm.handleChange]);
-
-  // Autocompletamento campi quando si seleziona un pantone esterno
-  // Questo effetto DEVE essere dopo la dichiarazione di pantoneForm!
-  useEffect(() => {
-    if (!pantoneEsternoSelezionato) return;
-    const selected = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
-    if (selected) {
-      const autocompleted = {
-        nomePantone: selected.label,
-        variante: selected.fornitore,
-        tipo: selected.tipo,
-        dose: 2.5,
-        codiceFornitore: selected.codiceFornitore,
-        pantoneEsternoInput: 2.5,
-      };
-      setLocalFormData((prev) => ({ ...prev, ...autocompleted }));
-      Object.entries(autocompleted).forEach(([key, value]) => {
-        const event = { target: { name: key, value } } as React.ChangeEvent<HTMLInputElement>;
-        pantoneForm.handleChange(event);
-      });
-    }
-  }, [pantoneEsternoSelezionato, pantoneMateriali, pantoneForm, pantoneForm.handleChange]);
+  }, [doseDeps, pantoneForm.formData.dose, pantoneForm.formData, setFormField]);
 
   return (
     <PantoneFormLayout

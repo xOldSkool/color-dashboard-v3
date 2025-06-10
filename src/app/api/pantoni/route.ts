@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       basiNormalizzate,
       dataCreazione,
     };
-    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo);
+    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo, rawData.basi);
     if (rawData.noteMagazzino) {
       await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId }, { $set: { noteMagazzino: rawData.noteMagazzino } });
     }
@@ -69,7 +69,7 @@ export async function PATCH(req: NextRequest) {
     if (updatedNomePantone !== existingPantone.nomePantone || basiNormalizzate !== existingPantone.basiNormalizzate) {
       pantoneGroupId = await generaPantoneGroupId(db, { ...existingPantone, ...updateFields, basi: updatedBasi });
     }
-    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo);
+    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo, updatedBasi);
     if (updateFields.noteMagazzino) {
       await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId }, { $set: { noteMagazzino: updateFields.noteMagazzino } });
     }

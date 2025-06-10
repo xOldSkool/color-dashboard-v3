@@ -1,6 +1,6 @@
 import { MagazzinoPantoni } from '@/types/magazzinoPantoneTypes';
 import { BaseMateriale, Materiale, MovimentoMateriale } from '@/types/materialeTypes';
-import { Pantone } from '@/types/pantoneTypes';
+import { Pantone, BasiPantone } from '@/types/pantoneTypes';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { calcolaProduzionePantone } from './calcoli';
 import { normalizzaBasi } from './normalizzaBasi';
@@ -32,13 +32,28 @@ export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promi
 }
 
 // Funzione per creare il magazzino solo se non esiste
-export async function insertMagazzinoIfNotExists(db: Db, groupId: string, tipo: string) {
+export async function insertMagazzinoIfNotExists(db: Db, groupId: string, tipo: string, basi?: BasiPantone[]) {
   const collection: Collection<MagazzinoPantoni> = db.collection('magazzinoPantoni');
   const esiste = await collection.findOne({ pantoneGroupId: groupId });
   if (!esiste) {
+    let dispMagazzino = 0;
+    if (basi && Array.isArray(basi)) {
+      // Cerca una base con utilizzo Pantone
+      const basePantone = basi.find((b) => Array.isArray(b.utilizzo) && b.utilizzo.includes('Pantone'));
+      if (basePantone) {
+        // Cerca il materiale corrispondente
+        const materiale = await db.collection<Materiale>('materiali').findOne({
+          nomeMateriale: basePantone.nomeMateriale,
+          fornitore: basePantone.fornitore,
+        });
+        if (materiale) {
+          dispMagazzino = materiale.quantita;
+        }
+      }
+    }
     return await db.collection('magazzinoPantoni').insertOne({
       pantoneGroupId: groupId,
-      dispMagazzino: 0,
+      dispMagazzino,
       tipo: tipo ?? 'EB',
       movimenti: [],
     });

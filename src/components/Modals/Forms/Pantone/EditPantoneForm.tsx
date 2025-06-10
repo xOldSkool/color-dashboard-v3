@@ -36,13 +36,11 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     return fd;
   }, [pantone, pantoneMateriali]);
 
-  // Stato locale per formData (per sincronizzazione campi dinamici)
-  const [localFormData, setLocalFormData] = useState<Record<string, string | number | undefined>>(initialData);
   // Ref per tracciare i campi dinamici già aggiunti
   const addedBaseKeysRef = useRef<Set<string>>(new Set());
 
-  // Ricava il tipo selezionato dal localFormData (prima di chiamare usePantoneForm)
-  const tipoSelezionato = typeof localFormData['tipo'] === 'string' && localFormData['tipo'] !== '' ? localFormData['tipo'] : undefined;
+  // Ricava il tipo selezionato dal formData (prima di chiamare usePantoneForm)
+  const tipoSelezionato = typeof initialData['tipo'] === 'string' && initialData['tipo'] !== '' ? initialData['tipo'] : undefined;
   // Carica le basi solo se il tipo è selezionato
   const { basi, loading, error } = useBasiMateriali(tipoSelezionato);
 
@@ -61,37 +59,6 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
       return acc;
     }, {});
   }, [basiFiltrate]);
-
-  // Effetto: sincronizza formData con i campi dinamici delle basi
-  useEffect(() => {
-    const nuoviCampi: Record<string, string | number> = {};
-    Object.keys(basiRaggruppatePerName).forEach((nome) => {
-      const fornitoreKey = `fornitore_${nome}`;
-      const valoreKey = `valore_${nome}`;
-      if (!addedBaseKeysRef.current.has(fornitoreKey)) {
-        nuoviCampi[fornitoreKey] = '';
-        addedBaseKeysRef.current.add(fornitoreKey);
-      }
-      if (!addedBaseKeysRef.current.has(valoreKey)) {
-        nuoviCampi[valoreKey] = '';
-        addedBaseKeysRef.current.add(valoreKey);
-      }
-    });
-    if (Object.keys(nuoviCampi).length > 0) {
-      setLocalFormData((prev) => ({ ...prev, ...nuoviCampi }));
-    }
-    // Pulizia: se cambiano le basi, rimuovi le chiavi non più presenti
-    const allKeys = new Set<string>();
-    Object.keys(basiRaggruppatePerName).forEach((nome) => {
-      allKeys.add(`fornitore_${nome}`);
-      allKeys.add(`valore_${nome}`);
-    });
-    addedBaseKeysRef.current.forEach((key) => {
-      if (!allKeys.has(key)) {
-        addedBaseKeysRef.current.delete(key);
-      }
-    });
-  }, [basiRaggruppatePerName]);
 
   // Custom submit logic per modifica
   const onSubmit = async (formData: Record<string, string | number | undefined>) => {
@@ -114,20 +81,60 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   };
 
   const pantoneForm = usePantoneForm({
-    initialData: localFormData,
+    initialData,
     onSubmit,
     validateFields,
     modalKey: 'editPantone',
   });
 
-  // Sincronizza localFormData con formData di usePantoneForm
+  // Effetto: sincronizza formData con i campi dinamici delle basi
   useEffect(() => {
-    setLocalFormData(pantoneForm.formData);
-  }, [pantoneForm.formData]);
+    const nuoviCampi: Record<string, string | number> = {};
+    Object.keys(basiRaggruppatePerName).forEach((nome) => {
+      const fornitoreKey = `fornitore_${nome}`;
+      const valoreKey = `valore_${nome}`;
+      if (!addedBaseKeysRef.current.has(fornitoreKey)) {
+        nuoviCampi[fornitoreKey] = '';
+        addedBaseKeysRef.current.add(fornitoreKey);
+      }
+      if (!addedBaseKeysRef.current.has(valoreKey)) {
+        nuoviCampi[valoreKey] = '';
+        addedBaseKeysRef.current.add(valoreKey);
+      }
+    });
+    if (Object.keys(nuoviCampi).length > 0) {
+      Object.entries(nuoviCampi).forEach(([key, value]) => {
+        const event = { target: { name: key, value } } as React.ChangeEvent<HTMLInputElement>;
+        pantoneForm.handleChange(event);
+      });
+    }
+    // Pulizia: se cambiano le basi, rimuovi le chiavi non più presenti
+    const allKeys = new Set<string>();
+    Object.keys(basiRaggruppatePerName).forEach((nome) => {
+      allKeys.add(`fornitore_${nome}`);
+      allKeys.add(`valore_${nome}`);
+    });
+    addedBaseKeysRef.current.forEach((key) => {
+      if (!allKeys.has(key)) {
+        addedBaseKeysRef.current.delete(key);
+      }
+    });
+  }, [basiRaggruppatePerName, pantoneForm]);
+
+  // Helper per chiamare handleChange con nome e valore senza ChangeEvent
+  const setFormField = React.useCallback(
+    (name: string, value: string | number) => {
+      pantoneForm.handleChange({
+        target: { name, value },
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
+    },
+    [pantoneForm]
+  );
 
   // Autocompletamento campi quando si seleziona un pantone esterno
+  const autoCompletedRef = useRef(false);
   useEffect(() => {
-    if (!pantoneEsternoSelezionato) return;
+    if (!pantoneEsternoSelezionato || autoCompletedRef.current) return;
     const selected = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
     if (selected) {
       const autocompleted = {
@@ -138,16 +145,26 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         codiceFornitore: selected.codiceFornitore,
         pantoneEsternoInput: 2.5,
       };
-      setLocalFormData((prev) => ({ ...prev, ...autocompleted }));
       Object.entries(autocompleted).forEach(([key, value]) => {
-        const event = { target: { name: key, value } } as React.ChangeEvent<HTMLInputElement>;
-        pantoneForm.handleChange(event);
+        setFormField(key, value ?? '');
       });
+      autoCompletedRef.current = true;
     }
-  }, [pantoneEsternoSelezionato, pantoneMateriali, pantoneForm, pantoneForm.handleChange]);
+  }, [pantoneEsternoSelezionato, pantoneMateriali, setFormField]);
+
+  // Dipendenza hash per dose effect
+  const doseDeps = React.useMemo(
+    () =>
+      Object.keys(pantoneForm.formData)
+        .filter((k) => k.startsWith('valore_') || k === 'pantoneEsternoInput')
+        .map((k) => `${k}:${pantoneForm.formData[k]}`)
+        .join('|'),
+    [pantoneForm.formData]
+  );
 
   // Aggiorna automaticamente il campo dose come somma di tutte le quantità
   useEffect(() => {
+    // Calcola la dose solo se cambiano i valori delle basi o pantoneEsternoInput
     const doseBasi = Object.entries(pantoneForm.formData)
       .filter(([key]) => key.startsWith('valore_'))
       .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
@@ -157,10 +174,9 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         : 0;
     const doseTotale = doseBasi + dosePantoneEsterno;
     if (Number(pantoneForm.formData.dose) !== doseTotale) {
-      const event = { target: { name: 'dose', value: doseTotale } } as unknown as React.ChangeEvent<HTMLInputElement>;
-      pantoneForm.handleChange(event);
+      setFormField('dose', doseTotale);
     }
-  }, [pantoneForm, pantoneForm.formData, pantoneForm.handleChange]);
+  }, [doseDeps, pantoneForm.formData.dose, pantoneForm.formData, setFormField]);
 
   return (
     <PantoneFormLayout
