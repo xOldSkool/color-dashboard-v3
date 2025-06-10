@@ -1,4 +1,5 @@
 import { z } from 'zod';
+const REQUIRED_FIELD_MSG = 'Il campo è obbligatorio';
 
 // Movimento per carico
 export const MovimentoCaricoSchema = z.object({
@@ -30,12 +31,12 @@ export const MovimentoSchema = z.discriminatedUnion('tipo', [MovimentoCaricoSche
 
 export const MaterialeSchema = z.object({
   _id: z.union([z.string(), z.any()]),
-  nomeMateriale: z.string().min(1, 'Il nome è obbligatorio'),
-  label: z.string().min(1, 'La label è obbligatoria'),
+  nomeMateriale: z.string().min(1),
+  label: z.string().min(1, REQUIRED_FIELD_MSG),
   codiceColore: z.string().optional().nullable(),
   codiceFornitore: z.string().optional().nullable(),
-  quantita: z.number().min(0, 'La quantità deve essere >= 0'),
-  fornitore: z.string().min(1, 'Il fornitore è obbligatorio'),
+  quantita: z.number().min(0, REQUIRED_FIELD_MSG),
+  fornitore: z.string().min(1, REQUIRED_FIELD_MSG),
   tipo: z.enum(['EB', 'UV']),
   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
   utilizzo: z.array(z.enum(['Base', 'Materiale', 'Pantone'])),
@@ -46,12 +47,12 @@ export const MaterialeSchema = z.object({
 
 export const MaterialeSchemaOpzionale = z.object({
   _id: z.union([z.string(), z.any()]),
-  nomeMateriale: z.string().min(1, 'Il nome è obbligatorio'),
-  label: z.string().min(1, 'La label è obbligatoria'),
+  nomeMateriale: z.string().min(1, REQUIRED_FIELD_MSG),
+  label: z.string().min(1, REQUIRED_FIELD_MSG),
   codiceColore: z.string().optional().nullable(),
   codiceFornitore: z.string().optional().nullable(),
-  quantita: z.number().min(0, 'La quantità deve essere >= 0'),
-  fornitore: z.string().min(1, 'Il fornitore è obbligatorio'),
+  quantita: z.number().min(0, REQUIRED_FIELD_MSG),
+  fornitore: z.string().min(1, REQUIRED_FIELD_MSG),
   tipo: z.enum(['EB', 'UV']),
   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
   utilizzo: z.array(z.enum(['Base', 'Materiale', 'Pantone'])),

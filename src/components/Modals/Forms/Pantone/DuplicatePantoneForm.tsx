@@ -10,6 +10,8 @@ import { pantoneToFormData } from '@/lib/adapter';
 import { useRouter } from 'next/navigation';
 import { Pantone } from '@/types/pantoneTypes';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
+import { usePantoneFormValidation } from '@/hooks/usePantoneFormValidation';
+import { BaseMateriale } from '@/types/materialeTypes';
 
 interface DuplicatePantoneProps {
   pantone: Pantone;
@@ -54,7 +56,7 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
     return basi.filter((base) => base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base'));
   }, [basi]);
   const basiRaggruppatePerName = useMemo(() => {
-    return basiFiltrate.reduce((acc: Record<string, typeof basi>, base) => {
+    return basiFiltrate.reduce((acc: Record<string, BaseMateriale[]>, base) => {
       if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
       acc[base.nomeMateriale].push(base);
       return acc;
@@ -86,14 +88,45 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
     modalKey: 'duplicatePantone',
   });
 
+  // Hook centralizzato per la validazione
+  const { fieldErrors, handleChangeWithValidation: originalHandleChangeWithValidation } = usePantoneFormValidation<
+    Record<string, string | number | undefined>,
+    Pantone
+  >({
+    formData: pantoneForm.formData,
+    schema: PantoneSchema as unknown as import('zod').ZodSchema<Pantone>,
+    buildPantoneFromFormData: (args) =>
+      buildPantoneFromFormData({
+        formData: args.formData,
+        basiRaggruppatePerName: args.basiRaggruppatePerName as Record<string, BaseMateriale[]>,
+        pantoneEsternoSelezionato: args.pantoneEsternoSelezionato,
+        pantoneMateriali: args.pantoneMateriali as BaseMateriale[],
+      }),
+    basiRaggruppatePerName: basiRaggruppatePerName as Record<string, unknown>,
+    pantoneEsternoSelezionato,
+    pantoneMateriali: pantoneMateriali as unknown[],
+  });
+
+  // Wrapper che aggiorna sia formData che errori
+  const handleChangeWithValidation = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    customValue?: string | number
+  ) => {
+    pantoneForm.handleChange(e);
+    originalHandleChangeWithValidation(e, customValue);
+  };
+
   // Helper per chiamare handleChange con nome e valore senza ChangeEvent
   const setFormField = React.useCallback(
     (name: string, value: string | number) => {
       pantoneForm.handleChange({
         target: { name, value },
       } as unknown as React.ChangeEvent<HTMLInputElement>);
+      originalHandleChangeWithValidation({
+        target: { name, value },
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
     },
-    [pantoneForm]
+    [pantoneForm, originalHandleChangeWithValidation]
   );
 
   // Effetto: sincronizza formData con i campi dinamici delle basi
@@ -178,8 +211,9 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
   return (
     <PantoneFormLayout
       formData={pantoneForm.formData}
-      handleChange={pantoneForm.handleChange}
+      handleChange={handleChangeWithValidation}
       errorMessage={pantoneForm.errorMessage}
+      fieldErrors={fieldErrors}
       pantoneMateriali={pantoneMateriali}
       pantoneEsternoSelezionato={pantoneEsternoSelezionato}
       setPantoneEsternoSelezionato={setPantoneEsternoSelezionato}

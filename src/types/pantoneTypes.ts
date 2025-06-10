@@ -48,7 +48,7 @@ export interface RawPantone {
   nomePantone?: string;
   passoCarta?: number;
   hCarta?: number;
-  consumo?: number;
+  consumo: number;
   dose?: number;
   variante?: string;
   articolo?: string;

@@ -9,6 +9,8 @@ import { pantoneToFormData } from '@/lib/adapter';
 import { useRouter } from 'next/navigation';
 import { Pantone } from '@/types/pantoneTypes';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
+import { usePantoneFormValidation } from '@/hooks/usePantoneFormValidation';
+import { BaseMateriale } from '@/types/materialeTypes';
 
 interface EditFormProps {
   pantone: Pantone;
@@ -51,7 +53,7 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     return basi.filter((base) => base.stato === 'In uso' && Array.isArray(base.utilizzo) && base.utilizzo.includes('Base'));
   }, [basi]);
   const basiRaggruppatePerName = useMemo(() => {
-    return basiFiltrate.reduce((acc: Record<string, typeof basi>, base) => {
+    return basiFiltrate.reduce((acc: Record<string, BaseMateriale[]>, base) => {
       if (!acc[base.nomeMateriale]) acc[base.nomeMateriale] = [];
       acc[base.nomeMateriale].push(base);
       return acc;
@@ -66,10 +68,15 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
       pantoneEsternoSelezionato,
       pantoneMateriali,
     });
-    // Validazione con Zod
-    const validation = PantoneSchema.safeParse(aggiornato);
-    if (!validation.success) {
-      alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+    // Validazione centralizzata tramite hook
+    const errors = validateAllFields();
+    if (errors) {
+      alert(
+        'Errore di validazione:\n' +
+          Object.entries(errors)
+            .map(([k, v]) => `${k} - ${v}`)
+            .join('\n')
+      );
       return false;
     }
     if (!pantone._id) return false;
@@ -84,6 +91,35 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     validateFields,
     modalKey: 'editPantone',
   });
+
+  // Hook centralizzato per la validazione
+  const {
+    fieldErrors,
+    handleChangeWithValidation: originalHandleChangeWithValidation,
+    validateAllFields,
+  } = usePantoneFormValidation<Record<string, string | number | undefined>, Pantone>({
+    formData: pantoneForm.formData,
+    schema: PantoneSchema as unknown as import('zod').ZodSchema<Pantone>,
+    buildPantoneFromFormData: (args) =>
+      buildPantoneFromFormData({
+        formData: args.formData,
+        basiRaggruppatePerName: args.basiRaggruppatePerName as Record<string, BaseMateriale[]>,
+        pantoneEsternoSelezionato: args.pantoneEsternoSelezionato,
+        pantoneMateriali: args.pantoneMateriali as BaseMateriale[],
+      }),
+    basiRaggruppatePerName: basiRaggruppatePerName as Record<string, unknown>,
+    pantoneEsternoSelezionato,
+    pantoneMateriali: pantoneMateriali as unknown[],
+  });
+
+  // Wrapper che aggiorna sia formData che errori
+  const handleChangeWithValidation = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    customValue?: string | number
+  ) => {
+    pantoneForm.handleChange(e);
+    originalHandleChangeWithValidation(e, customValue);
+  };
 
   // Effetto: sincronizza formData con i campi dinamici delle basi
   useEffect(() => {
@@ -179,8 +215,9 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
   return (
     <PantoneFormLayout
       formData={pantoneForm.formData}
-      handleChange={pantoneForm.handleChange}
+      handleChange={handleChangeWithValidation}
       errorMessage={pantoneForm.errorMessage}
+      fieldErrors={fieldErrors}
       pantoneMateriali={pantoneMateriali}
       pantoneEsternoSelezionato={pantoneEsternoSelezionato}
       setPantoneEsternoSelezionato={setPantoneEsternoSelezionato}

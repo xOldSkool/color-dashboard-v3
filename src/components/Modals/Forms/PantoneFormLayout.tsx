@@ -10,6 +10,7 @@ export interface PantoneFormLayoutProps {
   formData: Record<string, string | number | undefined>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   errorMessage?: string | null;
+  fieldErrors?: Record<string, string | undefined>; // AGGIUNTA: errori campo per campo
   pantoneMateriali?: Materiale[];
   pantoneEsternoSelezionato?: string | null;
   setPantoneEsternoSelezionato?: (id: string | null) => void;
@@ -33,6 +34,7 @@ export default function PantoneFormLayout({
   formData,
   handleChange,
   errorMessage,
+  fieldErrors = {},
   pantoneMateriali = [],
   pantoneEsternoSelezionato = null,
   setPantoneEsternoSelezionato,
@@ -80,9 +82,9 @@ export default function PantoneFormLayout({
       </div>
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-3 gap-2">
-          <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} />
-          <InputMap fields={pantoneFieldsCenter} formData={formData} handleChange={handleChange} />
-          <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} />
+          <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
+          <InputMap fields={pantoneFieldsCenter} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
+          <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold mt-5">Composizione</h2>

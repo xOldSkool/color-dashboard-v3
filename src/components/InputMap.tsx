@@ -13,9 +13,10 @@ interface InputMapProps {
   fields: Field[];
   formData: Record<string, string | number | undefined | string[]>;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  fieldErrors?: Record<string, string | undefined>;
 }
 
-export default function InputMap({ fields, formData, handleChange }: InputMapProps): JSX.Element {
+export default function InputMap({ fields, formData, handleChange, fieldErrors = {} }: InputMapProps): JSX.Element {
   return (
     <div>
       {fields.map((field, index) => {
@@ -46,6 +47,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
                   </label>
                 ))}
               </div>
+              {fieldErrors[field.name] && <p className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</p>}
             </div>
           );
         }
@@ -72,7 +74,10 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
           placeholder: field.placeholder || '0',
           rows: field.form === 'textarea' ? field.rows || undefined : undefined,
           disabled: isDisabled,
-          className: 'w-full p-2 rounded bg-zinc-600 text-white focus:outline-none' + (isDisabled ? ' cursor-not-allowed' : ''),
+          className:
+            'w-full p-2 rounded bg-zinc-600 text-white focus:outline-none' +
+            (isDisabled ? ' cursor-not-allowed' : '') +
+            (fieldErrors[field.name] ? 'border border-1 border-[var(--error)]' : ''),
         };
 
         if (tag === 'select') {
@@ -86,6 +91,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
                   </option>
                 ))}
               </select>
+              {fieldErrors[field.name] && <p className="text-[var(--error)] text-xs mt-1">{fieldErrors[field.name]}</p>}
             </div>
           );
         }
@@ -94,6 +100,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
           <div key={index} className="flex flex-col items-start">
             {field.label && <label htmlFor={field.name}>{field.label}</label>}
             {createElement(tag, { id: field.name, ...commonProps })}
+            {fieldErrors[field.name] && <p className="text-[var(--error)] text-sm mt-1">{fieldErrors[field.name]}</p>}
           </div>
         );
       })}

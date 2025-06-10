@@ -10,6 +10,8 @@ import { BaseMateriale } from '@/types/materialeTypes';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
+import { Pantone } from '@/types/pantoneTypes';
+import { usePantoneFormValidation } from '@/hooks/usePantoneFormValidation';
 
 export default function NewPantoneForm() {
   const router = useRouter();
@@ -26,6 +28,7 @@ export default function NewPantoneForm() {
   // Campi richiesti per la validazione
   const pantoneFields = [...pantoneFieldsLeft, ...pantoneFieldsCenter, ...pantoneNotes];
   const validateFields = pantoneFields.filter((f) => f.required).map((f) => f.name);
+  // Stato per errori campo per campo
 
   // Raggruppamento basi per nome
   const basiFiltrate = useMemo(() => {
@@ -47,12 +50,18 @@ export default function NewPantoneForm() {
       pantoneEsternoSelezionato,
       pantoneMateriali,
     });
-    // Validazione con Zod
-    const validation = PantoneSchema.safeParse(nuovoPantone);
-    if (!validation.success) {
-      alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+    // Validazione con Zod tramite hook
+    const errors = validateAllFields();
+    if (errors) {
+      alert(
+        'Errore di validazione:\n' +
+          Object.entries(errors)
+            .map(([k, v]) => `${k} - ${v}`)
+            .join('\n')
+      );
       return false;
     }
+    setFieldErrors({}); // Nessun errore
     await createPantone(nuovoPantone);
     router.refresh();
     return true;
@@ -69,6 +78,36 @@ export default function NewPantoneForm() {
     validateFields,
     modalKey: 'newPantone',
   });
+
+  // Hook centralizzato per la validazione
+  const {
+    fieldErrors,
+    setFieldErrors,
+    handleChangeWithValidation: originalHandleChangeWithValidation,
+    validateAllFields,
+  } = usePantoneFormValidation<Record<string, string | number | undefined>, Pantone>({
+    formData,
+    schema: PantoneSchema as unknown as import('zod').ZodSchema<Pantone>,
+    buildPantoneFromFormData: (args) =>
+      buildPantoneFromFormData({
+        formData: args.formData,
+        basiRaggruppatePerName: args.basiRaggruppatePerName as Record<string, BaseMateriale[]>,
+        pantoneEsternoSelezionato: args.pantoneEsternoSelezionato,
+        pantoneMateriali: args.pantoneMateriali as BaseMateriale[],
+      }),
+    basiRaggruppatePerName: basiRaggruppatePerName as Record<string, unknown>,
+    pantoneEsternoSelezionato,
+    pantoneMateriali: pantoneMateriali as unknown[],
+  });
+
+  // Wrapper che aggiorna sia formData che errori
+  const handleChangeWithValidation = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    customValue?: string | number
+  ) => {
+    handleChange(e); // aggiorna lo stato del form
+    originalHandleChangeWithValidation(e, customValue); // aggiorna errori
+  };
 
   // Ref per tracciare i campi dinamici già aggiunti
   const addedBaseKeysRef = useRef<Set<string>>(new Set());
@@ -170,8 +209,9 @@ export default function NewPantoneForm() {
   return (
     <PantoneFormLayout
       formData={formData}
-      handleChange={handleChange}
+      handleChange={handleChangeWithValidation}
       errorMessage={errorMessage}
+      fieldErrors={fieldErrors}
       pantoneMateriali={pantoneMateriali}
       pantoneEsternoSelezionato={pantoneEsternoSelezionato}
       setPantoneEsternoSelezionato={setPantoneEsternoSelezionato}

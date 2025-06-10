@@ -14,6 +14,7 @@
   --hover: #292524;
   --hover-foreground: #e7e5e4;
   --selected-row: var(--foreground);
+  --error: #ef4444;
 }
 
 /* @theme inline {
@@ -36,6 +37,7 @@ html.dark {
     --hover: #e7e5e4;
     --hover-foreground: #1c1917;
     --selected-row: var(--foreground);
+    --error: #ef4444;
 }
 
 body {
