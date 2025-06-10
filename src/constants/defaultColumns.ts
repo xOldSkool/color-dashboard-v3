@@ -265,7 +265,7 @@ export const MAGAZZINO_PANTONI_COLUMNS: TableColumn[] = [
   },
   {
     key: 'count',
-    label: 'N° Pantoni',
+    label: 'N° Articoli',
     sortable: true,
     visibleByDefault_COLS: true,
     hideable: true,

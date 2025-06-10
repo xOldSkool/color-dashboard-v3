@@ -1,14 +1,14 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import PantoneFormLayout from './PantoneFormLayout';
+import PantoneFormLayout from '../PantoneFormLayout';
 import { usePantoneForm } from '@/hooks/usePantoneForm';
 import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useUpdatePantone } from '@/hooks/usePantone';
 import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
-import { getEnumValue } from '@/utils/getEnumValues';
 import { pantoneToFormData } from '@/lib/adapter';
 import { useRouter } from 'next/navigation';
 import { Pantone } from '@/types/pantoneTypes';
+import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
 
 interface EditFormProps {
   pantone: Pantone;
@@ -95,73 +95,19 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
 
   // Custom submit logic per modifica
   const onSubmit = async (formData: Record<string, string | number | undefined>) => {
-    const basiFinali = Object.entries(basiRaggruppatePerName)
-      .map(([nomeBase, basiArr]) => {
-        const fornitoreSelezionato = formData[`fornitore_${nomeBase}`];
-        const valoreInserito = formData[`valore_${nomeBase}`];
-        const baseSelezionata = basiArr.find((b) => b.fornitore === fornitoreSelezionato) || basiArr[0];
-        return {
-          nomeMateriale: baseSelezionata.nomeMateriale,
-          label: baseSelezionata.label,
-          quantita: Number(valoreInserito) || 0,
-          codiceFornitore: String(baseSelezionata.codiceFornitore || ''),
-          fornitore: String(baseSelezionata.fornitore || ''),
-          tipo: String(baseSelezionata.tipo || ''),
-          codiceColore: String(baseSelezionata.codiceColore || ''),
-          utilizzo: ['Base'],
-        };
-      })
-      .filter((b) => b.quantita > 0);
-    if (pantoneEsternoSelezionato && formData.pantoneEsternoInput) {
-      const pantoneEsterno = pantoneMateriali.find((m) => m._id?.toString() === pantoneEsternoSelezionato);
-      if (pantoneEsterno) {
-        basiFinali.push({
-          nomeMateriale: pantoneEsterno.nomeMateriale,
-          label: pantoneEsterno.label,
-          quantita: Number(formData.pantoneEsternoInput) || 0,
-          codiceFornitore: String(pantoneEsterno.codiceFornitore || ''),
-          fornitore: String(pantoneEsterno.fornitore || ''),
-          tipo: String(pantoneEsterno.tipo || ''),
-          codiceColore: String(pantoneEsterno.codiceColore || ''),
-          utilizzo: ['Pantone'],
-        });
-      }
-    }
-    if (!pantone._id) return false;
-    const aggiornato = {
-      ...pantone,
-      nomePantone: String(formData.nomePantone ?? pantone.nomePantone),
-      variante: String(formData.variante ?? pantone.variante),
-      articolo: String(formData.articolo ?? pantone.articolo),
-      is: String(formData.is ?? pantone.is),
-      cliente: String(formData.cliente ?? pantone.cliente),
-      noteArticolo: String(formData.noteArticolo ?? pantone.noteArticolo),
-      urgente: formData.urgente !== undefined ? String(formData.urgente) === 'true' : (pantone.urgente ?? false),
-      tipoCarta: String(formData.tipoCarta ?? pantone.tipoCarta),
-      fornitoreCarta: String(formData.fornitoreCarta ?? pantone.fornitoreCarta),
-      passoCarta: Number(formData.passoCarta ?? pantone.passoCarta) || 0,
-      hCarta: Number(formData.hCarta ?? pantone.hCarta) || 0,
-      stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso') ?? pantone.stato,
-      tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB') ?? pantone.tipo,
-      descrizione: String(formData.descrizione ?? pantone.descrizione),
-      noteColore: String(formData.noteColore ?? pantone.noteColore),
-      consumo: Number(formData.consumo ?? pantone.consumo) || 0,
-      dose: Number(formData.dose ?? pantone.dose) || 0,
-      daProdurre: formData.daProdurre !== undefined ? String(formData.daProdurre) === 'true' : (pantone.daProdurre ?? false),
-      qtDaProdurre: Number(formData.qtDaProdurre ?? pantone.qtDaProdurre) || 0,
-      battuteDaProdurre: Number(formData.battuteDaProdurre ?? pantone.battuteDaProdurre) || 0,
-      consegnatoProduzione:
-        formData.consegnatoProduzione !== undefined ? String(formData.consegnatoProduzione) === 'true' : (pantone.consegnatoProduzione ?? false),
-      qtConsegnataProduzione: Number(formData.qtConsegnataProduzione ?? pantone.qtConsegnataProduzione) || 0,
-      pantoneGroupId: String(formData.pantoneGroupId ?? pantone.pantoneGroupId),
-      basi: basiFinali,
-      basiNormalizzate: pantone.basiNormalizzate ?? '',
-    };
+    const aggiornato = buildPantoneFromFormData({
+      formData,
+      basiRaggruppatePerName,
+      pantoneEsternoSelezionato,
+      pantoneMateriali,
+    });
+    // Validazione con Zod
     const validation = PantoneSchema.safeParse(aggiornato);
     if (!validation.success) {
       alert('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
     }
+    if (!pantone._id) return false;
     await updatePantone(pantone._id.toString(), aggiornato);
     router.refresh();
     return true;
@@ -199,6 +145,22 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
       });
     }
   }, [pantoneEsternoSelezionato, pantoneMateriali, pantoneForm, pantoneForm.handleChange]);
+
+  // Aggiorna automaticamente il campo dose come somma di tutte le quantità
+  useEffect(() => {
+    const doseBasi = Object.entries(pantoneForm.formData)
+      .filter(([key]) => key.startsWith('valore_'))
+      .reduce((acc, [, value]) => acc + (Number(value) || 0), 0);
+    const dosePantoneEsterno =
+      pantoneForm.formData.pantoneEsternoInput !== undefined && pantoneForm.formData.pantoneEsternoInput !== ''
+        ? Number(pantoneForm.formData.pantoneEsternoInput) || 0
+        : 0;
+    const doseTotale = doseBasi + dosePantoneEsterno;
+    if (Number(pantoneForm.formData.dose) !== doseTotale) {
+      const event = { target: { name: 'dose', value: doseTotale } } as unknown as React.ChangeEvent<HTMLInputElement>;
+      pantoneForm.handleChange(event);
+    }
+  }, [pantoneForm, pantoneForm.formData, pantoneForm.handleChange]);
 
   return (
     <PantoneFormLayout

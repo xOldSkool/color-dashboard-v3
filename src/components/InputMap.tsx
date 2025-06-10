@@ -62,8 +62,7 @@ export default function InputMap({ fields, formData, handleChange }: InputMapPro
           displayValue = rawValue.toFixed(3);
         }
 
-        // const isDisabled = field.name === 'dose' || field.name === 'name';
-const isDisabled = field.name === 'name';
+        const isDisabled = field.name === 'dose' || field.name === 'name';
         const commonProps = {
           type: field.form === 'input' ? field.type : undefined,
           name: field.name,
