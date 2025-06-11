@@ -1,11 +1,23 @@
 import { DeliverPantoneParams, Pantone } from '@/types/pantoneTypes';
 import axios from 'axios';
 import { useState, useCallback } from 'react';
+import { toast } from 'react-toastify';
 
 export function useCreatePantone() {
-  const createPantone = async (pantone: Pantone): Promise<Pantone> => {
-    const response = await axios.post<Pantone>('/api/pantoni', pantone);
-    return response.data;
+  const createPantone = async (pantone: Pantone): Promise<Pantone | undefined> => {
+    try {
+      const response = await axios.post<{ message: string; id: string }>('/api/pantoni', pantone);
+      toast.success('Pantone creato con successo!');
+      return { ...pantone, _id: response.data.id } as Pantone;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const msg = error.response.data?.error || 'Errore creazione Pantone';
+        toast.error(msg);
+      } else {
+        toast.error('Errore di rete o server');
+      }
+      return undefined;
+    }
   };
   return { createPantone };
 }

@@ -3,6 +3,8 @@ import { Poppins } from 'next/font/google';
 import '@/app/globals.css';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import ModalManager from '@/components/Modals/ModalManager';
+import { Slide, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -30,6 +32,19 @@ export default function RootLayout({
           <main className="flex-1 w-screen bg-[var(--background)] overflow-auto px-4 pt-3">{children}</main>
         </div>
         <ModalManager />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+          transition={Slide}
+        />
       </body>
     </html>
   );
