@@ -28,21 +28,40 @@ export default function InputMap({ fields, formData, handleChange, fieldErrors =
         // Gestione speciale per checkbox multipli (array)
         if (field.form === 'input' && field.type === 'checkbox' && 'options' in field && Array.isArray(field.options)) {
           const options = field.options;
-          // formData[field.name] può essere string | number | undefined | string[]
-          let selectedValues: string[] = [];
-          const raw = formData[field.name];
-          if (Array.isArray(raw)) {
-            selectedValues = raw as string[];
-          } else if (typeof raw === 'string' && raw) {
-            selectedValues = [raw];
-          }
+          // selectedValues è sempre un array di stringhe, normalizzato a monte
+          const selectedValues: string[] = Array.isArray(formData[field.name]) ? (formData[field.name] as string[]).map(String) : [];
           return (
             <div key={index} className="flex flex-col items-start">
               {field.label && <label>{field.label}</label>}
               <div className="flex gap-4">
                 {options.map((opt) => (
                   <label key={opt} className="flex items-center gap-1">
-                    <input type="checkbox" name={field.name} value={opt} checked={selectedValues.includes(opt)} onChange={handleChange} />
+                    <input
+                      type="checkbox"
+                      name={field.name}
+                      value={opt}
+                      checked={selectedValues.includes(String(opt))}
+                      onChange={(e) => {
+                        // Gestione custom per checkbox multipli senza usare any
+                        const checked = e.target.checked;
+                        let newValues = [...selectedValues];
+                        if (checked) {
+                          if (!newValues.includes(opt)) newValues.push(opt);
+                        } else {
+                          newValues = newValues.filter((v) => v !== opt);
+                        }
+                        // Costruisci un event compatibile con handleChange ma typesafe
+                        const event = {
+                          target: {
+                            name: field.name,
+                            value: newValues,
+                            type: 'checkbox',
+                            checked: checked,
+                          },
+                        } as unknown as React.ChangeEvent<HTMLInputElement>;
+                        handleChange(event);
+                      }}
+                    />
                     {opt}
                   </label>
                 ))}
@@ -64,7 +83,9 @@ export default function InputMap({ fields, formData, handleChange, fieldErrors =
           displayValue = rawValue.toFixed(3);
         }
 
-        const isDisabled = field.name === 'dose' || field.name === 'name';
+        // Determina se il campo deve essere disabilitato (solo per input)
+        const isDisabled =
+          (field.form === 'input' && 'disabled' in field && field.disabled === true) || field.name === 'dose' || field.name === 'name';
         const commonProps = {
           type: field.form === 'input' ? field.type : undefined,
           name: field.name,

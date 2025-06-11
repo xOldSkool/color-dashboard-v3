@@ -90,13 +90,7 @@ export default function UnloadMaterialeForm({ materiale: materialeProp }: Unload
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 
   return (
-    <MaterialeFormLayout
-      title="Scarico materiale"
-      formData={formData}
-      handleChange={handleChange}
-      fieldList={materialeFieldsMovimentoUnload}
-      errorMessage={errorMessage}
-    >
+    <MaterialeFormLayout formData={formData} handleChange={handleChange} fieldList={materialeFieldsMovimentoUnload} errorMessage={errorMessage}>
       <p className="text-sm text-gray-500">
         Quantità attuale: <strong>{materiale.quantita}</strong> kg
       </p>

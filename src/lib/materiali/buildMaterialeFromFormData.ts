@@ -9,8 +9,19 @@ import { getEnumValue } from '@/utils/getEnumValues';
  * riduce errori e duplicazione, e garantisce coerenza tra form e modello dati.
  */
 export function buildMaterialeFromFormData(formData: Record<string, string | number | string[] | undefined>): Materiale {
+  // Type guard per valid enum
+  const isValidUtilizzo = (u: string): u is 'Base' | 'Materiale' | 'Pantone' => ['Base', 'Materiale', 'Pantone'].includes(u);
+  let utilizzo: Array<'Base' | 'Materiale' | 'Pantone'> = [];
+  if (Array.isArray(formData.utilizzo)) {
+    utilizzo = (formData.utilizzo as string[]).filter(isValidUtilizzo);
+  } else if (typeof formData.utilizzo === 'string' && formData.utilizzo) {
+    utilizzo = formData.utilizzo
+      .split(',')
+      .map((u) => u.trim())
+      .filter(isValidUtilizzo);
+  }
   return {
-    nomeMateriale: String(formData.name),
+    nomeMateriale: String(formData.nomeMateriale || ''),
     label: String(formData.label || ''),
     codiceColore: String(formData.codiceColore || ''),
     codiceFornitore: String(formData.codiceFornitore || ''),
@@ -18,11 +29,7 @@ export function buildMaterialeFromFormData(formData: Record<string, string | num
     fornitore: String(formData.fornitore || ''),
     tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
     stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-    utilizzo: Array.isArray(formData.utilizzo)
-      ? (formData.utilizzo as Array<'Base' | 'Materiale' | 'Pantone'>)
-      : typeof formData.utilizzo === 'string' && formData.utilizzo
-        ? [formData.utilizzo as 'Base' | 'Materiale' | 'Pantone']
-        : [],
+    utilizzo,
     noteMateriale: formData.noteMateriale ? String(formData.noteMateriale) : undefined,
     dataCreazione: formData.dataCreazione ? String(formData.dataCreazione) : new Date().toISOString(),
     movimenti:

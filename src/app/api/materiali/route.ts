@@ -103,7 +103,6 @@ export async function PATCH(request: NextRequest) {
         }
       }
     }
-    // --- FINE LOGICA DISPONIBILITÀ MAGAZZINO PANTONI ---
 
     // Aggiorna solo i campi necessari senza validazione finale su tutto il materiale
     await collection.updateOne({ _id: new ObjectId(id) }, { $set: { quantita, movimenti: movimentiAggiornati } });

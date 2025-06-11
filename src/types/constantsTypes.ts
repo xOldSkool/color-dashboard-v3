@@ -10,6 +10,7 @@ export interface FieldBase {
 export interface InputField extends FieldBase {
   form: 'input';
   type?: string;
+  disabled?: boolean;
 }
 
 export interface CheckboxGroupField extends InputField {

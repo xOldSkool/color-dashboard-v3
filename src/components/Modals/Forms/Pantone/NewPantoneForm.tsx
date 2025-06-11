@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import PantoneFormLayout from '../PantoneFormLayout';
-import { usePantoneForm } from '@/hooks/usePantoneForm';
+import { usePantoneForm } from '@/hooks/PantoneValidation/usePantoneForm';
 import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
 import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
@@ -11,7 +11,7 @@ import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
 import { Pantone } from '@/types/pantoneTypes';
-import { usePantoneFormValidation } from '@/hooks/usePantoneFormValidation';
+import { usePantoneFormValidation } from '@/hooks/PantoneValidation/usePantoneFormValidation';
 
 export default function NewPantoneForm() {
   const router = useRouter();

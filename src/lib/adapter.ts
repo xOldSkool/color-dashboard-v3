@@ -35,7 +35,20 @@ export function materialeToFormData(materiale: Materiale): Record<string, string
   const formData: Record<string, string | number | undefined> = {};
 
   Object.entries(materiale).forEach(([key, value]) => {
-    if (value instanceof Date) formData[key] = value.toISOString();
+    if (key === 'utilizzo') {
+      // Normalizza sempre come array di stringhe
+      if (Array.isArray(value)) {
+        formData[key] = value.join(','); // Per compatibilità con formData, ma la UI deve splittare in array
+      } else if (typeof value === 'string') {
+        // Se è una stringa concatenata, la UI dovrà splittare in array
+        formData[key] = value;
+      } else if (value == null) {
+        formData[key] = '';
+      } else {
+        // fallback: forza in stringa
+        formData[key] = String(value);
+      }
+    } else if (value instanceof Date) formData[key] = value.toISOString();
     else if (typeof value === 'object' && value !== null && '_bsontype' in value) formData[key] = value.toString();
     else if (typeof value === 'string' || typeof value === 'number' || value === undefined) formData[key] = value;
     else formData[key] = String(value);

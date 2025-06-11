@@ -147,10 +147,11 @@ export const materialeFieldsCreate: Field[] = [
   {
     form: 'input',
     type: 'text',
-    name: 'name',
+    name: 'nomeMateriale',
     label: 'Nome',
     placeholder: 'Inserito automaticamente',
     required: true,
+    disabled: true,
   },
   {
     form: 'input',

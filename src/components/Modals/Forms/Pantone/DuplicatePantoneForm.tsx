@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import PantoneFormLayout from '../PantoneFormLayout';
-import { usePantoneForm } from '@/hooks/usePantoneForm';
+import { usePantoneForm } from '@/hooks/PantoneValidation/usePantoneForm';
 import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useCreatePantone } from '@/hooks/usePantone';
 import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
@@ -10,7 +10,7 @@ import { pantoneToFormData } from '@/lib/adapter';
 import { useRouter } from 'next/navigation';
 import { Pantone } from '@/types/pantoneTypes';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
-import { usePantoneFormValidation } from '@/hooks/usePantoneFormValidation';
+import { usePantoneFormValidation } from '@/hooks/PantoneValidation/usePantoneFormValidation';
 import { BaseMateriale } from '@/types/materialeTypes';
 
 interface DuplicatePantoneProps {

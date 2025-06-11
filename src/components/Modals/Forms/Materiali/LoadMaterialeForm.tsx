@@ -89,13 +89,7 @@ export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMate
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 
   return (
-    <MaterialeFormLayout
-      title="Carico materiale"
-      formData={formData}
-      handleChange={handleChange}
-      fieldList={materialeFieldsMovimentoLoad}
-      errorMessage={errorMessage}
-    >
+    <MaterialeFormLayout formData={formData} handleChange={handleChange} fieldList={materialeFieldsMovimentoLoad} errorMessage={errorMessage}>
       <p className="text-sm text-gray-500">
         Quantità attuale: <strong>{materiale.quantita}</strong> kg
       </p>
