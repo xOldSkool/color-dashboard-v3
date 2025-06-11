@@ -1,5 +1,6 @@
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getPantoneMateriali } from '@/lib/materiali/logic';
+import { findPantoneGroupIdForMateriale } from '@/lib/pantoni/logic';
 import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { ObjectId } from 'mongodb';
@@ -90,7 +91,6 @@ export async function PATCH(request: NextRequest) {
     // Se il materiale è utilizzato come Pantone, aggiorna dispMagazzino del gruppo Pantone associato
     if (existingMateriale.utilizzo.includes('Pantone')) {
       // Trova il pantoneGroupId associato al materiale
-      const { findPantoneGroupIdForMateriale } = await import('@/lib/pantoni/findPantoneGroupIdForMateriale');
       const pantoneGroupId = await findPantoneGroupIdForMateriale(db, existingMateriale.nomeMateriale, existingMateriale.fornitore);
       if (pantoneGroupId) {
         // Aggiorna dispMagazzino in base al tipo di movimento

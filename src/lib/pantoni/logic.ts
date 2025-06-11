@@ -228,3 +228,16 @@ export async function annullaProduzionePantone({ db, pantoneId }: { db: Db; pant
 
   return { success: true };
 }
+
+export async function findPantoneGroupIdForMateriale(db: Db, nomeMateriale: string, fornitore: string): Promise<string | null> {
+  const pantone = await db.collection<Pantone>('pantoni').findOne({
+    basi: {
+      $elemMatch: {
+        nomeMateriale,
+        fornitore,
+        utilizzo: { $in: ['Pantone'] },
+      },
+    },
+  });
+  return pantone?.pantoneGroupId || null;
+}

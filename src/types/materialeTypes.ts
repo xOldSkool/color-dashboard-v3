@@ -16,14 +16,14 @@ export interface Materiale {
   _id?: ObjectId | string;
   nomeMateriale: string;
   label: string;
-  codiceColore?: string;
-  codiceFornitore?: string;
+  codiceColore?: string | null;
+  codiceFornitore?: string | null;
   quantita: number;
   fornitore: string;
   tipo: 'EB' | 'UV';
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   utilizzo: Array<'Base' | 'Materiale' | 'Pantone'>;
-  noteMateriale?: string;
+  noteMateriale?: string | null;
   dataCreazione: Date | string;
   movimenti?: MovimentoMateriale[];
 }
@@ -38,13 +38,13 @@ export interface RawMateriale {
   nomeMateriale: string;
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   label: string;
-  codiceColore?: string;
-  codiceFornitore?: string;
+  codiceColore?: string | null;
+  codiceFornitore?: string | null;
   quantita: number;
   fornitore: string;
   tipo: 'EB' | 'UV';
   utilizzo: Array<'Base' | 'Materiale' | 'Pantone'>;
-  noteMateriale?: string;
+  noteMateriale?: string | null;
   dataCreazione: string | Date;
   movimenti?: MovimentoMateriale[];
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { updatePantoneAndMaterialStock } from '@/lib/magazzinoPantoni/logic';
-import { findPantoneGroupIdForMateriale } from '@/lib/pantoni/findPantoneGroupIdForMateriale';
+import { findPantoneGroupIdForMateriale } from '@/lib/pantoni/logic';
 
 const CaricoScaricoPantoneSchema = z.object({
   materialeId: z.string(),
