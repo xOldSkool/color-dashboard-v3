@@ -32,10 +32,16 @@ export function useUpdatePantone() {
 
 export function useDeletePantone() {
   const removePantone = async (ids: string | string[]): Promise<{ success: boolean }> => {
-    const response = await axios.delete<{ success: boolean }>('/api/pantoni', {
-      data: Array.isArray(ids) ? { ids } : { id: ids },
-    });
-    return response.data;
+    try {
+      const response = await axios.delete<{ success: boolean }>('/api/pantoni', {
+        data: Array.isArray(ids) ? { ids } : { id: ids },
+      });
+      toast.success('Pantone eliminato con successo!');
+      return response.data;
+    } catch (error) {
+      toast.error(`Errore durante l\'eliminazione del Pantone: ${error}`);
+      return { success: false };
+    }
   };
   return { removePantone };
 }

@@ -135,12 +135,13 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
     Object.keys(basiRaggruppatePerName).forEach((nome) => {
       const fornitoreKey = `fornitore_${nome}`;
       const valoreKey = `valore_${nome}`;
+      // Usa il valore già presente in initialData se esiste, altrimenti stringa vuota
       if (!addedBaseKeysRef.current.has(fornitoreKey)) {
-        nuoviCampi[fornitoreKey] = '';
+        nuoviCampi[fornitoreKey] = pantoneForm.formData[fornitoreKey] ?? initialData[fornitoreKey] ?? '';
         addedBaseKeysRef.current.add(fornitoreKey);
       }
       if (!addedBaseKeysRef.current.has(valoreKey)) {
-        nuoviCampi[valoreKey] = '';
+        nuoviCampi[valoreKey] = pantoneForm.formData[valoreKey] ?? initialData[valoreKey] ?? '';
         addedBaseKeysRef.current.add(valoreKey);
       }
     });
@@ -160,7 +161,7 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
         addedBaseKeysRef.current.delete(key);
       }
     });
-  }, [basiRaggruppatePerName, setFormField]);
+  }, [basiRaggruppatePerName, setFormField, initialData, pantoneForm.formData]);
 
   // Autocompletamento campi quando si seleziona un pantone esterno
   const autoCompletedRef = useRef(false);
