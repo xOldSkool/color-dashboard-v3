@@ -45,18 +45,18 @@ export const MaterialeSchema = z.object({
   movimenti: z.array(MovimentoSchema).optional(),
 });
 
-export const MaterialeSchemaOpzionale = z.object({
-  _id: z.union([z.string(), z.any()]),
-  nomeMateriale: z.string().min(1, REQUIRED_FIELD_MSG),
-  label: z.string().min(1, REQUIRED_FIELD_MSG),
-  codiceColore: z.string().optional().nullable(),
-  codiceFornitore: z.string().optional().nullable(),
-  quantita: z.number().min(0, REQUIRED_FIELD_MSG),
-  fornitore: z.string().min(1, REQUIRED_FIELD_MSG),
-  tipo: z.enum(['EB', 'UV']),
-  stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
-  utilizzo: z.array(z.enum(['Base', 'Materiale', 'Pantone'])),
-  noteMateriale: z.string().optional().nullable(),
-  dataCreazione: z.union([z.string(), z.date()]).optional(),
-  movimenti: z.array(MovimentoSchema).optional(),
-});
+// export const MaterialeSchemaOpzionale = z.object({
+//   _id: z.union([z.string(), z.any()]),
+//   nomeMateriale: z.string().min(1, REQUIRED_FIELD_MSG),
+//   label: z.string().min(1, REQUIRED_FIELD_MSG),
+//   codiceColore: z.string().optional().nullable(),
+//   codiceFornitore: z.string().optional().nullable(),
+//   quantita: z.number().min(0, REQUIRED_FIELD_MSG),
+//   fornitore: z.string().min(1, REQUIRED_FIELD_MSG),
+//   tipo: z.enum(['EB', 'UV']),
+//   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),
+//   utilizzo: z.array(z.enum(['Base', 'Materiale', 'Pantone'])),
+//   noteMateriale: z.string().optional().nullable(),
+//   dataCreazione: z.union([z.string(), z.date()]).optional(),
+//   movimenti: z.array(MovimentoSchema).optional(),
+// });

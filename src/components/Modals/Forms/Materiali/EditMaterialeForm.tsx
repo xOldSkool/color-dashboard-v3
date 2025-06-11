@@ -1,16 +1,16 @@
 'use client';
 import React from 'react';
-import InputMap from '@/components/InputMap';
+import MaterialeFormLayout from '@/components/Modals/Forms/MaterialeFormLayout';
 import { materialeFieldsCreate } from '@/constants/inputFields';
 import { useUpdateMaterialeCompleto } from '@/hooks/useMateriali';
 import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
-import { getEnumValue } from '@/utils/getEnumValues';
 import { Materiale } from '@/types/materialeTypes';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
 import { materialeToFormData } from '@/lib/adapter';
 import toCamelCase from '@/utils/toCamelCase';
+import { buildMaterialeFromFormData } from '@/lib/materiali/buildMaterialeFromFormData';
 
 interface EditMaterialeFormProps {
   materiale: Materiale;
@@ -36,10 +36,11 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
     if (type === 'checkbox' && name === 'utilizzo' && e.target instanceof HTMLInputElement) {
       const checked = e.target.checked;
       setFormData((prev) => {
-        const prevArr = (prev.utilizzo ?? []) as string[];
+        const prevArr = Array.isArray(prev.utilizzo) ? (prev.utilizzo as string[]) : [];
         let newArr: string[];
         if (checked) {
-          newArr = [...prevArr, value];
+          // Evita duplicati e aggiungi solo se non già presente
+          newArr = prevArr.includes(value) ? prevArr : [...prevArr, value];
         } else {
           newArr = prevArr.filter((v) => v !== value);
         }
@@ -66,19 +67,11 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         setErrorMessage('ID materiale mancante.');
         return false;
       }
-      const materialeAggiornato = {
-        nomeMateriale: String(formData.name),
-        label: String(formData.label || ''),
-        codiceColore: String(formData.codiceColore || ''),
-        codiceFornitore: String(formData.codiceFornitore || ''),
-        fornitore: String(formData.fornitore || ''),
-        tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
-        stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
-        utilizzo: (formData.utilizzo as string[]).filter((v): v is 'Base' | 'Materiale' | 'Pantone' => ['Base', 'Materiale', 'Pantone'].includes(v)),
-        noteMateriale: String(formData.noteMateriale || ''),
-        quantita: materiale.quantita, // obbligatorio per Materiale
-        dataCreazione: materiale.dataCreazione, // obbligatorio per Materiale
-      };
+      // Costruzione oggetto materiale aggiornato tramite funzione centralizzata
+      const materialeAggiornato = buildMaterialeFromFormData(formData);
+      // Mantieni i valori obbligatori che non devono cambiare
+      materialeAggiornato.quantita = materiale.quantita;
+      materialeAggiornato.dataCreazione = materiale.dataCreazione;
 
       // Validazione con Zod
       const validation = MaterialeSchema.safeParse(materialeAggiornato);
@@ -130,9 +123,14 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
   }, []);
 
   return (
-    <form>
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-      <InputMap fields={materialeFieldsCreate} formData={formData} handleChange={handleChange} />
-    </form>
+    <MaterialeFormLayout
+      title="Modifica materiale"
+      formData={formData}
+      handleChange={handleChange}
+      fieldList={materialeFieldsCreate}
+      errorMessage={errorMessage}
+    >
+      {/* Eventuali children custom, ad esempio pulsanti */}
+    </MaterialeFormLayout>
   );
 }

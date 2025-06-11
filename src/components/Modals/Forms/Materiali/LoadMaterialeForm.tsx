@@ -7,6 +7,7 @@ import { Materiale } from '@/types/materialeTypes';
 import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import MaterialeFormLayout from '@/components/Modals/Forms/MaterialeFormLayout';
 
 // Tipi
 type FormDataState = Record<string, string>;
@@ -24,7 +25,7 @@ export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMate
   const formDataRef = useRef<FormDataState>({});
 
   // Gestione input
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
@@ -88,36 +89,16 @@ export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMate
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 
   return (
-    <form className="space-y-4">
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+    <MaterialeFormLayout
+      title="Carico materiale"
+      formData={formData}
+      handleChange={handleChange}
+      fieldList={materialeFieldsMovimentoLoad}
+      errorMessage={errorMessage}
+    >
       <p className="text-sm text-gray-500">
         Quantità attuale: <strong>{materiale.quantita}</strong> kg
       </p>
-      {materialeFieldsMovimentoLoad.map((field) => (
-        <div key={field.name}>
-          <label className="block mb-1 font-semibold">{field.label}</label>
-          {field.form === 'input' ? (
-            <input
-              type={field.type}
-              name={field.name}
-              placeholder={field.placeholder}
-              required={field.required}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              value={formData[field.name] || ''}
-            />
-          ) : (
-            <textarea
-              name={field.name}
-              rows={field.rows}
-              placeholder={field.placeholder}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              value={formData[field.name] || ''}
-            />
-          )}
-        </div>
-      ))}
-    </form>
+    </MaterialeFormLayout>
   );
 }
