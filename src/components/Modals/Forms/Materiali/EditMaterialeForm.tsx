@@ -6,7 +6,7 @@ import { useUpdateMaterialeCompleto } from '@/hooks/useMateriali';
 import { MaterialeSchema } from '@/schemas/MaterialeSchema';
 import { Materiale } from '@/types/materialeTypes';
 import { useRouter } from 'next/navigation';
-import { useMaterileForm } from '@/hooks/MaterialeValidation/useMaterialeForm';
+import { useMaterialeForm } from '@/hooks/MaterialeValidation/useMaterialeForm';
 import { useMaterialeFormValidation } from '@/hooks/MaterialeValidation/useMaterialeFormValidation';
 import { normalizzaMovimenti } from '@/lib/materiali/normalizzaMovimenti';
 import { materialeToFormData } from '@/lib/adapter';
@@ -38,7 +38,7 @@ export default function EditMaterialeForm({ materiale }: EditMaterialeFormProps)
         : [];
     return { ...base, nomeMateriale, utilizzo };
   })();
-  const materialeForm = useMaterileForm({
+  const materialeForm = useMaterialeForm({
     initialData,
     onSubmit: handleSubmit,
     modalKey: 'editMateriale',

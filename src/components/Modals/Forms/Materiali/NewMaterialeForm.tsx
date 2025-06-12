@@ -7,7 +7,7 @@ import { z } from 'zod';
 import React from 'react';
 import MaterialeFormLayout from '@/components/Modals/Forms/MaterialeFormLayout';
 import { buildMaterialeFromFormData } from '@/lib/materiali/buildMaterialeFromFormData';
-import { useMaterileForm } from '@/hooks/MaterialeValidation/useMaterialeForm';
+import { useMaterialeForm } from '@/hooks/MaterialeValidation/useMaterialeForm';
 import { useMaterialeFormValidation } from '@/hooks/MaterialeValidation/useMaterialeFormValidation';
 import toCamelCase from '@/utils/toCamelCase';
 
@@ -16,7 +16,7 @@ export default function NewMaterialeForm() {
   const { createMateriale } = useCreateMateriale();
 
   // Inizializzazione form con custom hook
-  const materialeForm = useMaterileForm({
+  const materialeForm = useMaterialeForm({
     initialData: {},
     onSubmit: handleSubmit,
     modalKey: 'newMateriale',

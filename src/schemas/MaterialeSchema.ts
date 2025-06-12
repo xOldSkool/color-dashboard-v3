@@ -4,21 +4,21 @@ const REQUIRED_FIELD_MSG = 'Il campo è obbligatorio';
 // Movimento per carico
 export const MovimentoCaricoSchema = z.object({
   tipo: z.literal('carico'),
-  quantita: z.number(),
+  quantita: z.number().min(1, REQUIRED_FIELD_MSG),
   data: z.union([z.string(), z.date()]),
   noteOperatore: z.string().optional(),
   causale: z.string(),
-  DDT: z.string(), // obbligatorio solo per carico
-  dataDDT: z.union([z.string(), z.date()]), // obbligatorio solo per carico
+  DDT: z.string().min(1, REQUIRED_FIELD_MSG),
+  dataDDT: z.union([z.string(), z.date()]),
   riferimentoPantone: z.string().optional(),
 });
 
 // Movimento per scarico
 export const MovimentoScaricoSchema = z.object({
   tipo: z.literal('scarico'),
-  quantita: z.number(),
+  quantita: z.number().min(1, REQUIRED_FIELD_MSG),
   data: z.union([z.string(), z.date()]),
-  noteOperatore: z.string().optional(),
+  noteOperatore: z.string().min(1, REQUIRED_FIELD_MSG),
   causale: z.string(),
   DDT: z.string().optional(),
   dataDDT: z.union([z.string(), z.date()]).optional(),
@@ -33,9 +33,9 @@ export const MaterialeSchema = z.object({
   _id: z.union([z.string(), z.any()]),
   nomeMateriale: z.string().min(1),
   label: z.string().min(1, REQUIRED_FIELD_MSG),
-  codiceColore: z.string().optional().nullable(),
-  codiceFornitore: z.string().optional().nullable(),
-  quantita: z.number().min(0, REQUIRED_FIELD_MSG),
+  codiceColore: z.string().min(1, REQUIRED_FIELD_MSG),
+  codiceFornitore: z.string().min(1, REQUIRED_FIELD_MSG),
+  quantita: z.number().min(1, REQUIRED_FIELD_MSG),
   fornitore: z.string().min(1, REQUIRED_FIELD_MSG),
   tipo: z.enum(['EB', 'UV']),
   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare']),

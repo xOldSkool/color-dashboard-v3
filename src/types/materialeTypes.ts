@@ -12,6 +12,20 @@ export interface MovimentoMateriale {
   riferimentoPantone?: string;
 }
 
+export interface MovimentoCaricoInput {
+  quantita: number;
+  causale: string;
+  DDT: string;
+  dataDDT: string | Date;
+  riferimentoPantone?: string;
+  noteOperatore?: string;
+}
+
+export interface MovimentoScaricoInput {
+  quantita: number;
+  noteOperatore: string;
+}
+
 export interface Materiale {
   _id?: ObjectId | string;
   nomeMateriale: string;

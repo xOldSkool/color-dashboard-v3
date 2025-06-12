@@ -1,13 +1,14 @@
 'use client';
 import { materialeFieldsMovimentoLoad } from '@/constants/inputFields';
 import { useUpdateMateriale } from '@/hooks/useMateriali';
-import { MovimentoSchema } from '@/schemas/MaterialeSchema';
+import { MovimentoCaricoSchema } from '@/schemas/MaterialeSchema';
 import { useModalStore } from '@/store/useModalStore';
 import { Materiale } from '@/types/materialeTypes';
-import { getEnumValue } from '@/utils/getEnumValues';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import MaterialeFormLayout from '@/components/Modals/Forms/MaterialeFormLayout';
+import { useMaterialeFormValidation } from '@/hooks/MaterialeValidation/useMaterialeFormValidation';
+import { buildMaterialeFromFormData } from '@/lib/materiali/buildMaterialeFromFormData';
 
 // Tipi
 type FormDataState = Record<string, string>;
@@ -24,41 +25,56 @@ export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMate
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formDataRef = useRef<FormDataState>({});
 
-  // Gestione input
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
-      formDataRef.current = updated;
-      return updated;
-    });
-  };
+  // Sincronizza il ref con lo stato formData per evitare problemi di valore non aggiornato
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
+  // Validazione centralizzata per campo
+  const { fieldErrors, handleChangeWithValidation, validateMovimento } = useMaterialeFormValidation({
+    formData,
+    setFormData,
+    schema: MovimentoCaricoSchema,
+    buildMaterialeFromFormData: (fd) => buildMaterialeFromFormData(fd),
+    isMovimento: true,
+  });
 
   // Submit movimento
   const submit = useCallback(async () => {
     setErrorMessage(null);
     if (!materiale || !materiale._id) return false;
     const currentFormData = formDataRef.current;
-    const movimento = {
-      ...currentFormData,
-      quantita: Math.round(Number(currentFormData.quantita) * 1000) / 1000,
-      data: new Date().toISOString(),
-      tipo: getEnumValue(currentFormData.tipo, ['carico', 'scarico'] as const, 'carico'),
-      noteOperatore: currentFormData.noteOperatore,
-      causale: 'Arrivo fornitore',
-      DDT: currentFormData.DDT,
-      dataDDT: currentFormData.dataDDT,
-      fromUnload: false,
-    };
-    // Validazione solo sul movimento corrente
-    const movimentoValidation = MovimentoSchema.safeParse(movimento);
-    if (!movimentoValidation.success) {
-      setErrorMessage('Errore di validazione:\n' + movimentoValidation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+    const quantita = Number(currentFormData.quantita);
+    if (isNaN(quantita) || quantita <= 0) {
+      setErrorMessage('La quantità deve essere un numero valido maggiore di zero.');
       return false;
     }
-    const nuovaQuantita = Math.round((materiale.quantita + movimento.quantita) * 1000) / 1000;
+    if (!currentFormData.DDT || !currentFormData.dataDDT) {
+      setErrorMessage('DDT e Data DDT sono obbligatori.');
+      return false;
+    }
+    // Validazione movimento tramite funzione dedicata
+    const { validation, movimento } = validateMovimento(
+      {
+        quantita: quantita,
+        DDT: currentFormData.DDT,
+        dataDDT: currentFormData.dataDDT,
+        noteOperatore: currentFormData.noteOperatore,
+        causale: 'Arrivo fornitore',
+        tipo: 'carico',
+        data: new Date().toISOString(),
+      },
+      'carico'
+    );
+    if (!validation.success) {
+      setErrorMessage('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+      return false;
+    }
+    // Cast esplicito per evitare errori di tipo
+    const movimentoCarico = movimento as import('@/types/materialeTypes').MovimentoMateriale;
+    const nuovaQuantita = Math.round((materiale.quantita + quantita) * 1000) / 1000;
     try {
-      await updateMateriale(String(materiale._id), movimento, nuovaQuantita);
+      await updateMateriale(String(materiale._id), movimentoCarico, nuovaQuantita);
     } catch {
       setErrorMessage('Errore durante la richiesta al server per il carico/scarico materiale.');
       return false;
@@ -67,7 +83,7 @@ export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMate
     router.refresh();
     closeModal('loadMateriale');
     return true;
-  }, [materiale, updateMateriale, router, closeModal]);
+  }, [materiale, updateMateriale, router, closeModal, validateMovimento]);
 
   // Reset form
   const reset = useCallback(() => setFormData({}), []);
@@ -89,10 +105,12 @@ export default function LoadMaterialeForm({ materiale: materialeProp }: LoadMate
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 
   return (
-    <MaterialeFormLayout formData={formData} handleChange={handleChange} fieldList={materialeFieldsMovimentoLoad} errorMessage={errorMessage}>
-      <p className="text-sm text-gray-500">
-        Quantità attuale: <strong>{materiale.quantita}</strong> kg
-      </p>
-    </MaterialeFormLayout>
+    <MaterialeFormLayout
+      formData={formData}
+      handleChange={handleChangeWithValidation}
+      fieldList={materialeFieldsMovimentoLoad}
+      errorMessage={errorMessage}
+      fieldErrors={fieldErrors}
+    />
   );
 }

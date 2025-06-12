@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUpdatePantone } from '@/hooks/usePantone';
-import { useUpdateMagazzinoPantoni } from '@/hooks/useUpdateMagazzinoPantoni';
+import { useUpdateMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { useModalStore } from '@/store/useModalStore';
 import { useRouter } from 'next/navigation';
 import { Pantone } from '@/types/pantoneTypes';

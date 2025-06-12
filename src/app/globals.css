@@ -47,37 +47,29 @@ body {
   font-family: var(--font-poppins);
 }
 
-/* Toastify base */
+/* TOAST */
 .Toastify__toast {
   background: var(--background-toast, var(--foreground)) !important;
   color: var(--foreground-toast, var(--background)) !important;
   border-radius: 0.5rem !important;
   font-family: var(--font-poppins);
 }
-
-/* Success */
 .Toastify__toast--success {
   background: var(--success-toast, var(--foreground)) !important;
   color: var(--foreground-toast, var(--background)) !important;
 }
-
-/* Error */
 .Toastify__toast--error {
   background: var(--error-toast, var(--danger)) !important;
   color: var(--foreground-toast, var(--background)) !important;
 }
 
-/* Progress bar generica */
+
 .Toastify__progress-bar {
   background: var(--progress-toast, var(--accent)) !important;
 }
-
-/* Success */
 .Toastify__progress-bar--success {
   background: var(--progress-toast-success, var(--success-toast, var(--success))) !important;
 }
-
-/* Error */
 .Toastify__progress-bar--error {
   background: var(--progress-toast-error, var(--error-toast, var(--danger))) !important;
 }

@@ -1,10 +1,13 @@
 'use client';
 import { materialeFieldsMovimentoUnload } from '@/constants/inputFields';
 import { useUpdateMateriale } from '@/hooks/useMateriali';
+import { useMaterialeFormValidation } from '@/hooks/MaterialeValidation/useMaterialeFormValidation';
+import { MovimentoScaricoSchema } from '@/schemas/MaterialeSchema';
+import { buildMaterialeFromFormData } from '@/lib/materiali/buildMaterialeFromFormData';
 import { useModalStore } from '@/store/useModalStore';
 import { Materiale } from '@/types/materialeTypes';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import MaterialeFormLayout from '@/components/Modals/Forms/MaterialeFormLayout';
 
 type FormDataState = {
@@ -24,41 +27,47 @@ export default function UnloadMaterialeForm({ materiale: materialeProp }: Unload
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formDataRef = useRef<FormDataState>({});
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
-      formDataRef.current = updated;
-      return updated;
-    });
-  };
+  // Sincronizza il ref con lo stato formData per evitare problemi di valore non aggiornato
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
+  // Validazione centralizzata per campo
+  const { fieldErrors, handleChangeWithValidation, validateMovimento } = useMaterialeFormValidation({
+    formData,
+    setFormData,
+    schema: MovimentoScaricoSchema,
+    buildMaterialeFromFormData: (fd) => buildMaterialeFromFormData(fd),
+    isMovimento: true,
+  });
 
   // Submit movimento scarico
   const submit = useCallback(async () => {
     setErrorMessage(null);
     if (!materiale || !materiale._id) return false;
     const currentFormData = formDataRef.current;
-    const movimento = {
-      ...currentFormData,
-      quantita: Math.round(Number(currentFormData.quantita) * 1000) / 1000,
-      data: new Date().toISOString(),
-      tipo: 'scarico',
-      noteOperatore: currentFormData.noteOperatore,
-      causale: currentFormData.noteOperatore,
-      DDT: '',
-      dataDDT: '',
-      fromUnload: true,
-    };
-    // Validazione solo sul movimento corrente
-    const { MovimentoSchema } = await import('@/schemas/MaterialeSchema');
-    const movimentoValidation = MovimentoSchema.safeParse(movimento);
-    if (!movimentoValidation.success) {
-      setErrorMessage('Errore di validazione:\n' + movimentoValidation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
+    const quantita = Number(currentFormData.quantita);
+    // Validazione movimento tramite funzione dedicata
+    const { validation, movimento } = validateMovimento(
+      {
+        quantita: quantita,
+        noteOperatore: currentFormData.noteOperatore,
+        tipo: 'scarico',
+        causale: 'Scarico effettuato da operatore',
+        data: new Date().toISOString(),
+        DDT: currentFormData.DDT,
+        dataDDT: currentFormData.dataDDT,
+      },
+      'scarico'
+    );
+    if (!validation.success) {
+      setErrorMessage('Errore di validazione:\n' + validation.error.issues.map((e) => `${e.path.join('.')} - ${e.message}`).join('\n'));
       return false;
     }
-    const nuovaQuantita = Math.round((materiale.quantita - movimento.quantita) * 1000) / 1000;
+    const movimentoScarico = movimento as import('@/types/materialeTypes').MovimentoMateriale;
+    const nuovaQuantita = Math.round((materiale.quantita - quantita) * 1000) / 1000;
     try {
-      await updateMateriale(String(materiale._id), movimento, nuovaQuantita);
+      await updateMateriale(String(materiale._id), movimentoScarico, nuovaQuantita);
     } catch {
       setErrorMessage('Errore durante la richiesta al server per lo scarico materiale.');
       return false;
@@ -67,7 +76,7 @@ export default function UnloadMaterialeForm({ materiale: materialeProp }: Unload
     router.refresh();
     closeModal('unloadMateriale');
     return true;
-  }, [materiale, updateMateriale, router, closeModal]);
+  }, [materiale, updateMateriale, router, closeModal, validateMovimento]);
 
   const reset = useCallback(() => setFormData({}), []);
 
@@ -90,10 +99,17 @@ export default function UnloadMaterialeForm({ materiale: materialeProp }: Unload
   if (!materiale) return <p>Materiale non selezionato o errore nel processo. Contattare lo sviluppatore!</p>;
 
   return (
-    <MaterialeFormLayout formData={formData} handleChange={handleChange} fieldList={materialeFieldsMovimentoUnload} errorMessage={errorMessage}>
-      <p className="text-sm text-gray-500">
-        Quantità attuale: <strong>{materiale.quantita}</strong> kg
+    <>
+      <p className="text-lg text-[var(--text)] mb-5">
+        Quantità disponibile: <strong>{materiale.quantita}</strong> kg
       </p>
-    </MaterialeFormLayout>
+      <MaterialeFormLayout
+        formData={formData}
+        handleChange={handleChangeWithValidation}
+        fieldList={materialeFieldsMovimentoUnload}
+        errorMessage={errorMessage}
+        fieldErrors={fieldErrors}
+      />
+    </>
   );
 }

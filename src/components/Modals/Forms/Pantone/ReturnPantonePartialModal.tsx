@@ -1,6 +1,6 @@
 import { useModalStore } from '@/store/useModalStore';
 import { useUpdatePantone } from '@/hooks/usePantone';
-import { useUpdateMagazzinoPantoni } from '@/hooks/useUpdateMagazzinoPantoni';
+import { useUpdateMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { useLoadPantone } from '@/hooks/useLoadPantone';
 import { usePantoneMateriali } from '@/hooks/useMateriali';

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useModalStore, ModalKey } from '@/store/useModalStore';
 import toCamelCase from '@/utils/toCamelCase';
 
-export function useMaterileForm({
+export function useMaterialeForm({
   initialData = {},
   onSubmit,
   onSuccess,
@@ -46,7 +46,7 @@ export function useMaterileForm({
         setFormData((prev) => ({ ...prev, nomeMateriale }));
       }
     }
-  }, [formData.label]);
+  }, [formData.label, formData.nomeMateriale]);
 
   // Forza valore iniziale array per checkbox multipli (es. utilizzo)
   useEffect(() => {
