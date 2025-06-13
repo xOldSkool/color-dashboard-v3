@@ -108,12 +108,16 @@ export default async function PantonePage({ params }: { params: Promise<{ id: st
           <div className="grid">
             <h2 className="text-3xl font-semibold mb-2">Ricetta</h2>
             <div className="flex flex-col text-xl">
-              {pantone.basi?.map(({ nomeMateriale, label, quantita }, idx) => (
-                <div key={nomeMateriale ?? idx}>
-                  {quantita > 0 ? (
+              {pantone.basi?.map((base, idx) => (
+                <div key={base.nomeMateriale ?? idx}>
+                  {base.quantita > 0 ? (
                     <div>
-                      <span className="font-semibold">{label}: </span>
-                      <span>{quantita} kg</span>
+                      <span className="font-semibold">{base.label}</span>
+                      <span className="text-lg mx-1 text-neutral-400">
+                        - {base.fornitore} {base.codiceColore}
+                      </span>
+                      {': '}
+                      <span>{base.quantita} kg</span>
                     </div>
                   ) : null}
                 </div>
