@@ -3,6 +3,7 @@ import { useModalStore } from '@/store/useModalStore';
 import { useUpdatePantone } from '@/hooks/usePantone';
 import { useLoadPantone } from '@/hooks/useLoadPantone';
 import { usePantoneMateriali } from '@/hooks/useMateriali';
+import { useUpdateMagazzinoPantoni, useMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { Pantone } from '@/types/pantoneTypes';
 import { useRouter } from 'next/navigation';
 
@@ -21,6 +22,11 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
   const { updatePantone } = useUpdatePantone();
   const { loadPantone } = useLoadPantone();
   const { pantoneMateriali } = usePantoneMateriali();
+  const { updateMagazzinoPantoni } = useUpdateMagazzinoPantoni();
+  const { magazzinoPantone } = useMagazzinoPantoni({
+    pantoneGroupId: pantone.pantoneGroupId,
+    tipo: pantone.tipo,
+  });
   const submitRef = useRef<(() => Promise<boolean>) | null>(null);
   const resetRef = useRef<(() => void) | null>(null);
   const qtConsegnataProduzione = pantone.qtConsegnataProduzione || 0;
@@ -54,7 +60,7 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
       setLoading(false);
       return false;
     }
-    // --- Rientro totale: aggiorna Pantone e Materiale tramite API centralizzata ---
+    // --- Rientro totale: aggiorna Pantone, Materiale e MagazzinoPantoni tramite API centralizzata ---
     try {
       await updatePantone(String(pantone._id), {
         consegnatoProduzione: false,
@@ -80,9 +86,21 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
           setLoading(false);
           return false;
         }
-      } else {
-        // Se non c'è materiale associato, aggiorna solo Pantone tramite API (già fatto sopra)
       }
+      // --- Aggiorna anche il magazzino Pantoni ---
+      const dispMagazzino = magazzinoPantone?.dispMagazzino ?? 0;
+      await updateMagazzinoPantoni({
+        pantoneGroupId: pantone.pantoneGroupId,
+        tipo: pantone.tipo,
+        dispMagazzino: dispMagazzino + quantita,
+        ultimoUso: new Date().toISOString(),
+        movimento: {
+          tipo: 'carico',
+          quantita,
+          data: new Date().toISOString(),
+          causale: 'Rientro da produzione',
+        },
+      });
       if (onSuccess) onSuccess();
       router.refresh();
       return true;
@@ -92,7 +110,18 @@ export default function ReturnPantoneForm({ pantone, onSuccess }: ReturnPantoneF
     } finally {
       setLoading(false);
     }
-  }, [formData, qtConsegnataProduzione, pantone, onSuccess, updatePantone, router, loadPantone, pantoneMateriali]);
+  }, [
+    formData,
+    qtConsegnataProduzione,
+    pantone,
+    onSuccess,
+    updatePantone,
+    router,
+    loadPantone,
+    pantoneMateriali,
+    magazzinoPantone,
+    updateMagazzinoPantoni,
+  ]);
 
   const reset = useCallback(() => {
     setFormData({ qtRientro: '' });
