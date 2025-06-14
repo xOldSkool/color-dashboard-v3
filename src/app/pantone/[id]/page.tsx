@@ -132,10 +132,10 @@ export default async function PantonePage({ params }: { params: Promise<{ id: st
                 <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-2">{pantone.noteArticolo}</div>
               </>
             )}
-            {pantone?.noteColore?.trim() && (
+            {magazzino?.noteColore?.trim() && (
               <>
                 <h3 className="text-xl">Note colore</h3>
-                <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-2">{pantone.noteColore}</div>
+                <div className="bg-[var(--hover-btn-ghost)] rounded-lg text-lg p-2">{magazzino.noteColore}</div>
               </>
             )}
             {magazzino?.noteMagazzino?.trim() && (
