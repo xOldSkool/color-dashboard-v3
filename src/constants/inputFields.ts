@@ -120,6 +120,9 @@ export const pantoneNotes: Field[] = [
     placeholder: "Inserisci note per l'articolo",
     rows: 3,
   },
+];
+
+export const magazzinoPantoniNotes: Field[] = [
   {
     form: 'textarea',
     name: 'noteColore',

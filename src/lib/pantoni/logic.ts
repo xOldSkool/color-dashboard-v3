@@ -32,9 +32,18 @@ export async function generaPantoneGroupId(db: Db, nuovoPantone: Pantone): Promi
 }
 
 // Funzione per creare il magazzino solo se non esiste
-export async function insertMagazzinoIfNotExists(db: Db, groupId: string, tipo: string, basi?: BasiPantone[]) {
+export async function insertMagazzinoIfNotExists(
+  db: Db,
+  groupId: string,
+  tipo: string,
+  basi?: BasiPantone[],
+  noteColore?: string,
+  noteMagazzino?: string
+) {
+  const tipoPantone: 'EB' | 'UV' = tipo === 'UV' ? 'UV' : 'EB';
+  console.log('[insertMagazzinoIfNotExists] chiamata con:', { groupId, tipoPantone, noteColore, noteMagazzino });
   const collection: Collection<MagazzinoPantoni> = db.collection('magazzinoPantoni');
-  const esiste = await collection.findOne({ pantoneGroupId: groupId });
+  const esiste = await collection.findOne({ pantoneGroupId: groupId, tipo: tipoPantone });
   if (!esiste) {
     let dispMagazzino = 0;
     if (basi && Array.isArray(basi)) {
@@ -51,12 +60,18 @@ export async function insertMagazzinoIfNotExists(db: Db, groupId: string, tipo: 
         }
       }
     }
-    return await db.collection('magazzinoPantoni').insertOne({
+    const doc = {
       pantoneGroupId: groupId,
       dispMagazzino,
-      tipo: tipo ?? 'EB',
+      tipo: tipoPantone,
       movimenti: [],
-    });
+      ...(noteColore ? { noteColore } : {}),
+      ...(noteMagazzino ? { noteMagazzino } : {}),
+    };
+    console.log('[insertMagazzinoIfNotExists] inserisco documento:', doc);
+    return await db.collection('magazzinoPantoni').insertOne(doc);
+  } else {
+    console.log('[insertMagazzinoIfNotExists] documento già esistente:', esiste);
   }
 }
 

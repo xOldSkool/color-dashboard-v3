@@ -13,6 +13,7 @@ export interface MagazzinoPantoni {
   dispMagazzino: number;
   tipo: 'EB' | 'UV';
   ultimoUso: Date | string;
+  noteColore?: string;
   noteMagazzino?: string;
   count?: number;
   movimenti?: MovimentoMagazzino[];

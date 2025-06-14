@@ -19,7 +19,6 @@ export interface Pantone {
   stato: 'In uso' | 'Obsoleto' | 'Da verificare';
   tipo: 'EB' | 'UV';
   descrizione: string;
-  noteColore?: string;
   consumo: number;
   dose: number;
   daProdurre?: boolean;
@@ -59,7 +58,6 @@ export interface RawPantone {
   fornitoreCarta?: string;
   tipo?: 'EB' | 'UV';
   descrizione?: string;
-  noteColore?: string;
   noteArticolo?: string;
   consegnatoProduzione?: boolean;
   qtConsegnataProduzione?: number;

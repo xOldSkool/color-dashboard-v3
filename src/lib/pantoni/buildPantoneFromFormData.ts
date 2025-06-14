@@ -68,7 +68,6 @@ export function buildPantoneFromFormData({
     stato: getEnumValue(formData.stato, ['In uso', 'Obsoleto', 'Da verificare'] as const, 'In uso'),
     tipo: getEnumValue(formData.tipo, ['EB', 'UV'] as const, 'EB'),
     descrizione: String(formData.descrizione || ''),
-    noteColore: String(formData.noteColore || ''),
     consumo: Number(formData.consumo) || 0,
     dose: Number(formData.dose) || 0,
     daProdurre: Boolean(formData.daProdurre) && formData.daProdurre !== 'false',

@@ -25,9 +25,15 @@ export async function POST(req: NextRequest) {
       basiNormalizzate,
       dataCreazione,
     };
-    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo, rawData.basi);
+    console.log('[pantoni POST] noteColore:', rawData.noteColore, 'noteMagazzino:', rawData.noteMagazzino);
+    await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo, rawData.basi, rawData.noteColore, rawData.noteMagazzino);
     if (rawData.noteMagazzino) {
-      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId }, { $set: { noteMagazzino: rawData.noteMagazzino } });
+      console.log('[pantoni POST] update noteMagazzino:', rawData.noteMagazzino);
+      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId, tipo: rawData.tipo }, { $set: { noteMagazzino: rawData.noteMagazzino } });
+    }
+    if (rawData.noteColore) {
+      console.log('[pantoni POST] update noteColore:', rawData.noteColore);
+      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId, tipo: rawData.tipo }, { $set: { noteColore: rawData.noteColore } });
     }
 
     // Validazione Zod sul payload
@@ -71,7 +77,12 @@ export async function PATCH(req: NextRequest) {
     }
     await insertMagazzinoIfNotExists(db, pantoneGroupId, rawData.tipo, updatedBasi);
     if (updateFields.noteMagazzino) {
-      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId }, { $set: { noteMagazzino: updateFields.noteMagazzino } });
+      await db
+        .collection('magazzinoPantoni')
+        .updateOne({ pantoneGroupId, tipo: rawData.tipo }, { $set: { noteMagazzino: updateFields.noteMagazzino } });
+    }
+    if (updateFields.noteColore) {
+      await db.collection('magazzinoPantoni').updateOne({ pantoneGroupId, tipo: rawData.tipo }, { $set: { noteColore: updateFields.noteColore } });
     }
 
     const aggiornato: Pantone = {

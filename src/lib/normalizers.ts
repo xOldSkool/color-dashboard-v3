@@ -21,7 +21,6 @@ export function normalizePantone(raw: RawPantone): Pantone {
     fornitoreCarta: String(raw.fornitoreCarta ?? ''),
     tipo: raw.tipo === 'EB' || raw.tipo === 'UV' ? raw.tipo : 'EB',
     descrizione: String(raw.descrizione ?? ''),
-    noteColore: String(raw.noteColore ?? ''),
     noteArticolo: String(raw.noteArticolo ?? ''),
     consegnatoProduzione: Boolean(raw.consegnatoProduzione),
     qtConsegnataProduzione: Number(raw.qtConsegnataProduzione ?? 0),
@@ -105,6 +104,6 @@ export function normalizeMovimenti(materiale: Materiale) {
   return (materiale.movimenti ?? []).map((mov, idx) => ({
     ...mov,
     _id: `${materiale._id}_mov_${idx}`,
-    materialeId: materiale._id, // opzionale, se vuoi tracciare il materiale di origine
+    materialeId: materiale._id,
   }));
 }

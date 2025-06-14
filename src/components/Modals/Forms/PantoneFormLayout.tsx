@@ -2,7 +2,7 @@ import React from 'react';
 import InputMap from '@/components/InputMap';
 import Loader from '@/components/Loader';
 import { H3 } from '@/components/UI/Titles&Texts';
-import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
+import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes, magazzinoPantoniNotes } from '@/constants/inputFields';
 import { BaseMateriale } from '@/types/materialeTypes';
 import { Materiale } from '@/types/materialeTypes';
 
@@ -84,7 +84,10 @@ export default function PantoneFormLayout({
         <div className="grid grid-cols-3 gap-2">
           <InputMap fields={pantoneFieldsLeft} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
           <InputMap fields={pantoneFieldsCenter} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
-          <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
+          <div>
+            <InputMap fields={pantoneNotes} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
+            <InputMap fields={magazzinoPantoniNotes} formData={formData} handleChange={handleChange} fieldErrors={fieldErrors} />
+          </div>
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold mt-5">Composizione</h2>

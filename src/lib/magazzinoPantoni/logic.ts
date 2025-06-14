@@ -19,6 +19,7 @@ export async function aggregateMagazzinoPantoni(db: Db) {
       dispMagazzino: m.dispMagazzino,
       ultimoUso: m.ultimoUso,
       noteMagazzino: m.noteMagazzino,
+      noteColore: m.noteColore,
       count: pantoniGroup.length,
     };
   });

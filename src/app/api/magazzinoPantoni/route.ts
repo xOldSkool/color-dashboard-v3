@@ -27,12 +27,14 @@ export async function PATCH(req: NextRequest) {
   try {
     const db = await connectToDatabase();
     const data = await req.json();
+    console.log('[magazzinoPantoni PATCH] ricevo:', data);
     const { pantoneGroupId, tipo, movimento, ...rest } = data;
     if (!pantoneGroupId || !tipo) {
       return NextResponse.json({ error: 'pantoneGroupId e tipo sono obbligatori' }, { status: 400 });
     }
     const collection = db.collection('magazzinoPantoni');
     const magazzino = await collection.findOne({ pantoneGroupId, tipo });
+    console.log('[magazzinoPantoni PATCH] trovato:', magazzino);
     if (!magazzino) {
       return NextResponse.json({ error: 'Magazzino non trovato' }, { status: 404 });
     }
@@ -57,6 +59,7 @@ export async function PATCH(req: NextRequest) {
       // Defensive: never allow full replacement
       return NextResponse.json({ error: 'Aggiornamento non valido' }, { status: 400 });
     }
+    console.log('[magazzinoPantoni PATCH] update:', update);
     await collection.updateOne({ pantoneGroupId, tipo }, update);
     return NextResponse.json({ message: 'Magazzino aggiornato con successo!' }, { status: 200 });
   } catch (error) {

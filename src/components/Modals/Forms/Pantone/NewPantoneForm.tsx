@@ -12,10 +12,13 @@ import { useModalStore } from '@/store/useModalStore';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
 import { Pantone } from '@/types/pantoneTypes';
 import { usePantoneFormValidation } from '@/hooks/PantoneValidation/usePantoneFormValidation';
+import { useUpdateMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
+import { toast } from 'react-toastify';
 
 export default function NewPantoneForm() {
   const router = useRouter();
   const { createPantone } = useCreatePantone();
+  const { updateMagazzinoPantoni } = useUpdateMagazzinoPantoni();
   const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
   const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
   const closeModal = useModalStore((state) => state.closeModal);
@@ -62,7 +65,22 @@ export default function NewPantoneForm() {
       return false;
     }
     setFieldErrors({}); // Nessun errore
-    await createPantone(nuovoPantone);
+    const noteColore = typeof formData['noteColore'] === 'string' ? formData['noteColore'] : '';
+    const noteMagazzino = typeof formData['noteMagazzino'] === 'string' ? formData['noteMagazzino'] : '';
+    const payload: Pantone & { noteColore?: string; noteMagazzino?: string } = { ...nuovoPantone, noteColore, noteMagazzino };
+    await createPantone(payload);
+
+    // Usa l'hook per aggiornare noteColore e noteMagazzino
+    const pantoneGroupId = nuovoPantone.pantoneGroupId;
+    const tipo = nuovoPantone.tipo;
+    if (pantoneGroupId && tipo) {
+      try {
+        await updateMagazzinoPantoni({ pantoneGroupId, tipo, noteColore, noteMagazzino });
+      } catch {
+        toast.error('Errore aggiornamento note magazzino');
+      }
+    }
+
     router.refresh();
     return true;
   };

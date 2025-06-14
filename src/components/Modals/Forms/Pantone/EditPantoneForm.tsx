@@ -3,6 +3,7 @@ import PantoneFormLayout from '../PantoneFormLayout';
 import { usePantoneForm } from '@/hooks/PantoneValidation/usePantoneForm';
 import { useBasiMateriali, usePantoneMateriali } from '@/hooks/useMateriali';
 import { useUpdatePantone } from '@/hooks/usePantone';
+import { useMagazzinoPantoni, useUpdateMagazzinoPantoni } from '@/hooks/useMagazzinoPantoni';
 import { pantoneFieldsLeft, pantoneFieldsCenter, pantoneNotes } from '@/constants/inputFields';
 import { PantoneSchema } from '@/schemas/PantoneSchema';
 import { pantoneToFormData } from '@/lib/adapter';
@@ -11,6 +12,7 @@ import { Pantone } from '@/types/pantoneTypes';
 import { buildPantoneFromFormData } from '@/lib/pantoni/buildPantoneFromFormData';
 import { usePantoneFormValidation } from '@/hooks/PantoneValidation/usePantoneFormValidation';
 import { BaseMateriale } from '@/types/materialeTypes';
+import { toast } from 'react-toastify';
 
 interface EditFormProps {
   pantone: Pantone;
@@ -19,10 +21,12 @@ interface EditFormProps {
 export default function EditPantoneForm({ pantone }: EditFormProps) {
   const router = useRouter();
   const { updatePantone } = useUpdatePantone();
+  const { updateMagazzinoPantoni } = useUpdateMagazzinoPantoni();
+  const { magazzinoPantone } = useMagazzinoPantoni({ pantoneGroupId: pantone.pantoneGroupId, tipo: pantone.tipo });
   const [pantoneEsternoSelezionato, setPantoneEsternoSelezionato] = useState<string | null>(null);
   const { pantoneMateriali, loading: loadingPantoniMateriali } = usePantoneMateriali();
 
-  // Precarica formData dal pantone originale
+  // Precarica formData dal pantone originale e dalle note magazzino
   const initialData = useMemo(() => {
     const fd = pantoneToFormData(pantone);
     if (Array.isArray(pantone.basi)) {
@@ -35,8 +39,13 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
         }
       }
     }
+    // Autocompleta noteColore e noteMagazzino dal magazzinoPantone
+    if (magazzinoPantone) {
+      fd.noteColore = magazzinoPantone.noteColore || '';
+      fd.noteMagazzino = magazzinoPantone.noteMagazzino || '';
+    }
     return fd;
-  }, [pantone, pantoneMateriali]);
+  }, [pantone, pantoneMateriali, magazzinoPantone]);
 
   // Ref per tracciare i campi dinamici già aggiunti
   const addedBaseKeysRef = useRef<Set<string>>(new Set());
@@ -81,6 +90,19 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
     }
     if (!pantone._id) return false;
     await updatePantone(pantone._id.toString(), aggiornato);
+
+    // Aggiorna note in magazzinoPantoni
+    const pantoneGroupId = aggiornato.pantoneGroupId;
+    const tipo = aggiornato.tipo;
+    const noteColore = typeof formData['noteColore'] === 'string' ? formData['noteColore'] : '';
+    const noteMagazzino = typeof formData['noteMagazzino'] === 'string' ? formData['noteMagazzino'] : '';
+    if (pantoneGroupId && tipo) {
+      try {
+        await updateMagazzinoPantoni({ pantoneGroupId, tipo, noteColore, noteMagazzino });
+      } catch {
+        toast.error('Errore aggiornamento note magazzino');
+      }
+    }
     router.refresh();
     return true;
   };
@@ -212,6 +234,22 @@ export default function EditPantoneForm({ pantone }: EditFormProps) {
       setFormField('dose', doseTotale);
     }
   }, [doseDeps, pantoneForm.formData.dose, pantoneForm.formData, setFormField]);
+
+  // Aggiorna i campi noteColore e noteMagazzino solo se sono vuoti (così l'utente può modificarli)
+  useEffect(() => {
+    if (magazzinoPantone) {
+      if ((pantoneForm.formData['noteColore'] === undefined || pantoneForm.formData['noteColore'] === '') && magazzinoPantone.noteColore) {
+        pantoneForm.handleChange({
+          target: { name: 'noteColore', value: magazzinoPantone.noteColore },
+        } as React.ChangeEvent<HTMLInputElement>);
+      }
+      if ((pantoneForm.formData['noteMagazzino'] === undefined || pantoneForm.formData['noteMagazzino'] === '') && magazzinoPantone.noteMagazzino) {
+        pantoneForm.handleChange({
+          target: { name: 'noteMagazzino', value: magazzinoPantone.noteMagazzino },
+        } as React.ChangeEvent<HTMLInputElement>);
+      }
+    }
+  }, [magazzinoPantone, pantoneForm]);
 
   return (
     <PantoneFormLayout
