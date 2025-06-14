@@ -232,18 +232,22 @@ export default function DuplicatePantoneForm({ pantone }: DuplicatePantoneProps)
     }
   }, [doseDeps, pantoneForm.formData.dose, pantoneForm.formData, setFormField]);
 
-  // Aggiorna i campi noteColore e noteMagazzino solo se sono vuoti (così l'utente può modificarli)
+  // Aggiorna i campi noteColore e noteMagazzino solo la prima volta che arrivano dal magazzinoPantone
+  const hasSetNoteColore = useRef(false);
+  const hasSetNoteMagazzino = useRef(false);
   useEffect(() => {
     if (magazzinoPantone) {
-      if ((pantoneForm.formData['noteColore'] === undefined || pantoneForm.formData['noteColore'] === '') && magazzinoPantone.noteColore) {
+      if (!hasSetNoteColore.current && magazzinoPantone.noteColore !== undefined) {
         pantoneForm.handleChange({
-          target: { name: 'noteColore', value: magazzinoPantone.noteColore },
+          target: { name: 'noteColore', value: magazzinoPantone.noteColore || '' },
         } as React.ChangeEvent<HTMLInputElement>);
+        hasSetNoteColore.current = true;
       }
-      if ((pantoneForm.formData['noteMagazzino'] === undefined || pantoneForm.formData['noteMagazzino'] === '') && magazzinoPantone.noteMagazzino) {
+      if (!hasSetNoteMagazzino.current && magazzinoPantone.noteMagazzino !== undefined) {
         pantoneForm.handleChange({
-          target: { name: 'noteMagazzino', value: magazzinoPantone.noteMagazzino },
+          target: { name: 'noteMagazzino', value: magazzinoPantone.noteMagazzino || '' },
         } as React.ChangeEvent<HTMLInputElement>);
+        hasSetNoteMagazzino.current = true;
       }
     }
   }, [magazzinoPantone, pantoneForm]);
