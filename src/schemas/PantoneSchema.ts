@@ -46,7 +46,6 @@ export const PantoneSchema = z.object({
   stato: z.enum(['In uso', 'Obsoleto', 'Da verificare'], REQUIRED_FIELD_MSG),
   tipo: z.enum(['EB', 'UV'], REQUIRED_FIELD_MSG),
   descrizione: z.string(),
-  noteColore: z.string().optional(),
   consumo: z.number().nonnegative(),
   dose: z.number().nonnegative(),
   daProdurre: z.boolean().optional(),
