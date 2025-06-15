@@ -7,7 +7,7 @@ import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllMateriali } from '@/lib/materiali/db';
 import { normalizeMateriali } from '@/lib/normalizers';
 
-export default async function MaterialiPage() {
+export default async function Materiali() {
   const db = await connectToDatabase();
   const raw = await getAllMateriali(db);
   const materiali = normalizeMateriali(raw);

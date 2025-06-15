@@ -10,17 +10,9 @@ import {
 } from '@/constants/defaultColumns';
 import { useTableStore } from '@/store/useTableStore';
 import { TableColumn } from '@/types/constantsTypes';
+import { TableKey } from '@/types/tablesTypes';
 import { JSX } from 'react';
 
-export type TableKey =
-  | 'ricettario'
-  | 'materiali' //
-  | 'movimenti-materiale'
-  | 'magazzino-pantoni' //
-  | 'da-produrre'
-  | 'consegnati-produzione'
-  | 'movimenti-magazzino'
-  | 'scheda-pantone';
 export interface ColumnSelectorProps {
   tableKey: TableKey;
 }

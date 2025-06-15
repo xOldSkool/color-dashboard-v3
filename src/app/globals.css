@@ -74,6 +74,17 @@ body {
   background: var(--progress-toast-error, var(--error-toast, var(--danger))) !important;
 }
 
+/* Nasconde le frecce su/giù negli input number per Chrome, Edge, Safari */
+.input-no-spinner::-webkit-outer-spin-button,
+.input-no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Per Firefox */
+.input-no-spinner[type="number"] {
+  -moz-appearance: textfield;
+}
+
 @layer components {
   /* BUTTON VARIANTS */
   .btn-primary {

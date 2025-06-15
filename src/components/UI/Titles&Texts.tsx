@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 type Props = { children: ReactNode; className?: string };
 
 export function H1({ children, className }: Props) {
-  return <h1 className={`${className} text-4xl font-semibold pb-1`}>{children}</h1>;
+  return <h1 className={`${className} text-4xl font-semibold pt-2 pb-1`}>{children}</h1>;
 }
 export function H2({ children, className }: Props) {
   return <h2 className={`${className} text-3xl font-semibold pb-1`}>{children}</h2>;

@@ -60,6 +60,7 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
     <>
       <div className="flex flex-row items-center justify-between py-6">
         <div className="flex flex-row items-center gap-2">
+          {/* Mostra la search anche per inventario */}
           <input
             type="search"
             name="cerca"
@@ -69,13 +70,17 @@ export default function TableToolbar<T extends BaseItem>({ data, rowsPerPage, se
             className="bg-[var(--background)] border-1 border-dashed border-[var(--border)] rounded-lg p-2 w-72"
             placeholder="Cerca nell'elenco"
           />
-          <div>
-            <Button modalKey="filterPantone" tooltip="Filtri" icon={ListFilter} variant="toolbar" iconClass={'size-8 hover:text-[var(--accent)]'} />
-          </div>
+          {/* Mostra il pulsante filtri solo se NON è inventario */}
+          {tableKey !== 'inventario' && (
+            <div>
+              <Button modalKey="filterPantone" tooltip="Filtri" icon={ListFilter} variant="toolbar" iconClass={'size-8 hover:text-[var(--accent)]'} />
+            </div>
+          )}
         </div>
         <div>
           <div className="flex flex-row items-center gap-2">
-            {tableKey === 'movimenti-magazzino' ? (
+            {/* Solo colonne e select righe per inventario */}
+            {tableKey === 'inventario' ? (
               <>
                 <Button
                   icon={Columns3Cog}

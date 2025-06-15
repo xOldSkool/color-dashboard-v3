@@ -21,6 +21,7 @@ import {
   SquarePen,
   Trash2,
   FileInput,
+  Save,
 } from 'lucide-react';
 
 // USO DEL COMPONENTE BUTTON:
@@ -56,7 +57,8 @@ type IconName =
   | 'loadout'
   | 'loadnew'
   | 'transfer'
-  | 'file';
+  | 'file'
+  | 'save';
 
 interface ButtonProps {
   children?: ReactNode;
@@ -116,6 +118,7 @@ export default function Button({
     loadnew: Package,
     transfer: RefreshCcwDot,
     file: FileInput,
+    save: Save,
   };
 
   const handleClick = () => {

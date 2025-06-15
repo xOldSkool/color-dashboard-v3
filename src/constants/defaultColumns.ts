@@ -442,6 +442,7 @@ export const CONFIG_CONSEGNATI_PRODUZIONE: string[] = ['hex', 'nomePantone', 'va
 export const CONFIG_SCHEDA_PANTONE: string[] = ['variante', 'articolo', 'passoCarta', 'hCarta', 'consumo', 'descrizione', 'noteArticolo'];
 export const CONFIG_MATERIALI: string[] = ['label', 'codiceColore', 'fornitore', 'tipo', 'quantita', 'utilizzo', 'stato'];
 export const CONFIG_MOVIMENTI_MATERIALE: string[] = ['tipo', 'quantita', 'causale', 'data', 'noteOperatore', 'DDT', 'dataDDT'];
+export const CONFIG_INVENTARIO: string[] = ['codiceFornitore', 'fornitore', 'label', 'codiceColore', 'quantita'];
 
 export const visibleColumns = DEFAULT_COLS.map((key) => PANTONE_COLUMNS.find((col) => col.key === key)); //scorre ogni chiave in DEFAULT_COLS e per ogni chiave (key) cerca nell'array PANTONE_COLUMNS l'oggetto con quella chiave (key). "!" serve a dire che si trova sempre un valore diverso da undefined
 

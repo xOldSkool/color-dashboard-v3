@@ -29,7 +29,7 @@ export default function RootLayout({
           <aside>
             <Sidebar />
           </aside>
-          <main className="flex-1 w-screen bg-[var(--background)] overflow-auto px-4 pt-3">{children}</main>
+          <main className="flex-1 w-screen bg-[var(--background)] overflow-auto px-4">{children}</main>
         </div>
         <ModalManager />
         <ToastContainer

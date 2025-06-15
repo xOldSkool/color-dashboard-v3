@@ -8,7 +8,7 @@ interface TableState {
   selectedPantoni: Pantone[];
   selectedMateriali: Materiale[];
   searchQuery: string;
-  visibleUserCols: string[]; // Non usato, ma lascialo per compatibilità
+  visibleUserCols: string[]; // Non usato
   visibleUserColsMap: Record<string, string[]>;
   selectedTableKey: string | null;
 

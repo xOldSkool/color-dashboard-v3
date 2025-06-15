@@ -43,3 +43,14 @@ export interface TableToolbarProps<T extends BaseItem> {
   setRowsPerPage: (rows: number) => void;
   tableKey: string;
 }
+
+export type TableKey =
+  | 'ricettario'
+  | 'materiali'
+  | 'movimenti-materiale'
+  | 'magazzino-pantoni'
+  | 'da-produrre'
+  | 'consegnati-produzione'
+  | 'movimenti-magazzino'
+  | 'scheda-pantone'
+  | 'inventario';

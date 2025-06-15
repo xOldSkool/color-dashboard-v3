@@ -9,6 +9,8 @@ import { TableColumn } from '@/types/constantsTypes';
 import TableBody from './TableBody';
 import TableToolbar from './TableToolbar';
 import { ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
+import InventarioTableBody from './Inventario/InventarioTableBody';
+import type { Materiale } from '@/types/materialeTypes';
 
 // USO DEL COMPONENTE TABLE:
 // <Table
@@ -40,6 +42,10 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
   const defaultRows = rows ?? 25;
   const [rowsPerPage, setRowsPerPage] = useState(defaultRows);
   const visibleUserCols = getVisibleUserCols(tableKey);
+
+  // Stato per input inventario
+  const [quantitaReale, setQuantitaReale] = useState<Record<string, number>>({});
+  const [quantitaDaOrdinare, setQuantitaDaOrdinare] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (rows && rows !== rowsPerPage) {
@@ -126,6 +132,13 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
   const allIds: string[] = sortedData.map((item) => item._id!.toString());
   const allSelected: boolean = allIds.every((id) => selectedRows.includes(id));
 
+  const handleChangeQuantitaReale = (id: string, value: number) => {
+    setQuantitaReale((prev) => ({ ...prev, [id]: value }));
+  };
+  const handleChangeQuantitaDaOrdinare = (id: string, value: number) => {
+    setQuantitaDaOrdinare((prev) => ({ ...prev, [id]: value }));
+  };
+
   return (
     <>
       <div className="">
@@ -155,18 +168,38 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
                 </span>
               </div>
             ))}
+            {/* Colonne custom per inventario */}
+            {tableKey === 'inventario' && (
+              <>
+                <div>Quantità reale</div>
+                <div>Quantità da ordinare</div>
+              </>
+            )}
           </div>
         </div>
         {/* BODY TABELLA */}
-        <TableBody
-          data={sortedData}
-          visibleColumns={visibleColumns}
-          toggleSelection={toggleSelection}
-          isSelected={isSelected}
-          tableKey={tableKey}
-          currentPage={currentPage}
-          rowsPerPage={rowsPerPage}
-        />
+        {tableKey === 'inventario' ? (
+          <InventarioTableBody
+            materiali={sortedData as Materiale[]}
+            visibleColumns={visibleColumns}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            quantitaReale={quantitaReale}
+            quantitaDaOrdinare={quantitaDaOrdinare}
+            onChangeQuantitaReale={handleChangeQuantitaReale}
+            onChangeQuantitaDaOrdinare={handleChangeQuantitaDaOrdinare}
+          />
+        ) : (
+          <TableBody
+            data={sortedData}
+            visibleColumns={visibleColumns}
+            toggleSelection={toggleSelection}
+            isSelected={isSelected}
+            tableKey={tableKey}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+          />
+        )}
       </div>
       <TablePagination currentPage={currentPage} setCurrentPage={setCurrentPage} totalItems={sortedData.length} rowsPerPage={rowsPerPage} />
     </>
