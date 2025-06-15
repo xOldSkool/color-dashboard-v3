@@ -5,7 +5,7 @@ import Modal from './Modal';
 import { useTableStore } from '@/store/useTableStore';
 import EditPantoneForm from './Forms/Pantone/EditPantoneForm';
 import DuplicatePantone from './Forms/Pantone/DuplicatePantoneForm';
-import ColumnSelector, { TableKey } from '../Tables/ColumnsSelector';
+import ColumnSelector from '../Tables/ColumnsSelector';
 import ProducePantoneForm from './Forms/Pantone/ProducePantoneForm';
 import RemoveFromToProduceForm from './Forms/Pantone/RemoveFromToProduceForm';
 import { useEffect, useRef } from 'react';
@@ -21,6 +21,7 @@ import ReturnPantonePartialModal from './Forms/Pantone/ReturnPantonePartialModal
 import MarkPantoneAsConsumed from './Forms/Pantone/MarkPantoneAsConsumed';
 import TransferPantone from './Forms/Pantone/TransferPantone';
 import ExportToFile from './Forms/ExportToFile';
+import { TableKey } from '@/types/tablesTypes';
 
 export default function ModalManager() {
   const router = useRouter();
