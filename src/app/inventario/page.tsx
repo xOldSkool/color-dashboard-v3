@@ -1,11 +1,9 @@
 export const dynamic = 'force-dynamic';
-import { Table } from '@/components/ClientWrapper';
 import { H1 } from '@/components/UI/Titles&Texts';
-import { CONFIG_INVENTARIO } from '@/constants/defaultColumns';
 import { connectToDatabase } from '@/lib/connectToMongoDb';
 import { getAllMateriali } from '@/lib/materiali/db';
 import { normalizeMateriali } from '@/lib/normalizers';
-// import InventarioActions from './actions';
+import InventarioClient from './InventarioClient';
 
 export default async function Inventario() {
   const db = await connectToDatabase();
@@ -14,8 +12,7 @@ export default async function Inventario() {
   return (
     <div className="p-4">
       <H1>Inventario</H1>
-      <Table items={materiali} config={CONFIG_INVENTARIO} tableKey="inventario" rows={50} />
-      {/* <InventarioActions /> */}
+      <InventarioClient materiali={materiali} />
     </div>
   );
 }

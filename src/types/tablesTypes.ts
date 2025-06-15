@@ -28,6 +28,14 @@ export interface TableProps<T extends BaseItem> {
   tableKey: string;
   rows?: number;
   filterFn?: (item: T) => boolean;
+  // Props opzionali per inventario
+  quantitaReale?: Record<string, number>;
+  setQuantitaReale?: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  quantitaDaOrdinare?: Record<string, number>;
+  setQuantitaDaOrdinare?: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  // Funzioni wrapper per input custom inventario
+  onChangeQuantitaReale?: (id: string, value: number) => void;
+  onChangeQuantitaDaOrdinare?: (id: string, value: number) => void;
 }
 
 export interface TablePaginationProps {

@@ -32,7 +32,19 @@ import type { Materiale } from '@/types/materialeTypes';
 //     - TablePagination: navigazione tra le pagine
 //     - HexToBoxColor: renderizzazione visiva del colore da codice hex
 
-export default function Table<T extends BaseItem>({ items = [], config = [], tableKey, rows, filterFn }: TableProps<T>): JSX.Element {
+export default function Table<T extends BaseItem>({
+  items = [],
+  config = [],
+  tableKey,
+  rows,
+  filterFn,
+  quantitaReale,
+  setQuantitaReale,
+  quantitaDaOrdinare,
+  setQuantitaDaOrdinare,
+  onChangeQuantitaReale,
+  onChangeQuantitaDaOrdinare,
+}: TableProps<T>): JSX.Element {
   const data = items;
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<string | number>(0);
@@ -42,10 +54,6 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
   const defaultRows = rows ?? 25;
   const [rowsPerPage, setRowsPerPage] = useState(defaultRows);
   const visibleUserCols = getVisibleUserCols(tableKey);
-
-  // Stato per input inventario
-  const [quantitaReale, setQuantitaReale] = useState<Record<string, number>>({});
-  const [quantitaDaOrdinare, setQuantitaDaOrdinare] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (rows && rows !== rowsPerPage) {
@@ -132,13 +140,6 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
   const allIds: string[] = sortedData.map((item) => item._id!.toString());
   const allSelected: boolean = allIds.every((id) => selectedRows.includes(id));
 
-  const handleChangeQuantitaReale = (id: string, value: number) => {
-    setQuantitaReale((prev) => ({ ...prev, [id]: value }));
-  };
-  const handleChangeQuantitaDaOrdinare = (id: string, value: number) => {
-    setQuantitaDaOrdinare((prev) => ({ ...prev, [id]: value }));
-  };
-
   return (
     <>
       <div className="">
@@ -184,10 +185,10 @@ export default function Table<T extends BaseItem>({ items = [], config = [], tab
             visibleColumns={visibleColumns}
             currentPage={currentPage}
             rowsPerPage={rowsPerPage}
-            quantitaReale={quantitaReale}
-            quantitaDaOrdinare={quantitaDaOrdinare}
-            onChangeQuantitaReale={handleChangeQuantitaReale}
-            onChangeQuantitaDaOrdinare={handleChangeQuantitaDaOrdinare}
+            quantitaReale={quantitaReale ?? {}}
+            quantitaDaOrdinare={quantitaDaOrdinare ?? {}}
+            onChangeQuantitaReale={onChangeQuantitaReale ?? ((id, value) => setQuantitaReale?.((prev) => ({ ...prev, [id]: value })))}
+            onChangeQuantitaDaOrdinare={onChangeQuantitaDaOrdinare ?? ((id, value) => setQuantitaDaOrdinare?.((prev) => ({ ...prev, [id]: value })))}
           />
         ) : (
           <TableBody
