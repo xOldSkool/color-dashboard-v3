@@ -7,8 +7,10 @@ import InventarioActions from './actions';
 import { utils, writeFile } from 'xlsx';
 import type { Materiale } from '@/types/materialeTypes';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 export default function InventarioClient({ materiali }: { materiali: Materiale[] }) {
+  const router = useRouter();
   const [quantitaReale, setQuantitaReale] = useState<Record<string, number>>({});
   const [quantitaDaOrdinare, setQuantitaDaOrdinare] = useState<Record<string, number>>({});
   const { salvaInventario, isSaving } = useSalvaInventario();
@@ -24,6 +26,7 @@ export default function InventarioClient({ materiali }: { materiali: Materiale[]
     }
     const ok = await salvaInventario(modifiche);
     if (ok) setQuantitaReale({});
+    router.refresh();
   };
 
   // Esporta
