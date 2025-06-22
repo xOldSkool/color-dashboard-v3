@@ -9,6 +9,7 @@ Stack utilizzato:
 - Mongodb (atlas)
 
 Uso typescript in modalità strict, non usare 'any' da nessuna parte!
+Bisogna evitare il 'propdrilling' usando zustand.
 
 Flusso per le richieste http:
 
