@@ -45,14 +45,14 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
   return (
     <>
       {/* overlay nero con opacità 50%. Se premuto -> onClose(setIsOpen = false) */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--foreground-50)]" onClick={onClose}>
         {/* corpo della modale */}
         <div
-          className="bg-zinc-700 rounded-2xl shadow-xl min-w-fit max-w-5xl max-h-[90vh] flex flex-col overflow-y-auto scrollbar-none scrollbar-thumb-gray-500 scrollbar-track-gray-800"
+          className="bg-[var(--background)] rounded-2xl shadow-xl min-w-fit max-w-5xl max-h-[90vh] flex flex-col overflow-y-auto scrollbar-none scrollbar-thumb-gray-500 scrollbar-track-gray-800"
           onClick={(e) => e.stopPropagation()} // blocca click interno
         >
           {/* header della modale */}
-          <div className="flex items-center justify-between border-b-2 border-neutral-600">
+          <div className="flex items-center justify-between border-b-1 border-dashed border-[var(--border)]">
             {/* titolo */}
             <H3 className="m-4 mt-5">{title}</H3>
             {/* bottone di chiusura */}
@@ -69,14 +69,14 @@ export default function Modal({ title, modalKey, onClose, children, showFooter =
 
           {/* footer della modale */}
           {showFooter && (
-            <div className="flex justify-between p-5 border-t-2 border-neutral-600">
+            <div className="flex justify-between p-5 border-t-1 border-dashed border-[var(--border)]">
               <div>
-                <Button onClick={handleReset} variant="ghost">
+                <Button onClick={handleReset} variant="ghost" className="hover:bg-[var(--danger)] hover:text-white">
                   Reset
                 </Button>
               </div>
               <div className="flex flex-row space-x-2">
-                <Button onClick={onClose} variant="ghost">
+                <Button onClick={onClose} variant="ghost" className="hover:bg-[var(--danger)] hover:text-white">
                   Annulla
                 </Button>
                 <Button onClick={handleConfirm} variant="primary" disabled={!isFormValid || submitLoading} isLoading={submitLoading}>

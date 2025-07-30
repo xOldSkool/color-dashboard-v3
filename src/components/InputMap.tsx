@@ -66,7 +66,7 @@ export default function InputMap({ fields, formData, handleChange, fieldErrors =
                   </label>
                 ))}
               </div>
-              {fieldErrors[field.name] && <p className="text-red-500 text-xs mt-1">{fieldErrors[field.name]}</p>}
+              {fieldErrors[field.name] && <p className="text-[var(--danger)] text-xs mt-1">{fieldErrors[field.name]}</p>}
             </div>
           );
         }
@@ -96,7 +96,7 @@ export default function InputMap({ fields, formData, handleChange, fieldErrors =
           rows: field.form === 'textarea' ? field.rows || undefined : undefined,
           disabled: isDisabled,
           className:
-            'w-full p-2 rounded bg-zinc-600 text-white focus:outline-none' +
+            'w-full p-2 rounded bg-[var(--input)] text-[var(--text)] focus:outline-none' +
             (isDisabled ? ' cursor-not-allowed' : '') +
             (fieldErrors[field.name] ? 'border border-1 border-[var(--error)]' : ''),
         };

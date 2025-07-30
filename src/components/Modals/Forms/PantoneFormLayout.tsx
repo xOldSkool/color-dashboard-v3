@@ -51,13 +51,13 @@ export default function PantoneFormLayout({
     <form className="w-6xl">
       <div className="flex flex-row justify-between">
         <H3 className="mb-2">Dettagli Pantone</H3>
-        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {errorMessage && <p className="text-[var(--danger)]">{errorMessage}</p>}
         {/* Select Pantone Esterno */}
         {pantoneMateriali.length > 0 && setPantoneEsternoSelezionato && (
           <div className="mb-4 flex flex-row items-center border border-dashed border-[var(--border)] rounded-xl px-2">
             <label className="font-semibold mr-2">Importa pantone esterno:</label>
             <select
-              className="p-2 rounded bg-zinc-700 text-white focus:outline-none"
+              className="p-2 rounded bg-[var(--background)] text-[var(--text)] focus:outline-none"
               onChange={(e) => setPantoneEsternoSelezionato(e.target.value || null)}
               value={pantoneEsternoSelezionato || ''}
               disabled={loadingPantoniMateriali}
@@ -100,14 +100,16 @@ export default function PantoneFormLayout({
                 return (
                   <label className="mb-1">
                     {pantoneEsterno.label}
-                    <span className="ml-2 text-sm text-neutral-300 italic">{pantoneEsterno.fornitore}</span>
+                    <span className="ml-2 text-sm text-[var(--details)] italic">
+                      {pantoneEsterno.fornitore} - {pantoneEsterno.codiceColore}
+                    </span>
                   </label>
                 );
               })()}
               <input
                 type="number"
                 name="pantoneEsternoInput"
-                className="w-32 p-2 rounded bg-zinc-600 text-white focus:outline-none"
+                className="w-32 p-2 rounded bg-[var(--secondary)] text-[var(--text)] focus:outline-none"
                 value={formData.pantoneEsternoInput ?? ''}
                 onChange={handleChange}
                 min={0}
@@ -120,9 +122,9 @@ export default function PantoneFormLayout({
             loading ? (
               <Loader />
             ) : error ? (
-              <p className="text-red-500">{error}</p>
+              <p className="text-[var(--danger)]">{error}</p>
             ) : basi.length === 0 ? (
-              <p className="text-neutral-400 italic">Nessuna base disponibile per questo &quot;Tipo&quot;.</p>
+              <p className="text-[var(--text)] italic">Nessuna base disponibile per questo &quot;Tipo&quot;.</p>
             ) : (
               <div className="grid grid-cols-4 gap-2">
                 {Object.entries(basiRaggruppatePerName).map(([nome, basi]) => {
@@ -141,7 +143,7 @@ export default function PantoneFormLayout({
                           {fornitoriDisponibili.length > 1 ? (
                             <select
                               name={`fornitore_${nome}`}
-                              className="ml-2 rounded bg-zinc-800 text-white italic focus:outline-none"
+                              className="ml-2 rounded bg-[var(--input)] text-[var(--text)] italic focus:outline-none"
                               onChange={handleChange}
                               value={formData[`fornitore_${nome}`] || ''}
                             >
@@ -153,7 +155,7 @@ export default function PantoneFormLayout({
                               ))}
                             </select>
                           ) : (
-                            <span className="ml-2 text-sm text-neutral-300 italic">
+                            <span className="ml-2 text-sm text-[var(--details)] italic">
                               {fornitoriDisponibili[0].fornitore} - {fornitoriDisponibili[0].codiceColore}
                             </span>
                           )}
@@ -163,7 +165,7 @@ export default function PantoneFormLayout({
                         name={`valore_${nome}`}
                         type="number"
                         placeholder="0"
-                        className="w-full p-2 rounded bg-zinc-600 text-white focus:outline-none mt-1"
+                        className="w-full p-2 rounded bg-[var(--input)] text-[var(--text)] focus:outline-none mt-1"
                         value={formData[`valore_${nome}`] || ''}
                         onChange={handleChange}
                       />
@@ -173,7 +175,7 @@ export default function PantoneFormLayout({
               </div>
             )
           ) : (
-            <p className="text-neutral-400 italic">Seleziona un &quot;Tipo&quot; per vedere le basi disponibili.</p>
+            <p className="text-[var(--text)] italic">Seleziona un &quot;Tipo&quot; per vedere le basi disponibili.</p>
           )}
         </div>
         {children}
